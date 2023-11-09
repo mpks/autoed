@@ -41,9 +41,6 @@ def main():
     observer.schedule(event_handler, watch_path, recursive=True)
     observer.start()
 
-#    last_time_saved = time.time()
-#    number_of_datasets = len(event_handler.dataset_names)
-
     try:
         while True:
             time.sleep(1)
@@ -58,17 +55,6 @@ def main():
                 dataset = event_handler.datasets[key]
                 event_handler.queue.pop(key)
                 dataset.process()
-
-#            current_time = time.time()
-#            current_number_of_datasets = len(event_handler.dataset_names)
-#
-#            stale = current_time - last_time_saved > (WRITE_STATUS_EVERY*60)
-#            more_files = number_of_datasets != current_number_of_datasets
-#
-#            if stale or more_files:
-#                last_time_saved = current_time
-#                number_of_datasets = current_number_of_datasets
-#                event_handler.save_datasets_and_status()
 
     except KeyboardInterrupt:
         observer.stop()
@@ -96,43 +82,9 @@ class DirectoryHandler(FileSystemEventHandler):
         self.datasets = dict()
         self.queue = dict()
 
-#        if os.path.exists(self.status_file):
-#            self.load_datasets_and_status()
-#        self.search_datasets()   # Datasets not listed in .autoed_status.txt
-
         self.script = script
         self.last_triggered = 0
 
-#    def search_datasets(self):
-#        for root, dirs, files in os.walk(self.watch_path):
-#            for file in files:
-#                if file.endswith('.__master.h5'):
-#                    basename = os.path.join(root, file[:-12])
-#                    if basename not in self.dataset_names:
-#                        dataset = SinglaDataset.from_basename(basename)
-#                        self.dataset_names.add(basename)
-#                        self.datasets[basename] = dataset
-#                        dataset.process()
-#
-#    def load_datasets_and_status(self):
-#        """Returns a set of dataset names and a dictionary with datasets"""
-#
-#        with open(self.status_file, 'r') as status_file:
-#            for line in status_file.readlines():
-#                status, basename = line.strip().split()
-#                dir_name = os.path.basename(basename)
-#                if os.path.exists(dir_name):
-#                    dataset = SinglaDataset.from_basename(basename)
-#                    dataset.status = status
-#
-#                    self.dataset_names.add(basename)
-#                    self.datasets[basename] = dataset
-#
-#    def save_datasets_and_status(self):
-#        with open(self.status_file, 'w') as status_file:
-#            for name in self.dataset_names:
-#                status = self.datasets[name].status
-#                status_file.write(f"{status}  {name}\n")
 
     def on_created(self, event):
 
