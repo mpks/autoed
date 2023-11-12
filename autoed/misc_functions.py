@@ -1,4 +1,9 @@
 import re
+import h5py
+import os
+import numpy as np
+
+import autoed
 
 
 def scrap(filename, var_name):
@@ -16,6 +21,26 @@ def scrap(filename, var_name):
     pattern = r'.*\s*=\s*(.*)$'
     value = re.search(pattern, match_line).group(1)
     return value
+
+
+def overwrite_mask(filename):
+    """Given a hdf5 file, overwrite the pixel mask"""
+
+    try:
+        with h5py.File(filename, 'r+') as file:
+
+            src = '/entry/instrument/detector/detectorSpecific/'
+            src += 'pixel_mask'
+            pixel_mask = file[src]
+
+            mask_path = 'data/singla_mask.npz'
+            mask_path = os.path.join(autoed.__path__[0], mask_path)
+            data = np.load(mask_path)
+            mask = data['mask']
+            pixel_mask[...] = mask
+
+    except KeyError:
+        pass
 
 
 def electron_wavelength(energy_kev):

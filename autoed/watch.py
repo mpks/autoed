@@ -8,6 +8,7 @@ import re
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from .dataset import SinglaDataset
+from .misc_functions import overwrite_mask
 
 """
 A watchdog script that watches a directory for file changes.
@@ -85,7 +86,6 @@ class DirectoryHandler(FileSystemEventHandler):
         self.script = script
         self.last_triggered = 0
 
-
     def on_created(self, event):
 
         if not event.is_directory:
@@ -104,6 +104,8 @@ class DirectoryHandler(FileSystemEventHandler):
                 basename = event.src_path[:-4]
             if is_masterfile:
                 basename = event.src_path[:-12]
+                time.sleep(1)
+                overwrite_mask(event.src_path)
             if is_datafile:
                 basename = event.src_path[:-17]
 
