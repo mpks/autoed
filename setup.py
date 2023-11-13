@@ -7,7 +7,8 @@ setup(
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
-            'autoed = autoed.autoed:main'
+            'autoed = autoed.autoed:main',
+            'autoed_beam_center = autoed.beam_center:main'
         ]
     },
     setup_requires=['argcomplete'],
