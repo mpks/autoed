@@ -14,11 +14,10 @@ import argcomplete
 # PYTHON_ARGCOMPLETE_OK
 def main():
 
-    msg = 'Daemon script to automatic processing of ED data'
+    msg = 'Daemon script for automatic processing of ED data'
     parser = argparse.ArgumentParser(description=msg)
     parser.add_argument('command',
-                        choices=['start', 'watch',
-                                 'list', 'stop',
+                        choices=['start', 'watch', 'list', 'stop',
                                  'kill'],
                         help='Commands to execute')
     parser.add_argument('dirname', nargs='?', default=None,
@@ -160,6 +159,24 @@ class AutoedDaemon:
                 return True
         return False
 
+    def is_subdirectory(self, path_to_check):
+
+        is_sub = False
+        p2 = os.path.abspath(path_to_check)
+        for p1 in self.directories:
+
+            is_sub = is_sub or p2.startswith(p1 + os.sep)
+        return is_sub
+
+    def is_parent_directory(self, path_to_check):
+
+        is_parent = False
+        p2 = os.path.abspath(path_to_check)
+        for p1 in self.directories:
+
+            is_parent = is_parent or p1.startswith(p2 + os.sep)
+        return is_parent
+
     def watch(self, dirname):
 
         if not os.path.exists(self.lock_file):
@@ -173,6 +190,14 @@ class AutoedDaemon:
             sys.exit(0)
         if full_path in self.directories:
             print(r'Directory {dirname} already watched.')
+            sys.exit(1)
+        elif self.is_subdirectory(full_path):
+            print(f'Can not watch {dirname}.')
+            print(r'Already watching its parent directory.')
+            sys.exit(1)
+        elif self.is_parent_directory(full_path):
+            print(f'Can not watch {dirname}.')
+            print(r'Already watching its subdirectories.')
             sys.exit(1)
         else:
             command = 'autoed_watch ' + full_path
@@ -214,6 +239,8 @@ def kill_process_and_children(pid):
         pass
     except psutil.TimeoutExpired:
         pass
+
+
 
 
 if __name__ == '__main__':
