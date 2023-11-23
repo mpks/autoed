@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autoed',
-    version='0.0.2',
+    version='0.0.3',
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
@@ -13,6 +13,7 @@ setup(
     },
     setup_requires=['argcomplete'],
     packages=find_packages(),
+    package_data={'autoed': ['data/*']},
     install_requires=[
         'watchdog',
         'numpy>=1.10.0',
@@ -21,6 +22,7 @@ setup(
         'argparse',
         'python-daemon',
         'pathlib',
-        'argcomplete'
+        'argcomplete',
+        'psutil'
     ]
 )
