@@ -15,9 +15,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         'watchdog',
-        'numpy>=1.26.0',
+        'numpy>=1.10.0',
         'nexgen',
-        'h5py>=3.10.0',
+        'h5py',
         'argparse',
         'python-daemon',
         'pathlib',
