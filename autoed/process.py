@@ -139,7 +139,7 @@ class SinglaConverter:
         frame_rate = float(scrap(self._log_file, 'frame rate'))
         rotation_angle = rotation_speed / frame_rate
 
-        nex_cmd = 'ED_nexus singla '
+        nex_cmd = 'ED_nexus singla-phil '
         nex_cmd += '%s ' % self._phil_file
         nex_cmd += 'input.datafiles=%s ' % self._data_file
         nex_cmd += 'goniometer.starts=%.0f,0,0,0 ' % start_angle
