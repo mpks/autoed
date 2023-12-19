@@ -36,7 +36,7 @@ def generate_nexus_file(dataset):
 
     data_file_pattern = dataset.base + r'.__data_*.h5'
 
-    nex_cmd = 'ED_nexus singla-phil'
+    nex_cmd = 'ED_nexus singla-phil '
     nex_cmd += '%s ' % phil_file
     nex_cmd += r'input.datafiles=%s ' % data_file_pattern
     nex_cmd += 'goniometer.starts=%.0f,0,0,0 ' % start_angle
