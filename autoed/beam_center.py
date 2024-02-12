@@ -8,6 +8,8 @@ import autoed
 import matplotlib.gridspec as gridspec
 from matplotlib.patches import Circle
 import argparse
+import time
+
 
 hdf5plugin
 
@@ -53,8 +55,13 @@ class BeamCenterCalculator:
         mask_data = np.load(mask_path)
         self.mask = mask_data['mask']
 
-        self.file = h5py.File(filename, 'r')
-        self.dataset = self.file['/entry/data/data']
+        while True:
+            try:
+                self.file = h5py.File(filename, 'r')
+                self.dataset = self.file['/entry/data/data']
+                break
+            except OSError:
+                time.sleep(1)
 
     def center_from_average(self, every=100,
                             bad_pixel_treshold=20000,
@@ -422,6 +429,16 @@ def plot_profile(image, profile_x, profile_y, beam_x, beam_y,
     ax_y.tick_params(labelleft=False)
 
     plt.savefig(filename, dpi=800)
+
+
+def is_file_fully_copied(file_path):
+    prev_size = 0
+    while True:
+        curr_size = os.path.getsize(file_path)
+        if curr_size == prev_size:
+            return True
+        time.sleep(1)  # Adjust the interval based on your needs
+        prev_size = curr_size
 
 
 if __name__ == '__main__':

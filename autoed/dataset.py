@@ -2,6 +2,7 @@
 import os
 import logging
 from .convert import generate_nexus_file
+from .beam_center import BeamCenterCalculator
 
 
 class SinglaDataset:
@@ -20,13 +21,18 @@ class SinglaDataset:
         self.dataset_name = dataset_name
         self.base = os.path.join(path, dataset_name)
         self.master_file = self.base + '.__master.h5'
-        self.log_file = self.base + '.log'
+        self.log_file = self.base + '._.log'
         self.autoed_log_file = self.base + '.autoed.log'
         self.nexgen_file = self.base + '._.nxs'
+        self.mdoc_file = self.base + '._.mrc.mdoc'
+        self.output_path = None
+        self.logger = None
+        self.status = 'NEW'
+        self.beam_center = None
+        self.processed = False
+        self.data_files = []
 
-        mdoc_file = dataset_name[0:9] + dataset_name[14:] + '._.mrc.mdoc'
-        self.mdoc_file = os.path.join(path, mdoc_file)
-
+    def set_logger(self):
         self.logger = logging.getLogger(self.base)
         self.logger.setLevel(logging.DEBUG)
 
@@ -44,9 +50,6 @@ class SinglaDataset:
         self.logger.addHandler(file_handler)
         # self.logger.addHandler(stream_handler)
 
-        self.status = 'NEW'
-        self.data_files = []
-
     def all_files_present(self):
         """Checks if all files for the current dataset are present"""
 
@@ -62,11 +65,28 @@ class SinglaDataset:
         dataset_name = os.path.basename(basename)
         return cls(path, dataset_name)
 
+    def _compute_beam_center(self):
+
+        if len(self.data_files) > 0:
+            calculator = BeamCenterCalculator(self.data_files[0])
+            x, y = calculator.center_from_average()
+            self.beam_center = (x, y)
+            calculator.file.close()
+
+        return
+
     def process(self):
-        success = generate_nexus_file(self)
-        if success:
-            # print('Can process with xia2')
-            pass
+
+        if not self.processed:
+            self.processed = True
+            if not self.beam_center:
+                self._compute_beam_center()
+            success = generate_nexus_file(self)
+            if success:
+                if self.output_path:
+                    os.makedirs(self.output_path, exist_ok=True)
+                # print('Can process with xia2')
+                pass
 
     def convert(self):
         """Generates Nexus file from the dataset files using nexgen"""

@@ -19,8 +19,13 @@ Run with:
 autoed_watch directory_name
 """
 
-WRITE_STATUS_EVERY = 2     # Status will be saved every 2 minutes
-queue_time_sec = 1         # Time before all files present and processing
+# There is a minimal requirement for conversion:
+# all files (mdoc, log, data and master) must be present in a directory.
+# However, this is a minimal set. Imagine there are two data files.
+# The apearance of the first might trigger the processing. That is
+# why there is a queue where we wait for other data files to appear.
+# If they do not appear after some period, the data is processed.
+queue_time_sec = 2
 
 
 def main():
@@ -89,54 +94,55 @@ class DirectoryHandler(FileSystemEventHandler):
     def on_created(self, event):
 
         if not event.is_directory:
-            # print('New file detected: ', event.src_path)
             is_logfile = re.match(r".*\.log$", event.src_path)
             is_autoedlog = re.match(r".*\.autoed\.log$", event.src_path)
             is_nexgenlog = re.match(r".*EDnxs\.log$", event.src_path)
             is_masterfile = re.match(r".*\.__master\.h5$", event.src_path)
             is_datafile = re.match(r".*\.__data_\d{6}\.h5$", event.src_path)
             is_mdocfile = re.match(r".*\.mdoc", event.src_path)
+            filename = os.path.basename(event.src_path)
+            is_dosfile = filename.startswith('dos_')
 
             dataset = None
             basename = None
 
-            if is_logfile and not is_autoedlog and not is_nexgenlog:
-                basename = event.src_path[:-4]
-            if is_masterfile:
-                basename = event.src_path[:-12]
-                time.sleep(1)
-                overwrite_mask(event.src_path)
-            if is_datafile:
-                basename = event.src_path[:-17]
+            # Process only events that happened in ED directory
+            if 'ED' in event.src_path.split(os.path.sep):
 
-            if basename:
-                if basename not in self.dataset_names:  # Add a new dataset
-                    self.dataset_names.add(basename)
-                    dataset = SinglaDataset.from_basename(basename)
-                    self.datasets[dataset.base] = dataset
-
-                else:                          # Get an existing dataset
-                    dataset = self.datasets[basename]
-
+                if is_logfile and not is_autoedlog and not is_nexgenlog:
+                    basename = event.src_path[:-6]    # Remove ._.log
+                if is_masterfile:
+                    basename = event.src_path[:-12]   # Remove .__master.h5
+                    time.sleep(1)
+                    overwrite_mask(event.src_path)
                 if is_datafile:
-                    dataset.data_files.append(event.src_path)
+                    basename = event.src_path[:-17]  # rm .__data_######.h5
+                if is_mdocfile:
+                    basename = event.src_path[:-11]   # Remove ._.mrc.mdoc
 
-            if is_mdocfile:      # Check if there is an existing dataset
-                mdoc_filename = os.path.basename(event.src_path)
-                mdoc_filename = mdoc_filename[:-11]   # Remove ._.mrc.mdoc
-                date_str = mdoc_filename[0:9]
-                rest = mdoc_filename[9:]
-                base_pattern = r".*" + date_str + r"\d{4}_" + rest
-                matched_datasets = [ds for ds in self.dataset_names if
-                                    re.match(base_pattern, ds)]
-                if matched_datasets:
-                    # Currently we assume there is only one mdoc
-                    # file for each dataset. This might change in the future
-                    dataset = self.datasets[matched_datasets[0]]
+                if basename and not is_dosfile:
+                    if (basename not in self.dataset_names
+                       and not is_logfile):  # Add a new dataset
+                        self.dataset_names.add(basename)
+                        dataset = SinglaDataset.from_basename(basename)
+                        self.datasets[dataset.base] = dataset
+                    else:                          # Get an existing dataset
+                        if basename in self.dataset_names:
+                            dataset = self.datasets[basename]
 
-            if dataset:
-                if dataset.all_files_present():
-                    self.queue[dataset.base] = time.time()
+                    if is_datafile:
+                        if event.src_path not in dataset.data_files:
+                            dataset.data_files.append(event.src_path)
+
+                if dataset:
+                    if dataset.all_files_present():
+                        in_path = os.path.dirname(dataset.base)
+                        out_path = replace_dir(in_path, 'ED', 'processed')
+                        os.makedirs(out_path, exist_ok=True)
+                        dataset.output_path = out_path
+                        if not dataset.logger:
+                            dataset.set_logger()
+                        self.queue[dataset.base] = time.time()
 
     def on_modified(self, event):
         current_time = time.time()
@@ -145,6 +151,20 @@ class DirectoryHandler(FileSystemEventHandler):
             if not event.is_directory:
                 # print('File modified', event.src_path)
                 pass
+
+
+def replace_dir(path, old_name, new_name):
+
+    components = path.split(os.path.sep)
+
+    for i, component in enumerate(components):
+
+        if component == old_name:
+            components[i] = new_name
+            break
+
+    new_path = os.path.join('/', *components)
+    return new_path
 
 
 if __name__ == "__main__":

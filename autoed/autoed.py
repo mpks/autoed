@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=msg)
     parser.add_argument('command',
                         choices=['start', 'watch', 'list', 'stop',
-                                 'kill'],
+                                 'kill', 'restart'],
                         help='Commands to execute')
     parser.add_argument('dirname', nargs='?', default=None,
                         help='Name of the directory to watch')
@@ -33,7 +33,6 @@ def main():
     autoed_daemon = AutoedDaemon()
 
     def signal_handler(signum, frame):
-        print('Entering singnal handler')
         autoed_daemon.stop()
         autoed_daemon.cleanup()
         sys.exit(0)
@@ -47,6 +46,8 @@ def main():
         autoed_daemon.watch(args.dirname)
     elif args.command == "list":
         autoed_daemon.list_directories()
+    elif args.command == "restart":
+        autoed_daemon.restart()
     elif args.command == "stop":
         autoed_daemon.stop()
     elif args.command == "kill" and args.pid is not None:
@@ -120,6 +121,18 @@ class AutoedDaemon:
                     time.sleep(1)
             finally:
                 self.cleanup()
+
+    def restart(self):
+        """Kills the running processes and starts watching again"""
+
+        # Kill running processes
+        for indir in self.directories:
+            pid = self.pids[indir]
+            kill_process_and_children(pid)
+
+        dirs = list(self.directories)
+        for in_dir in dirs:
+            self.watch(in_dir)
 
     def stop(self):
         self._running = False
@@ -239,8 +252,6 @@ def kill_process_and_children(pid):
         pass
     except psutil.TimeoutExpired:
         pass
-
-
 
 
 if __name__ == '__main__':

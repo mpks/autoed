@@ -2,7 +2,6 @@ import subprocess
 import os
 import re
 import time
-import logging
 
 from .misc_functions import electron_wavelength, scrap
 
@@ -42,8 +41,10 @@ def generate_nexus_file(dataset):
     nex_cmd += 'goniometer.starts=%.0f,0,0,0 ' % start_angle
     nex_cmd += 'goniometer.increments=%.5f,0,0,0 ' % rotation_angle
     nex_cmd += 'goniometer.vectors=0,-1,0,0,0,1,0,1,0,1,0,0 '
-    nex_cmd += 'detector.starts=809 '
+    nex_cmd += 'detector.starts=785.91 '
     nex_cmd += 'beam.wavelength=%.10f ' % wavelength
+    if dataset.beam_center:
+        nex_cmd += 'detector.beam_center=%.2f,%.2f ' % dataset.beam_center
     nex_cmd += '-m %s ' % dataset.master_file
 
     # Remove EDnxs.log if it exists
