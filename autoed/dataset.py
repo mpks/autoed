@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import logging
+import re
 from .convert import generate_nexus_file, run_slurm_job
 from .beam_center import BeamCenterCalculator
 from .misc_functions import replace_dir
@@ -38,6 +39,17 @@ class SinglaDataset:
         self.beam_center = None
         self.processed = False
         self.data_files = []
+
+    def search_and_update_data_files(self):
+
+        data_files = []
+        pattern = self.base + r'\.__data_\d{6}\.h5'
+        for root, dirs, files in os.walk(self.path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if re.match(pattern, file_path):
+                    data_files.append(file_path)
+        self.data_files = data_files
 
     def set_logger(self):
         self.logger = logging.getLogger(self.base)
@@ -83,7 +95,6 @@ class SinglaDataset:
         return
 
     def process(self):
-
         if not self.processed:
             self.processed = True
             if not self.beam_center:
@@ -91,11 +102,4 @@ class SinglaDataset:
             success = generate_nexus_file(self)
             if success:
                 os.makedirs(self.output_path, exist_ok=True)
-                # print('Can process with xia2')
                 run_slurm_job(self)
-                pass
-
-    def convert(self):
-        """Generates Nexus file from the dataset files using nexgen"""
-
-        return

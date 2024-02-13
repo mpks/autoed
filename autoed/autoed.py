@@ -9,6 +9,7 @@ import time
 import subprocess
 import psutil
 import argcomplete
+from .dataset import SinglaDataset
 
 
 # PYTHON_ARGCOMPLETE_OK
@@ -18,7 +19,7 @@ def main():
     parser = argparse.ArgumentParser(description=msg)
     parser.add_argument('command',
                         choices=['start', 'watch', 'list', 'stop',
-                                 'kill', 'restart'],
+                                 'kill', 'restart', 'process'],
                         help='Commands to execute')
     parser.add_argument('dirname', nargs='?', default=None,
                         help='Name of the directory to watch')
@@ -50,6 +51,8 @@ def main():
         autoed_daemon.restart()
     elif args.command == "stop":
         autoed_daemon.stop()
+    elif args.command == 'process' and args.dirname:
+        process_dir(args.dirname)
     elif args.command == "kill" and args.pid is not None:
         if not os.path.exists(autoed_daemon.lock_file):
             print("No daemon running")
