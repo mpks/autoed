@@ -23,6 +23,20 @@ def scrap(filename, var_name):
     return value
 
 
+def get_detector_distance(path):
+    """Read detector distance from PatchMaster.sh"""
+
+    pattern = r'detector.starts=(\d+(\.\d*)?)'
+    distance = 785.91
+    with open(path, 'r') as file:
+        for line in file:
+            ln_match = re.search(pattern, line.strip())
+            if ln_match:
+                distance = float(ln_match.group(1))
+                break
+    return distance
+
+
 def overwrite_mask(filename):
     """Given a hdf5 file, overwrite the pixel mask"""
 

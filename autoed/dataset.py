@@ -27,6 +27,7 @@ class SinglaDataset:
         self.autoed_log_file = self.base + '.autoed.log'
         self.nexgen_file = self.base + '._.nxs'
         self.mdoc_file = self.base + '._.mrc.mdoc'
+        self.patch_file = os.path.join(self.path, 'PatchMaster.sh')
 
         in_path = os.path.dirname(self.base)
         out_path = replace_dir(in_path, 'ED', 'processed')
@@ -75,7 +76,8 @@ class SinglaDataset:
         data_exists = len(self.data_files) > 0
         files_exist = (os.path.exists(self.master_file) and
                        os.path.exists(self.log_file) and
-                       os.path.exists(self.mdoc_file))
+                       os.path.exists(self.mdoc_file) and
+                       os.path.exists(self.patch_file))
         return files_exist and data_exists
 
     @classmethod

@@ -5,7 +5,10 @@ import time
 import autoed
 import json
 
-from .misc_functions import electron_wavelength, scrap
+
+from .misc_functions import (
+    electron_wavelength, scrap, get_detector_distance
+)
 
 
 def generate_nexus_file(dataset):
@@ -37,13 +40,15 @@ def generate_nexus_file(dataset):
 
     data_file_pattern = dataset.base + r'.__data_*.h5'
 
+    detector_distance = get_detector_distance(dataset.patch_file)
+
     nex_cmd = 'ED_nexus singla-phil '
     nex_cmd += '%s ' % phil_file
     nex_cmd += r'input.datafiles=%s ' % data_file_pattern
     nex_cmd += 'goniometer.starts=%.0f,0,0,0 ' % start_angle
     nex_cmd += 'goniometer.increments=%.5f,0,0,0 ' % rotation_angle
     nex_cmd += 'goniometer.vectors=0,-1,0,0,0,1,0,1,0,1,0,0 '
-    nex_cmd += 'detector.starts=785.91 '
+    nex_cmd += 'detector.starts=%f ' % detector_distance
     nex_cmd += 'beam.wavelength=%.10f ' % wavelength
     if dataset.beam_center:
         nex_cmd += 'detector.beam_center=%.2f,%.2f ' % dataset.beam_center
