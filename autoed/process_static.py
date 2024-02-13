@@ -45,17 +45,16 @@ def process_dir(dir_name):
     # Search for any master files
     master_files = gather_master_files(dir_path)
     for master_file in master_files:
-        print('Processing', master_file)
         basename = master_file[:-12]
         dataset = SinglaDataset.from_basename(basename)
 
         dataset.search_and_update_data_files()
-        print('Data files', dataset.data_files)
 
         if dataset.all_files_present():
-            print('All files present')
+
             if not os.path.exists(dataset.nexgen_file):
                 dataset.set_logger()
+                print('Processing ', dataset.base)
                 dataset.process()
 
 
