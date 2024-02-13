@@ -1,0 +1,21 @@
+{
+  "job": {
+    "partition": "cs05r",
+    "tasks": "1",
+    "cpus_per_task": "20",
+    "memory_per_cpu": 7000,
+    "name": "relion_cpu",
+    "current_working_directory": "/home/eci94165/2024/nt34283-21/spool/2024/processed/abc/sweep0/",
+    "time_limit": "72:00:00",
+    "environment": {
+      "PATH": "/bin:/usr/bin/:/usr/local/bin/",
+      "LD_LIBRARY_PATH": "/lib/:/lib64/:/usr/local/lib",
+      "MODULEPATH": "",
+      "USER": "eci94165",
+      "HOME": "/home/eci94165"
+    },
+    "standard_error": "./run.err",
+    "standard_output": "./run.out"
+  },
+  "script": "#!/bin/bash\n echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): running RELION job on host $(hostname -s) with job ID ${SLURM_JOB_ID:-(SLURM_JOB_ID not set)}\"\nsource /etc/profile.d/modules.sh\nmodule load EM/relion/4.0-slurm 2> /dev/null\nmodule load ccp4\n module load dials\n xia2 image=NEXUS_FILE_PATH goniometer.axis=0,-1,0 \nunset SLURM_JWT\necho \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): job finished\""
+}

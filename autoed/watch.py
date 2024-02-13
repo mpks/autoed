@@ -136,10 +136,6 @@ class DirectoryHandler(FileSystemEventHandler):
 
                 if dataset:
                     if dataset.all_files_present():
-                        in_path = os.path.dirname(dataset.base)
-                        out_path = replace_dir(in_path, 'ED', 'processed')
-                        os.makedirs(out_path, exist_ok=True)
-                        dataset.output_path = out_path
                         if not dataset.logger:
                             dataset.set_logger()
                         self.queue[dataset.base] = time.time()
@@ -151,20 +147,6 @@ class DirectoryHandler(FileSystemEventHandler):
             if not event.is_directory:
                 # print('File modified', event.src_path)
                 pass
-
-
-def replace_dir(path, old_name, new_name):
-
-    components = path.split(os.path.sep)
-
-    for i, component in enumerate(components):
-
-        if component == old_name:
-            components[i] = new_name
-            break
-
-    new_path = os.path.join('/', *components)
-    return new_path
 
 
 if __name__ == "__main__":

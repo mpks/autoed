@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import os
 import logging
-from .convert import generate_nexus_file
+from .convert import generate_nexus_file, run_slurm_job
 from .beam_center import BeamCenterCalculator
+from .misc_functions import replace_dir
 
 
 class SinglaDataset:
@@ -25,7 +26,13 @@ class SinglaDataset:
         self.autoed_log_file = self.base + '.autoed.log'
         self.nexgen_file = self.base + '._.nxs'
         self.mdoc_file = self.base + '._.mrc.mdoc'
-        self.output_path = None
+
+        in_path = os.path.dirname(self.base)
+        out_path = replace_dir(in_path, 'ED', 'processed')
+        os.makedirs(out_path, exist_ok=True)
+
+        self.output_path = out_path
+        self.slurm_file = os.path.join(out_path, 'slurm_config.json')
         self.logger = None
         self.status = 'NEW'
         self.beam_center = None
@@ -83,9 +90,9 @@ class SinglaDataset:
                 self._compute_beam_center()
             success = generate_nexus_file(self)
             if success:
-                if self.output_path:
-                    os.makedirs(self.output_path, exist_ok=True)
+                os.makedirs(self.output_path, exist_ok=True)
                 # print('Can process with xia2')
+                run_slurm_job(self)
                 pass
 
     def convert(self):

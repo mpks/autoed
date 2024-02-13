@@ -56,3 +56,17 @@ def electron_wavelength(energy_kev):
     wavelength_angs = wavelength_m * 1e10
 
     return wavelength_angs
+
+
+def replace_dir(path, old_name, new_name):
+    """Replace a directory name in a path """
+    components = path.split(os.path.sep)
+
+    for i, component in enumerate(components):
+
+        if component == old_name:
+            components[i] = new_name
+            break
+
+    new_path = os.path.join('/', *components)
+    return new_path
