@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autoed',
-    version='0.0.8',
+    version='0.0.9',
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
@@ -22,7 +22,6 @@ setup(
         'argparse',
         'python-daemon',
         'pathlib',
-        'json>=2.0.9',
         'argcomplete',
         'psutil'
     ]
