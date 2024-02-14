@@ -17,5 +17,5 @@
     "standard_error": "./run.err",
     "standard_output": "./run.out"
   },
-  "script": "#!/bin/bash\n echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): running RELION job on host $(hostname -s) with job ID ${SLURM_JOB_ID:-(SLURM_JOB_ID not set)}\"\nsource /etc/profile.d/modules.sh\nmodule load EM/relion/4.0-slurm 2> /dev/null\nmodule load ccp4\n module load dials\n xia2 image=NEXUS_FILE_PATH goniometer.axis=0,-1,0 \nunset SLURM_JWT\necho \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): job finished\""
+  "script": "#!/bin/bash\n echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): running RELION job on host $(hostname -s) with job ID ${SLURM_JOB_ID:-(SLURM_JOB_ID not set)}\"\nsource /etc/profile.d/modules.sh\nmodule load EM/relion/4.0-slurm 2> /dev/null\nmodule load ccp4\n module load dials\n xia2 image=NEXUS_FILE_PATH goniometer.axis=0,-1,0 dials.fix_distance=True dials.masking.d_max=9 \nunset SLURM_JWT\necho \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): job finished\""
 }
