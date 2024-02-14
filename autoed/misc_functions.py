@@ -2,6 +2,7 @@ import re
 import h5py
 import os
 import numpy as np
+import time
 
 import autoed
 
@@ -40,21 +41,26 @@ def get_detector_distance(path):
 def overwrite_mask(filename):
     """Given a hdf5 file, overwrite the pixel mask"""
 
-    try:
-        with h5py.File(filename, 'r+') as file:
+    while True:
+        try:
+            with h5py.File(filename, 'r+') as file:
 
-            src = '/entry/instrument/detector/detectorSpecific/'
-            src += 'pixel_mask'
-            pixel_mask = file[src]
+                src = '/entry/instrument/detector/detectorSpecific/'
+                src += 'pixel_mask'
+                pixel_mask = file[src]
 
-            mask_path = 'data/singla_mask.npz'
-            mask_path = os.path.join(autoed.__path__[0], mask_path)
-            data = np.load(mask_path)
-            mask = data['mask']
-            pixel_mask[...] = mask
+                mask_path = 'data/singla_mask.npz'
+                mask_path = os.path.join(autoed.__path__[0], mask_path)
+                data = np.load(mask_path)
+                mask = data['mask']
+                pixel_mask[...] = mask
+                break
 
-    except KeyError:
-        pass
+        except OSError:
+            time.sleep(1)
+
+        except KeyError:
+            break
 
 
 def electron_wavelength(energy_kev):
