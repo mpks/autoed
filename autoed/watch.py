@@ -100,6 +100,7 @@ class DirectoryHandler(FileSystemEventHandler):
             is_masterfile = re.match(r".*\.__master\.h5$", event.src_path)
             is_datafile = re.match(r".*\.__data_\d{6}\.h5$", event.src_path)
             is_mdocfile = re.match(r".*\.mdoc", event.src_path)
+            is_patchfile = re.match(r".*PatchMaster.sh$", event.src_path)
             filename = os.path.basename(event.src_path)
             is_dosfile = filename.startswith('dos_')
 
@@ -133,6 +134,21 @@ class DirectoryHandler(FileSystemEventHandler):
                     if is_datafile:
                         if event.src_path not in dataset.data_files:
                             dataset.data_files.append(event.src_path)
+
+                # The patchfile has a generic name PatchMaster.sh, so we can
+                # not get a specific name of the dataset. However, if there
+                # is an existing dataset in a given directory, we can take that
+                # one. Note that this will take only the first dataset and
+                # it won't work if there are several datasets in a directory
+                # Also, if there is not dataset in the directory, then we
+                # don't care (the patch file is probably copied first).
+                if is_patchfile:
+                    patch_dir = os.path.dirname(event.src_path)
+                    for key in self.datasets:
+                        td = self.datasets[key]
+                        if td.path == patch_dir:
+                            dataset = td
+                            break
 
                 if dataset:
                     if dataset.all_files_present():
