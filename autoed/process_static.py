@@ -45,7 +45,7 @@ def process_dir(dir_name):
     # Search for any master files
     master_files = gather_master_files(dir_path)
     for master_file in master_files:
-        basename = master_file[:-12]
+        basename = master_file[:-10]
         dataset = SinglaDataset.from_basename(basename)
 
         dataset.search_and_update_data_files()
@@ -64,7 +64,7 @@ def gather_master_files(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
-            if file_path.endswith('__master.h5'):
+            if file_path.endswith('_master.h5'):
                 master_files.append(file_path)
 
     return master_files

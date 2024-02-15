@@ -22,11 +22,11 @@ class SinglaDataset:
         self.path = path
         self.dataset_name = dataset_name
         self.base = os.path.join(path, dataset_name)
-        self.master_file = self.base + '.__master.h5'
-        self.log_file = self.base + '._.log'
+        self.master_file = self.base + '_master.h5'
+        self.log_file = self.base + '.log'
         self.autoed_log_file = self.base + '.autoed.log'
-        self.nexgen_file = self.base + '._.nxs'
-        self.mdoc_file = self.base + '._.mrc.mdoc'
+        self.nexgen_file = self.base + '.nxs'
+        self.mdoc_file = self.base + '.mrc.mdoc'
         self.patch_file = os.path.join(self.path, 'PatchMaster.sh')
 
         in_path = os.path.dirname(self.base)
@@ -44,7 +44,7 @@ class SinglaDataset:
     def search_and_update_data_files(self):
 
         data_files = []
-        pattern = self.base + r'\.__data_\d{6}\.h5'
+        pattern = self.base + r'\_data_\d{6}\.h5'
         for root, dirs, files in os.walk(self.path):
             for file in files:
                 file_path = os.path.join(root, file)

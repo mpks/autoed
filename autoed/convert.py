@@ -94,7 +94,10 @@ def run_slurm_job(dataset):
     with open(dataset.slurm_file, 'w') as file:
         json.dump(data, file, indent=2)
 
-    cmd = 'export `ssh wilson scontrol token lifespan=7776000`;'
+    if 'SLURM_JWT' not in os.environ:
+        cmd = 'export `ssh wilson scontrol token lifespan=7776000`;'
+    else:
+        cmd = ''
     cmd += 'curl -s -H X-SLURM-USER-NAME:${USER} -H '
     cmd += 'X-SLURM-USER-TOKEN:${SLURM_JWT} '
     cmd += '-H "Content-Type: application/json" '

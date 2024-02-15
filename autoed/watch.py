@@ -97,8 +97,8 @@ class DirectoryHandler(FileSystemEventHandler):
             is_logfile = re.match(r".*\.log$", event.src_path)
             is_autoedlog = re.match(r".*\.autoed\.log$", event.src_path)
             is_nexgenlog = re.match(r".*EDnxs\.log$", event.src_path)
-            is_masterfile = re.match(r".*\.__master\.h5$", event.src_path)
-            is_datafile = re.match(r".*\.__data_\d{6}\.h5$", event.src_path)
+            is_masterfile = re.match(r".*_master\.h5$", event.src_path)
+            is_datafile = re.match(r".*_data_\d{6}\.h5$", event.src_path)
             is_mdocfile = re.match(r".*\.mdoc", event.src_path)
             is_patchfile = re.match(r".*PatchMaster.sh$", event.src_path)
             filename = os.path.basename(event.src_path)
@@ -111,15 +111,15 @@ class DirectoryHandler(FileSystemEventHandler):
             if 'ED' in event.src_path.split(os.path.sep):
 
                 if is_logfile and not is_autoedlog and not is_nexgenlog:
-                    basename = event.src_path[:-6]    # Remove ._.log
+                    basename = event.src_path[:-4]    # .log
                 if is_masterfile:
-                    basename = event.src_path[:-12]   # Remove .__master.h5
+                    basename = event.src_path[:-10]   # Remove _master.h5
                     time.sleep(1)
                     overwrite_mask(event.src_path)
                 if is_datafile:
-                    basename = event.src_path[:-17]  # rm .__data_######.h5
+                    basename = event.src_path[:-15]  # rm _data_######.h5
                 if is_mdocfile:
-                    basename = event.src_path[:-11]   # Remove ._.mrc.mdoc
+                    basename = event.src_path[:-9]   # Remove .mrc.mdoc
 
                 if basename and not is_dosfile:
                     if (basename not in self.dataset_names
