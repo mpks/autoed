@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autoed',
-    version='0.0.17',
+    version='0.0.18',
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',

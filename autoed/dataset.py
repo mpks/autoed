@@ -94,7 +94,7 @@ class SinglaDataset:
                 self.logger.info('Waiting for data to be written: %s'
                                  % data_file)
                 con_temp, sd, td = is_file_fully_written(data_file,
-                                                         timeout=600)
+                                                         timeout=1200)
                 if con_temp:
                     self.logger.info('Data file size stable: %d %s'
                                      % (sd, data_file))
