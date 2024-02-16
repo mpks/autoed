@@ -1,44 +1,87 @@
 import subprocess
 import os
 import re
-import time
 import autoed
 import json
 
 
 from .misc_functions import (
-    electron_wavelength, scrap, get_detector_distance
+    electron_wavelength, scrap, get_detector_distance,
+    is_file_fully_written, overwrite_mask
 )
 
 
 def generate_nexus_file(dataset):
     """Generates Nexus file from the dataset files using nexgen"""
 
+    dataset.logger.info('Overwriting mask in : %s'
+                        % dataset.master_file)
+    overwrite_mask(dataset.master_file)
+    dataset.logger.info('Mask overwritten in : %s'
+                        % dataset.master_file)
+
     phil_file = os.path.join(dataset.path, 'ED_Singla.phil')
 
     if not os.path.exists(phil_file):
+        dataset.logger.info('Copying ED_Singl.phil')
         cmd = ['nexgen_phil get ED_Singla.phil -o ' + phil_file]
         subprocess.run(cmd, shell=True, text=True, capture_output=True)
-    # We have to wait for the ED_Singla.phil to be created
-    # Oterwise the nexgen processing will fail
-    time.sleep(1)     # do not delete
+    else:
+        dataset.logger.info('ED_Singl.phil detected')
 
+    if os.path.exists(dataset.nexgen_file):
+        dataset.logger.info('Found existing nexus file')
+        cmd = ['rm ' + dataset.nexgen_file]
+        subprocess.run(cmd, shell=True, text=True, capture_output=True)
+        dataset.logger.info('Nexus file removed')
+
+    phil_written, _, _ = is_file_fully_written(phil_file)
+    if not phil_written:
+        dataset.logger.info('Conversion failed. Phil file not written')
+        return 0
+
+    mdoc_written, _, _ = is_file_fully_written(dataset.mdoc_file)
+    if not mdoc_written:
+        dataset.logger.info('Conversion failed. mdoc file not complete')
+        return 0
+
+    dataset.logger.info('Scraping voltage from mdoc file')
     voltage_kev = float(scrap(dataset.mdoc_file, 'Voltage'))
     wavelength = electron_wavelength(voltage_kev)
 
+    log_written, _, _ = is_file_fully_written(dataset.log_file)
+    if not log_written:
+        dataset.logger.info('Conversion failed. log file not complete')
+        return 0
+
+    dataset.logger.info('Scraping speed_param from the log file')
     speed_param = float(scrap(dataset.log_file, 'speed parameter'))
+
+    dataset.logger.info('Scraping rotationSpeed from the log file')
     speed_line = scrap(dataset.log_file, 'rotationSpeed')
     pattern = r'^(.*)\*(.*)\+(.*)\*10\^(.*)$'
     params = re.search(pattern, speed_line)
+
     rotation_speed = float(params.group(1)) * speed_param
     rotation_speed += (float(params.group(3)) *
                        10**(float(params.group(4))))
 
     start_angle = float(scrap(dataset.log_file, 'start angle'))
+    dataset.logger.info('Scraping start angle from the log file: %f'
+                        % start_angle)
+
     frame_rate = float(scrap(dataset.log_file, 'frame rate'))
+    dataset.logger.info('Scraping frame rate from the log file: %f'
+                        % frame_rate)
+
     rotation_angle = rotation_speed / frame_rate
 
-    data_file_pattern = dataset.base + r'.__data_*.h5'
+    data_file_pattern = dataset.base + r'_data_*.h5'
+
+    patch_written, _, _ = is_file_fully_written(dataset.patch_file)
+    if not patch_written:
+        dataset.logger.info('Conversion failed. Patch file not complete')
+        return 0
 
     detector_distance = get_detector_distance(dataset.patch_file)
 

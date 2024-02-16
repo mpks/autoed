@@ -4,7 +4,7 @@ import logging
 import re
 from .convert import generate_nexus_file, run_slurm_job
 from .beam_center import BeamCenterCalculator
-from .misc_functions import replace_dir
+from .misc_functions import replace_dir, is_file_fully_written
 
 
 class SinglaDataset:
@@ -35,9 +35,10 @@ class SinglaDataset:
 
         self.output_path = out_path
         self.slurm_file = os.path.join(out_path, 'slurm_config.json')
-        self.logger = None
+        self.set_logger()
         self.status = 'NEW'
         self.beam_center = None
+        self.present_lock = False
         self.processed = False
         self.data_files = []
 
@@ -53,18 +54,23 @@ class SinglaDataset:
         self.data_files = data_files
 
     def set_logger(self):
+
         self.logger = logging.getLogger(self.base)
         self.logger.setLevel(logging.DEBUG)
 
-        file_handler = logging.FileHandler(self.autoed_log_file)
-        stream_handler = logging.StreamHandler()
+        # Clear the log file if it exists
+        with open(self.autoed_log_file, 'w'):
+            pass
 
-        fmt = '%(asctime)s %(levelname)s - %(message)s'
+        file_handler = logging.FileHandler(self.autoed_log_file)
+        # stream_handler = logging.StreamHandler()
+
+        fmt = '%(asctime)s.%(msecs)03d %(levelname)s - %(message)s'
         formatter = logging.Formatter(fmt, datefmt='%d-%m-%Y %H:%M:%S')
-        stream_handler.setFormatter(formatter)
+        # stream_handler.setFormatter(formatter)
         file_handler.setFormatter(formatter)
 
-        stream_handler.setLevel(logging.DEBUG)
+        # stream_handler.setLevel(logging.DEBUG)
         file_handler.setLevel(logging.DEBUG)
 
         self.logger.addHandler(file_handler)
@@ -78,7 +84,71 @@ class SinglaDataset:
                        os.path.exists(self.log_file) and
                        os.path.exists(self.mdoc_file) and
                        os.path.exists(self.patch_file))
-        return files_exist and data_exists
+
+        if files_exist and data_exists:
+            self.logger.info('All files present in dataset %s' % self.base)
+
+            con_data = True
+            for data_file in self.data_files:
+
+                self.logger.info('Waiting for data to be written: %s'
+                                 % data_file)
+                con_temp, sd, td = is_file_fully_written(data_file,
+                                                         timeout=600)
+                if con_temp:
+                    self.logger.info('Data file size stable: %d %s'
+                                     % (sd, data_file))
+                else:
+                    self.logger.info('Data file size test failed %d %s'
+                                     % (sd, data_file))
+                con_data = con_data and con_temp
+
+            self.logger.info('Waiting for master file: %s'
+                             % self.master_file)
+            con1, s1, t1 = is_file_fully_written(self.master_file,
+                                                 timeout=180)
+            if con1:
+                self.logger.info('Master file size stable: %d %s'
+                                 % (s1, self.master_file))
+            else:
+                self.logger.info('Master file size test failed: %d %s'
+                                 % (s1, self.master_file))
+
+            self.logger.info('Waiting for log file: %s'
+                             % self.log_file)
+            con2, s2, t2 = is_file_fully_written(self.log_file)
+            if con2:
+                self.logger.info('Log file size stable: %d %s'
+                                 % (s2, self.log_file))
+            else:
+                self.logger.info('Log file size test failed: %d %s'
+                                 % (s2, self.log_file))
+
+            self.logger.info('Waiting for mdoc file: %s'
+                             % self.mdoc_file)
+            con3, s3, t3 = is_file_fully_written(self.mdoc_file)
+            if con3:
+                self.logger.info('Mdoc file size stable: %d %s'
+                                 % (s3, self.mdoc_file))
+            else:
+                self.logger.info('Mdoc file size test failed: %d %s'
+                                 % (s3, self.mdoc_file))
+
+            self.logger.info('Waiting for Patch file: %s'
+                             % self.patch_file)
+            con4, s4, t4 = is_file_fully_written(self.patch_file)
+            if con4:
+                self.logger.info('PatchMaster.sh file size stable: %d %s'
+                                 % (s4, self.patch_file))
+            else:
+                self.logger.info('PatchMaster.sh file size test failed: %d %s'
+                                 % (s4, self.patch_file))
+            if con1 and con2 and con3 and con4 and con_data:
+                self.present_lock = True
+            return con1 and con2 and con3 and con4 and con_data
+        else:
+            self.logger.info('Dataset not complete %s' % self.base)
+            return False
 
     @classmethod
     def from_basename(cls, basename):
@@ -100,7 +170,15 @@ class SinglaDataset:
         if not self.processed:
             self.processed = True
             if not self.beam_center:
+                msg = 'Computing the beam center for %s'
+                self.logger.info(msg % self.dataset_name)
+
                 self._compute_beam_center()
+
+                msg = 'Beam center for %s' % self.dataset_name
+                msg += ' = (%f, %f) ' % self.beam_center
+                self.logger.info(msg)
+
             success = generate_nexus_file(self)
             if success:
                 os.makedirs(self.output_path, exist_ok=True)

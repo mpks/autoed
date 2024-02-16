@@ -90,3 +90,42 @@ def replace_dir(path, old_name, new_name):
 
     new_path = os.path.join('/', *components)
     return new_path
+
+
+def is_file_fully_written(filename,
+                          polling_interval=0.5,
+                          timeout=60):
+    """
+    Check if textual file is fully written by monitoring its size.
+
+    Parameters:
+    - filename: The name of the file to check.
+    - polling_interval: Time interval (in seconds) between size checks.
+    - timeout: Maximum time (in seconds) to wait for the file to stabilize.
+
+    Returns:
+    - True if the file size remains constant for the specified duration,
+      False otherwise.
+    """
+
+    start_time = time.time()
+    previous_size = None
+
+    while time.time() - start_time < timeout:
+        try:
+            size = os.path.getsize(filename)
+
+            c1 = previous_size is not None
+            c3 = size == previous_size
+            if c1 and c3:
+                if not size == 0:
+                    wait_time = time.time() - start_time
+                    return True, size, wait_time  # Size remains constant
+
+            previous_size = size
+        except FileNotFoundError:
+            pass  # File might not exist yet, continue checking
+
+        time.sleep(polling_interval)
+
+    return False, size, wait_time
