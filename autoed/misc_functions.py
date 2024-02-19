@@ -93,7 +93,7 @@ def replace_dir(path, old_name, new_name):
 
 
 def is_file_fully_written(filename,
-                          polling_interval=0.5,
+                          polling_interval=0.05,
                           timeout=60):
     """
     Check if textual file is fully written by monitoring its size.

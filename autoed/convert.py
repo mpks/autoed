@@ -33,9 +33,9 @@ def generate_nexus_file(dataset):
         dataset.logger.info('Found existing nexus file')
         cmd = ['rm ' + dataset.nexgen_file]
         subprocess.run(cmd, shell=True, text=True, capture_output=True)
-        dataset.logger.info('Nexus file removed')
+        dataset.logger.info('Old Nexus file removed')
 
-    phil_written, _, _ = is_file_fully_written(phil_file)
+    phil_written, _, _ = is_file_fully_written(phil_file, polling_interval=0.5)
     if not phil_written:
         dataset.logger.info('Conversion failed. Phil file not written')
         return 0
@@ -45,8 +45,8 @@ def generate_nexus_file(dataset):
         dataset.logger.info('Conversion failed. mdoc file not complete')
         return 0
 
-    dataset.logger.info('Scraping voltage from mdoc file')
     voltage_kev = float(scrap(dataset.mdoc_file, 'Voltage'))
+    dataset.logger.info('Scraping voltage from mdoc file: %f' % voltage_kev)
     wavelength = electron_wavelength(voltage_kev)
 
     log_written, _, _ = is_file_fully_written(dataset.log_file)
@@ -54,10 +54,10 @@ def generate_nexus_file(dataset):
         dataset.logger.info('Conversion failed. log file not complete')
         return 0
 
-    dataset.logger.info('Scraping speed_param from the log file')
     speed_param = float(scrap(dataset.log_file, 'speed parameter'))
+    dataset.logger.info('Scraping speed_param from the log file: %f' %
+                        speed_param)
 
-    dataset.logger.info('Scraping rotationSpeed from the log file')
     speed_line = scrap(dataset.log_file, 'rotationSpeed')
     pattern = r'^(.*)\*(.*)\+(.*)\*10\^(.*)$'
     params = re.search(pattern, speed_line)
@@ -65,6 +65,8 @@ def generate_nexus_file(dataset):
     rotation_speed = float(params.group(1)) * speed_param
     rotation_speed += (float(params.group(3)) *
                        10**(float(params.group(4))))
+    dataset.logger.info('Scraping rotationSpeed from the log file: %f' %
+                        rotation_speed)
 
     start_angle = float(scrap(dataset.log_file, 'start angle'))
     dataset.logger.info('Scraping start angle from the log file: %f'

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import logging
+import time
 import re
 from .convert import generate_nexus_file, run_slurm_job
 from .beam_center import BeamCenterCalculator
@@ -40,6 +41,7 @@ class SinglaDataset:
         self.beam_center = None
         self.present_lock = False
         self.processed = False
+        self.last_processed_time = 0
         self.data_files = []
 
     def search_and_update_data_files(self):
@@ -156,6 +158,16 @@ class SinglaDataset:
         dataset_name = os.path.basename(basename)
         return cls(path, dataset_name)
 
+    def update_processed(self):
+        """We would like to have the ability for AutoED to
+        process the data again if we want. For example,
+        if data is sitting for say 10 min after being
+        processed, it should be possible to reprocess it again
+        """
+        time_diff = time.time() - self.last_processed_time
+        if time_diff > 300:
+            self.processed = False
+
     def _compute_beam_center(self):
 
         if len(self.data_files) > 0:
@@ -183,3 +195,4 @@ class SinglaDataset:
             if success:
                 os.makedirs(self.output_path, exist_ok=True)
                 run_slurm_job(self)
+            self.last_processed_time = time.time()
