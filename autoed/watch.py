@@ -3,13 +3,14 @@ import time
 # import subprocess
 import autoed
 import os
-import sys
 import re
 from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from .dataset import SinglaDataset
 from .process_static import gather_master_files
 import logging
+import argparse
 
 """
 A watchdog script that watches a directory for file changes.
@@ -18,40 +19,69 @@ data if present.
 
 Run with:
 autoed_watch directory_name
+optionaly
+autoed_watch -i -s 30 directory_name
 """
-
-# Sometimes the same file will trigger the watchdog
-# Here, we have a wait time of 5 seconds between two
-# triggers to be detected.
-TRIGGER_TIME_SEC = 5
 
 
 def main():
-    if len(sys.argv) == 2:
-        input_dir = sys.argv[1]
-        watch_path = os.path.abspath(input_dir)
-        if not os.path.exists(watch_path):
-            msg = f'Path {watch_path} does not exist.'
-            raise FileNotFoundError(msg)
+
+    msg = 'Watchdog script for monitoring filesystem changes'
+    parser = argparse.ArgumentParser(description=msg)
+    parser.add_argument('--inotify', '-i', action='store_true',
+                        default=False,
+                        help='Run watchdog with inotify.')
+    hmsg = "Sleep duration between filesystem checks.\n"
+    hmsg += "By default 1 sec for inotify method, "
+    hmsg += "or 30 sec for pooling method."
+    parser.add_argument('--sleep_time', '-s', type=float,
+                        default=None,
+                        help=hmsg)
+    parser.add_argument('dirname', nargs='?', default=None,
+                        help='Name of the directory to watch')
+
+    args = parser.parse_args()
+
+    if args.inotify:
+        sleep_time = 1.0  # Default for inotify method
     else:
+        sleep_time = 30.0  # Default for polling method
+
+    if args.sleep_time:    # Overwrite the default
+        sleep_time = args.sleep_time
+
+    if not args.dirname:
         msg = 'autoed_watch requires a single argument'
         msg += ' (watch directory)'
         raise IOError(msg)
 
+    input_dir = args.dirname
+    watch_path = os.path.abspath(input_dir)
+    if not os.path.exists(watch_path):
+        msg = f'Path {watch_path} does not exist.'
+        raise FileNotFoundError(msg)
+
     processing_script = os.path.join(autoed.__path__[0], 'process.py')
 
-    watch_logger = set_watch_logger(watch_path)
+    watch_logger = set_watch_logger(watch_path,
+                                    args.inotify,
+                                    sleep_time)
 
     event_handler = DirectoryHandler(watch_path,
                                      processing_script,
                                      watch_logger)
-    observer = Observer()
+
+    if args.inotify:
+        observer = Observer()
+    else:
+        observer = PollingObserver(timeout=sleep_time)
+
     observer.schedule(event_handler, watch_path, recursive=True)
     observer.start()
 
     try:
         while True:
-            time.sleep(1)
+            time.sleep(sleep_time)
 
     except KeyboardInterrupt as e:
         watch_logger.exception(str(e))
@@ -153,7 +183,7 @@ class DirectoryHandler(FileSystemEventHandler):
         self.on_created(event)
 
 
-def set_watch_logger(watch_path):
+def set_watch_logger(watch_path, inotify, sleep):
 
     auto_logger = logging.getLogger(__name__)
     auto_logger.setLevel(logging.DEBUG)
@@ -174,6 +204,8 @@ def set_watch_logger(watch_path):
 
     auto_logger.info(40*'=')
     auto_logger.info('  Starting new logger')
+    auto_logger.info('  inotify: %s' % inotify)
+    auto_logger.info('  sleep time: %.1f' % sleep)
     auto_logger.info(40*'=')
 
     return auto_logger

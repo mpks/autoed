@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autoed',
-    version='0.1.0',
+    version='0.1.1',
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
@@ -18,7 +18,7 @@ setup(
     install_requires=[
         'watchdog',
         'numpy>=1.10.0',
-        'nexgen==0.7.3',
+        'nexgen==0.8.5',
         'h5py',
         'argparse',
         'python-daemon',

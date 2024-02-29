@@ -2,33 +2,30 @@
 import sys
 import os
 import argparse
-import argcomplete
 from .dataset import SinglaDataset
 
 
-# PYTHON_ARGCOMPLETE_OK
 def main():
 
     msg = 'Script for automatic processing of existing Singla data'
     parser = argparse.ArgumentParser(description=msg)
     parser.add_argument('dirname', nargs='?', default=None,
-                        help='Name of the directory to watch')
-    parser.add_argument('--pid', nargs='?', type=int,
-                        default=None,
-                        help='PID of the process to kill')
-
-    argcomplete.autocomplete(parser)
+                        help='Name of the directory to process')
+    hmsg = 'Do processing even when nexgen file already exists'
+    parser.add_argument('-f', '--force',  action='store_true',
+                        default=False,
+                        help=hmsg)
 
     args = parser.parse_args()
 
     if args.dirname:
-        process_dir(args.dirname)
+        process_dir(args.dirname, args.force)
     else:
         parser.print_help()
         sys.exit(1)
 
 
-def process_dir(dir_name):
+def process_dir(dir_name, force=False):
     """The function to search a directory recursively,
     convert all unprocessed files to nexgen and process
     them with xia2
@@ -52,10 +49,18 @@ def process_dir(dir_name):
 
         if dataset.all_files_present():
 
-            if not os.path.exists(dataset.nexgen_file):
+            if force:
                 dataset.set_logger()
                 print('Processing ', dataset.base)
                 dataset.process()
+            else:
+                if not os.path.exists(dataset.nexgen_file):
+                    dataset.set_logger()
+                    print('Processing ', dataset.base)
+                    dataset.process()
+                else:
+                    print('Ignoring. Nexgen file exist in ',
+                          dataset.base)
 
 
 def gather_master_files(directory):

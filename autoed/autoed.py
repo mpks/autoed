@@ -9,7 +9,6 @@ import time
 import subprocess
 import psutil
 import argcomplete
-from .dataset import SinglaDataset
 
 
 # PYTHON_ARGCOMPLETE_OK
@@ -19,13 +18,19 @@ def main():
     parser = argparse.ArgumentParser(description=msg)
     parser.add_argument('command',
                         choices=['start', 'watch', 'list', 'stop',
-                                 'kill', 'restart', 'process'],
+                                 'kill', 'restart'],
                         help='Commands to execute')
     parser.add_argument('dirname', nargs='?', default=None,
                         help='Name of the directory to watch')
     parser.add_argument('--pid', nargs='?', type=int,
                         default=None,
                         help='PID of the process to kill')
+    parser.add_argument('--inotify', '-i', action='store_true',
+                        default=False,
+                        help='Run observer with inotify.')
+    parser.add_argument('-t', '--time_sleep', type=float,
+                        default=None,
+                        help='Sleep duration between filesystem checks')
 
     argcomplete.autocomplete(parser)
 
@@ -44,15 +49,17 @@ def main():
     if args.command == "start":
         autoed_daemon.start()
     elif args.command == "watch" and args.dirname:
-        autoed_daemon.watch(args.dirname)
+        autoed_daemon.watch(
+            args.dirname,
+            use_inotify=args.inotify,
+            sleep_time=args.time_sleep
+        )
     elif args.command == "list":
         autoed_daemon.list_directories()
     elif args.command == "restart":
         autoed_daemon.restart()
     elif args.command == "stop":
         autoed_daemon.stop()
-    elif args.command == 'process' and args.dirname:
-        process_dir(args.dirname)
     elif args.command == "kill" and args.pid is not None:
         if not os.path.exists(autoed_daemon.lock_file):
             print("No daemon running")
@@ -193,7 +200,11 @@ class AutoedDaemon:
             is_parent = is_parent or p1.startswith(p2 + os.sep)
         return is_parent
 
-    def watch(self, dirname):
+    def watch(self,
+              dirname,
+              use_inotify=False,
+              sleep_time=None,
+              ):
 
         if not os.path.exists(self.lock_file):
             print("No daemon running")
@@ -216,7 +227,12 @@ class AutoedDaemon:
             print(r'Already watching its subdirectories.')
             sys.exit(1)
         else:
-            command = 'autoed_watch ' + full_path
+            command = 'autoed_watch '
+            if use_inotify:
+                command += '-i '
+            if sleep_time:
+                command += '-s %.1f ' % sleep_time
+            command += full_path
             if not self.is_process_running(command):
                 print('Watching path:', full_path)
                 process = subprocess.Popen(command, shell=True)
