@@ -30,7 +30,10 @@ def main():
                         help='Run observer with inotify.')
     parser.add_argument('-t', '--time_sleep', type=float,
                         default=None,
-                        help='Sleep duration between filesystem checks')
+                        help='Sleep duration between filesystem checks.')
+    parser.add_argument('--log-dir', type=str,
+                        default=None,
+                        help='A directory to store autoed log file.')
 
     argcomplete.autocomplete(parser)
 
@@ -52,7 +55,8 @@ def main():
         autoed_daemon.watch(
             args.dirname,
             use_inotify=args.inotify,
-            sleep_time=args.time_sleep
+            sleep_time=args.time_sleep,
+            log_dir= args.log_dir
         )
     elif args.command == "list":
         autoed_daemon.list_directories()
@@ -204,6 +208,7 @@ class AutoedDaemon:
               dirname,
               use_inotify=False,
               sleep_time=None,
+              log_dir=None,
               ):
 
         if not os.path.exists(self.lock_file):
@@ -232,6 +237,9 @@ class AutoedDaemon:
                 command += '-i '
             if sleep_time:
                 command += '-s %.1f ' % sleep_time
+            if log_dir:
+                log_path = os.path.abspath(log_dir)
+                command += '--log-dir ' + log_path + ' '
             command += full_path
             if not self.is_process_running(command):
                 print('Watching path:', full_path)

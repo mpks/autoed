@@ -37,6 +37,8 @@ def main():
     parser.add_argument('--sleep_time', '-s', type=float,
                         default=None,
                         help=hmsg)
+    parser.add_argument('--log-dir', type=str, default=None,
+                        help='A directory to store autoed log file.')
     parser.add_argument('dirname', nargs='?', default=None,
                         help='Name of the directory to watch')
 
@@ -56,14 +58,24 @@ def main():
         raise IOError(msg)
 
     input_dir = args.dirname
+
     watch_path = os.path.abspath(input_dir)
     if not os.path.exists(watch_path):
         msg = f'Path {watch_path} does not exist.'
         raise FileNotFoundError(msg)
 
+    if args.log_dir:
+        if not os.path.exists(args.log_dir):
+            msg = f'Path {args.log_dir} does not exist.'
+            raise FileNotFoundError(msg)
+
+        log_directory = args.log_dir
+    else:
+        log_directory = watch_path
+
     processing_script = os.path.join(autoed.__path__[0], 'process.py')
 
-    watch_logger = set_watch_logger(watch_path,
+    watch_logger = set_watch_logger(log_directory,
                                     args.inotify,
                                     sleep_time)
 
@@ -187,19 +199,16 @@ def set_watch_logger(watch_path, inotify, sleep):
 
     auto_logger = logging.getLogger(__name__)
     auto_logger.setLevel(logging.DEBUG)
-    # console_handler = logging.StreamHandler()
-    # console_handler.setLevel(logging.DEBUG)
 
     autoed_log_path = os.path.join(watch_path, 'autoed_watch.log')
     file_handler = logging.FileHandler(autoed_log_path, mode='a')
     file_handler.setLevel(logging.DEBUG)
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt, datefmt='%d-%m-%Y %H:%M:%S')
-    # console_handler.setFormatter(formatter)
-    # console_handler.auto_flush = True
+
     file_handler.setFormatter(formatter)
     file_handler.auto_flush = True
-    # auto_logger.addHandler(console_handler)
+
     auto_logger.addHandler(file_handler)
 
     auto_logger.info(40*'=')
