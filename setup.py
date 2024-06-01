@@ -8,7 +8,7 @@ setup(
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
             'autoed = autoed.autoed:main',
-            'autoed_beam_center = autoed.beam_center:main',
+            'autoed_beam_center = autoed.beam_position.beam_center:main',
             'autoed_process = autoed.process_static:main'
         ]
     },
