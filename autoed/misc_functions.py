@@ -1,3 +1,10 @@
+"""
+   In this module, we keep some of the miscellaneous function used in other
+   parts of the code.
+
+"""
+from __future__ import annotations
+from typing import Union
 import re
 import h5py
 import os
@@ -7,21 +14,66 @@ import time
 import autoed
 
 
-def scrap(filename, var_name):
-    """Reads the filename and returns a 'value' of the first line that matches a
-    pattern 'var_name = value' """
+basic_type = Union[float, int, str]
 
-    pattern = var_name + r'\s*=\s*(.*)'
+
+def scrap(input_file: str,
+          variable_name: str,
+          default_type: basic_type = None,
+          default_value: basic_type = None,
+          ) -> basic_type:
+    """
+    Read the `input_file` and return a value of the first line that matches a
+    pattern `var_name = value`
+
+    Parameters
+    ----------
+    input_file : str
+        Full path of the textual file from which to scrap data.
+    variable_name : str
+        The name of the variable we want to scrap from the text file.
+    default_type : Union[float, int, str]
+        If the function finds the matching line, the resulting value will be
+        converted to this type.
+    default_value : Union[float, int, str]
+        Return this value if the function fails to scrap the value from the
+        input file (or the conversion to default_type fails.
+
+    Returns
+    -------
+    success : boolean
+        True if value was successfully read from the `input_file`, False if
+        scrapping failed and `default_value` was returned.
+    value : Union[float, int, str]
+        The value of the variable `variable_name` from the `input_file` (or the
+        `default_value`.
+    """
+
+    pattern = variable_name + r'\s*=\s*(.*)'
     match_line = None
 
-    with open(filename, 'r') as file:
-        for line in file:
-            if re.match(pattern, line):
-                match_line = line.strip()
-                break
-    pattern = r'.*\s*=\s*(.*)$'
-    value = re.search(pattern, match_line).group(1)
-    return value
+    success = True
+
+    try:
+
+        if default_type not in (str, float, int):
+            raise TypeError
+
+        with open(input_file, 'r') as file:
+            for line in file:
+                if re.match(pattern, line):
+                    match_line = line.strip()
+                    break
+        pattern = r'.*\s*=\s*(.*)$'
+        value = re.search(pattern, match_line).group(1)
+        value = default_type(value)
+
+    except (FileNotFoundError, ValueError, TypeError):
+
+        success = False
+        value = default_value
+
+    return success, value
 
 
 def get_detector_distance(path):
@@ -39,7 +91,8 @@ def get_detector_distance(path):
 
 
 def overwrite_mask(filename):
-    """Given a hdf5 file, overwrite the pixel mask"""
+
+    """Given a HDF5 file, overwrite the pixel mask"""
 
     while True:
         try:

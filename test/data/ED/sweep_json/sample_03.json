@@ -1,0 +1,12 @@
+{
+    "voltage": 200.0,
+    "wavelength": 0.026,
+    "rotation_speed": "2",
+    "start_angle": -17.0,
+    "frame_rate": 4.0,
+    "angle_increment": 0.15,
+    "detector_distance": 333,
+    "sample_type": "macro",
+    "unit_cell": null,
+    "space_group": "P1"
+}

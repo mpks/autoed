@@ -1,0 +1,60 @@
+22-May-24  08:20:43
+SerialEM Version 3.9.0beta 64-bit,  built Aug  4 2021  14:23:01
+Current date  5/22/2024  08:20:43
+Camera length is  1.2 m
+High voltage is 200.0 kV
+
+----------------------
+--- MetaData ---
+-----------------------
+
+These are your experimental variables for this sweep.
+distance = 1407.6
+voltage = 200
+start angle = -20
+end angle = 10
+total angle = 30
+noFrames = 60
+speedParameter = 0.067563
+degrees per second = 2
+fps = 4
+wind up = 0.5
+delay time = 0.5
+oscillation width = 0.5
+oscillation offset = 15
+
+==================================================================================
+========================= User Defined 3DED/microED collection ======================
+==================================================================================
+----------------------
+--- SettingUp ---
+-----------------------
+
+Date and time of data collection
+20240522  0820
+
+Navigator details
+Item 225:  Stage: 145.61 -671.00 43  Label: 226
+Stage 145.60 -671.00 42.93
+145.
+-670.
+42.
+
+Created directory 20240522_nav226_145.-670.42._
+
+------------------------------
+--- CollectingData ---
+------------------------------
+
+Saved Z =   0,  -0.00 degrees
+Captured 0 degree .mrc preview
+Saved Z =   1, -20.50 degrees
+Captured start angle .mrc preview
+The return value from FastAcquisitionTrigger was      1
+Saved Z =   2,  10.50 degrees
+Captured end angle .mrc diffraction preview
+Saved Z =   3,   0.00 degrees
+Captured 0 degree .mrc diffraction preview
+==================================================================================
+===================================== Done =======================================
+==================================================================================

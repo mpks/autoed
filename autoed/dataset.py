@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
+"""Module that defines a Singla dataset class"""
 import os
 import logging
 import time
 import re
-from .convert import generate_nexus_file, run_slurm_job
-from .beam_center import BeamCenterCalculator
+from autoed.convert import generate_nexus_file
+from autoed.run_slurm import run_slurm_job
+from autoed.beam_position.beam_center import BeamCenterCalculator
 from .misc_functions import replace_dir, is_file_fully_written
 
 
-class SinglaDataset:
+class SinglaDataset:                    # pylint: disable=R0902
+    """A class to keep all data relevant to single experimental dataset"""
 
     def __init__(self, path, dataset_name):
         """
@@ -27,6 +30,7 @@ class SinglaDataset:
         self.log_file = self.base + '.log'
         self.autoed_log_file = self.base + '.autoed.log'
         self.nexgen_file = self.base + '.nxs'
+        self.json_file = self.base + '.json'
         self.mdoc_file = self.base + '.mrc.mdoc'
         self.patch_file = os.path.join(self.path, 'PatchMaster.sh')
 
