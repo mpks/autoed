@@ -91,7 +91,10 @@ class SinglaDataset:                    # pylint: disable=R0902
                        os.path.exists(self.mdoc_file) and
                        os.path.exists(self.patch_file))
 
-        if files_exist and data_exists:
+        new_files_exist = (os.path.exists(self.master_file) and
+                           os.path.exists(self.json_file))
+
+        if (files_exist and data_exists):
             self.logger.info('All files present in dataset %s' % self.base)
 
             con_data = True
@@ -152,6 +155,10 @@ class SinglaDataset:                    # pylint: disable=R0902
             if con1 and con2 and con3 and con4 and con_data:
                 self.present_lock = True
             return con1 and con2 and con3 and con4 and con_data
+        elif (new_files_exist and data_exists):
+
+            self.logger.info(f"Detected JSON dataset: {self.base}")
+            return True
         else:
             self.logger.info('Dataset not complete %s' % self.base)
             return False
@@ -176,7 +183,15 @@ class SinglaDataset:                    # pylint: disable=R0902
 
         if len(self.data_files) > 0:
             calculator = BeamCenterCalculator(self.data_files[0])
-            x, y = calculator.center_from_average()
+            x, y = calculator.center_from_midpoint(every=50)
+            if not x:
+                msg = 'Beam position along x is None. Setting beam_x to 514'
+                self.logger.error(msg)
+                x = 514
+            if not y:
+                msg = 'Beam position along y is None. Setting beam_y to 531'
+                self.logger.error(msg)
+                y = 531
             self.beam_center = (x, y)
             calculator.file.close()
 
