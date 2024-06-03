@@ -5,13 +5,12 @@ import os
 from autoed.misc_functions import is_file_fully_written, overwrite_mask
 
 
-def generate_nexus_file(dataset):
+def generate_nexus_file(dataset, metadata):
     """Generates Nexus file from the dataset files using nexgen"""
 
     dataset.logger.info(f"Overwriting mask in : {dataset.master_file}")
     overwrite_mask(dataset.master_file)
-    dataset.logger.info('Mask overwritten in : %s'
-                        % dataset.master_file)
+    dataset.logger.info(f"Mask overwritten in : {dataset.master_file}")
 
     phil_file = os.path.join(dataset.path, 'ED_Singla.phil')
 

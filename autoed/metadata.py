@@ -9,8 +9,6 @@ from autoed.misc_functions import (
     is_file_fully_written,
 )
 
-from autoed.dataset import SinglaDataset
-
 
 class Metadata:
     """A class to keep all relevant experimental metadata"""
@@ -24,7 +22,7 @@ class Metadata:
         self.unit_cell = None
         self.space_group = None
 
-    def from_txt(self, dataset: SinglaDataset) -> int:
+    def from_txt(self, dataset) -> int:
         """Read the metadata from textual files (e.g. log, mdoc etc)
 
         Returns
@@ -98,7 +96,7 @@ class Metadata:
 
         return 1
 
-    def from_json(self, dataset: SinglaDataset) -> int:
+    def from_json(self, dataset) -> int:
         """Read the metadata from json file format"""
 
         json_written, _, _ = is_file_fully_written(dataset.json_file)
