@@ -170,10 +170,10 @@ class SinglaDataset:                    # pylint: disable=R0902
         return cls(path, dataset_name)
 
     def update_processed(self):
-        """We would like to have the ability for AutoED to
-        process the data again if we want. For example,
-        if data is sitting for say 10 min after being
-        processed, it should be possible to reprocess it again
+        """
+        AutoED can process a dataset again if we want. If data is sitting
+        for say 10 min after being processed, it should be possible to
+        reprocess it again.
         """
         time_diff = time.time() - self.last_processed_time
         if time_diff > 300:
