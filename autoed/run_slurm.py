@@ -1,21 +1,13 @@
 import subprocess
 import os
-import re
 import autoed
 import json
-
-
-from .misc_functions import (
-    electron_wavelength, scrap, get_detector_distance,
-    is_file_fully_written, overwrite_mask
-)
 
 
 def run_slurm_job(dataset):
 
     slurm_config_file = 'data/relion_slurm_cpu.json'
-    slurm_config_file = os.path.join(autoed.__path__[0],
-                                     slurm_config_file)
+    slurm_config_file = os.path.join(autoed.__path__[0], slurm_config_file)
 
     with open(slurm_config_file, 'r') as file:
         data = json.load(file)

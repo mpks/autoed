@@ -22,7 +22,7 @@ class Metadata:
         self.unit_cell = None
         self.space_group = None
 
-    def from_txt(self, dataset) -> int:
+    def from_txt(self, dataset):
         """Read the metadata from textual files (e.g. log, mdoc etc)
 
         Returns
@@ -33,7 +33,7 @@ class Metadata:
         mdoc_written, _, _ = is_file_fully_written(dataset.mdoc_file)
         if not mdoc_written:
             dataset.logger.info('Conversion failed. mdoc file not complete')
-            return 0
+            return False
 
         # Get voltage and wavelength
         success, voltage = scrap(dataset.mdoc_file, 'Voltage', float, 200.0)
@@ -48,7 +48,7 @@ class Metadata:
         log_written, _, _ = is_file_fully_written(dataset.log_file)
         if not log_written:
             dataset.logger.info('Conversion failed. log file not complete')
-            return 0
+            return False
 
         # Get start angle
         success, start_angle = scrap(dataset.log_file, 'start angle',
@@ -91,48 +91,48 @@ class Metadata:
         patch_written, _, _ = is_file_fully_written(dataset.patch_file)
         if not patch_written:
             dataset.logger.info('Conversion failed. Patch file not complete')
-            return 0
+            return False
         self.detector_distance = get_detector_distance(dataset.patch_file)
 
-        return 1
+        return True
 
-    def from_json(self, dataset) -> int:
+    def from_json(self, dataset):
         """Read the metadata from json file format"""
 
         json_written, _, _ = is_file_fully_written(dataset.json_file)
 
         if not json_written:
             dataset.logger.error('JSON file not complete')
-            return 0
+            return False
 
         with open(dataset.json_file, 'r') as json_file:
             json_data = json.load(json_file)
 
         if not json_data['wavelength']:
             dataset.logger.error('wavelength set to None in JSON file')
-            return 0
+            return False
         self.wavelength = json_data['wavelength']
 
         if not json_data['angle_increment']:
             dataset.logger.error('angle_increment set to None in JSON file')
-            return 0
+            return False
         self.angle_increment = json_data['angle_increment']
 
         if not json_data['start_angle']:
             dataset.logger.error('start_angle set to None in JSON file')
-            return 0
+            return False
         self.start_angle = json_data['start_angle']
 
         if not json_data['detector_distance']:
             dataset.logger.error('detector_distance set to None in JSON file')
-            return 0
+            return False
         self.detector_distance = json_data['detector_distance']
 
         self.sample_type = json_data['sample_type']
         self.unit_cell = json_data['unit_cell']
         self.space_group = json_data['space_group']
 
-        return 1
+        return True
 
 
 def get_angle_increment_old(dataset):

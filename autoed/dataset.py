@@ -7,7 +7,8 @@ import re
 from autoed.convert import generate_nexus_file
 from autoed.run_slurm import run_slurm_job
 from autoed.beam_position.beam_center import BeamCenterCalculator
-from .misc_functions import replace_dir, is_file_fully_written
+from autoed.misc_functions import replace_dir, is_file_fully_written
+from autoed.metadata import Metadata
 
 
 class SinglaDataset:                    # pylint: disable=R0902
@@ -156,7 +157,6 @@ class SinglaDataset:                    # pylint: disable=R0902
                 self.present_lock = True
             return con1 and con2 and con3 and con4 and con_data
         elif (new_files_exist and data_exists):
-
             self.logger.info(f"Detected JSON dataset: {self.base}")
             return True
         else:
@@ -197,6 +197,22 @@ class SinglaDataset:                    # pylint: disable=R0902
 
         return
 
+    def _fetch_metadata(self):
+
+        metadata = Metadata()
+        new_files_exist = (os.path.exists(self.master_file) and
+                           os.path.exists(self.json_file))
+
+        # First try to fetch metadata from JSON format
+        success_json = False
+        if new_files_exist:
+            success_json = metadata.from_json(self)
+
+        # If fetching from JSON fails, try with the old data format
+        if not success_json:
+            metadata.from_txt(self)
+        return metadata
+
     def process(self):
         if not self.processed:
             self.processed = True
@@ -210,7 +226,8 @@ class SinglaDataset:                    # pylint: disable=R0902
                 msg += ' = (%f, %f) ' % self.beam_center
                 self.logger.info(msg)
 
-            success = generate_nexus_file(self)
+            metadata = self._fetch_metadata()
+            success = generate_nexus_file(self, metadata)
             if success:
                 os.makedirs(self.output_path, exist_ok=True)
                 run_slurm_job(self)
