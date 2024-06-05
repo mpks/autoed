@@ -2,7 +2,7 @@
 import sys
 import os
 import argparse
-from .dataset import SinglaDataset
+from autoed.dataset import SinglaDataset
 
 
 def main():

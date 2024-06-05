@@ -9,7 +9,7 @@ setup(
             'autoed_watch = autoed.watch:main',
             'autoed = autoed.autoed:main',
             'autoed_beam_center = autoed.beam_position.beam_center:main',
-            'autoed_process = autoed.process_static:main'
+            'autoed_process = autoed.process.process_static:main'
         ]
     },
     setup_requires=['argcomplete'],

@@ -10,14 +10,14 @@ import os
 def datasets():
 
     path = os.getcwd()
-    data_path_old = os.path.join(path, 'data/ED/sweep_old_text/')
-    dataset_01 = SinglaDataset(data_path_old, 'sample_01')
+    data_path_old = os.path.join(path, 'data/ED/text_01/')
+    dataset_01 = SinglaDataset(data_path_old, 'sample')
 
-    data_path_new = os.path.join(path, 'data/ED/sweep_new_text/')
-    dataset_02 = SinglaDataset(data_path_new, 'sample_02')
+    data_path_new = os.path.join(path, 'data/ED/text_02/')
+    dataset_02 = SinglaDataset(data_path_new, 'sample')
 
-    data_path_json = os.path.join(path, 'data/ED/sweep_json/')
-    dataset_03 = SinglaDataset(data_path_json, 'sample_03')
+    data_path_json = os.path.join(path, 'data/ED/json_01/')
+    dataset_03 = SinglaDataset(data_path_json, 'sample')
 
     return dataset_01, dataset_02, dataset_03
 
@@ -46,13 +46,16 @@ def test_metadata_old(datasets):
 
 
 def test_metadata_new(datasets):
+    print('Testing for text 02 format')
     metadata = Metadata()
     metadata.from_txt(datasets[1])
 
     assert abs(metadata.wavelength - 0.03701436625) < 1.e-5
     assert abs(metadata.angle_increment - 0.5) < 0.01
     assert abs(metadata.start_angle + 20.0) < 0.1
+    print('Start angle: OK')
     assert abs(metadata.detector_distance - 600.00) < 0.1
+    print('Detector distance: OK')
 
 
 def test_metadata_json(datasets):

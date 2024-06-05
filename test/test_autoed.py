@@ -48,6 +48,13 @@ def run_for_dataset(dataset, name):
 
     d = dataset
 
+    for file in [d.nxs_file, d.autoed_log, d.data_dest, d.master_dest,
+                 d.nexus_log, d.phil_file, d.trigger_file, d.slurm_file]:
+        try:
+            os.remove(file)
+        except FileNotFoundError:
+            pass
+
     shutil.copy2(d.data_origin, d.data_dest)
     shutil.copy2(d.master_origin,  d.master_dest)
 
@@ -65,7 +72,10 @@ def run_for_dataset(dataset, name):
 
     for file in [d.nxs_file, d.autoed_log, d.data_dest, d.master_dest,
                  d.nexus_log, d.phil_file, d.trigger_file, d.slurm_file]:
-        os.remove(file)
+        try:
+            os.remove(file)
+        except FileNotFoundError:
+            pass
 
 
 def run2(cmd):

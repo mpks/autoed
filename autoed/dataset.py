@@ -5,7 +5,7 @@ import logging
 import time
 import re
 from autoed.convert import generate_nexus_file
-from autoed.run_slurm import run_slurm_job
+from autoed.process.run_slurm import run_slurm_job
 from autoed.beam_position.beam_center import BeamCenterCalculator
 from autoed.misc_functions import replace_dir, is_file_fully_written
 from autoed.metadata import Metadata

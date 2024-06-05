@@ -7,8 +7,8 @@ import re
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
-from .dataset import SinglaDataset
-from .process_static import gather_master_files
+from autoed.dataset import SinglaDataset
+from autoed.process.process_static import gather_master_files
 import logging
 import argparse
 
