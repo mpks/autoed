@@ -47,7 +47,11 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.present_lock = False
         self.processed = False
         self.last_processed_time = 0
+        self.run_slurm = True
         self.data_files = []
+
+    def set_run_slurm(self, option=True):
+        self.run_slurm = option
 
     def search_and_update_data_files(self):
 

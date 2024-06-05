@@ -34,13 +34,19 @@ def run_slurm_job(dataset):
     cmd += '8443/slurm/v0.0.38/job/submit '
     cmd += '-d@' + dataset.slurm_file
 
-    p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE, cwd=dataset.path)
-    if p.stderr:
-        msg = 'Failed to process data with xia2'
-        dataset.logger.error(msg)
-        dataset.logger.error(p.stderr)
-        return 0
+    if dataset.run_slurm:
+        p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, cwd=dataset.path)
+        if p.stderr:
+            msg = 'Failed to process data with xia2'
+            dataset.logger.error(msg)
+            dataset.logger.error(p.stderr)
+            return 0
+        else:
+            dataset.logger.info('Data processed')
+            return 1
+
     else:
-        dataset.logger.info('Data processed')
+        dataset.logger.info('Slurm run switched off for this session.')
+        dataset.logger.info(f"Slurm command: {cmd}")
         return 1

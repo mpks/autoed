@@ -35,8 +35,11 @@ def main():
     hmsg += "By default 1 sec for inotify method, "
     hmsg += "or 30 sec for pooling method."
     parser.add_argument('--sleep_time', '-s', type=float,
-                        default=None,
-                        help=hmsg)
+                        default=None, help=hmsg)
+
+    msg = 'Run watchdog without slurm submission (for testing)'
+    parser.add_argument('--no_slurm', action='store_true', default=False,
+                        help=msg)
     parser.add_argument('--log-dir', type=str, default=None,
                         help='A directory to store autoed log file.')
     parser.add_argument('dirname', nargs='?', default=None,
@@ -79,9 +82,11 @@ def main():
                                     args.inotify,
                                     sleep_time)
 
+    run_slurm = not args.no_slurm
     event_handler = DirectoryHandler(watch_path,
                                      processing_script,
-                                     watch_logger)
+                                     watch_logger,
+                                     run_slurm=run_slurm)
 
     if args.inotify:
         observer = Observer()
@@ -106,7 +111,7 @@ def main():
 
 class DirectoryHandler(FileSystemEventHandler):
 
-    def __init__(self, watch_path, script, logger):
+    def __init__(self, watch_path, script, logger, run_slurm=True):
 
         """
         Parameters
@@ -126,6 +131,7 @@ class DirectoryHandler(FileSystemEventHandler):
         self.datasets = dict()
         self.queue = dict()
         self.logger = logger
+        self.run_slurm = run_slurm
 
         self.script = script
         self.last_triggered = 0
@@ -159,6 +165,7 @@ class DirectoryHandler(FileSystemEventHandler):
                                 self.dataset_names.add(basename)
                                 dataset = SinglaDataset.from_basename(basename)
                                 dataset.search_and_update_data_files()
+                                dataset.set_run_slurm(self.run_slurm)
                                 self.datasets[dataset.base] = dataset
                             else:
                                 dataset = self.datasets[basename]
