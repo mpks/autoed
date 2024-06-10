@@ -5,7 +5,7 @@ import os
 from autoed.misc_functions import is_file_fully_written, overwrite_mask
 
 
-def generate_nexus_file(dataset, metadata):
+def generate_nexus_file(dataset):
     """Generates Nexus file from the dataset files using nexgen"""
 
     dataset.logger.info(f"Overwriting mask in : {dataset.master_file}")
@@ -33,6 +33,7 @@ def generate_nexus_file(dataset, metadata):
         return 0
 
     data_file_pattern = dataset.base + r'_data_*.h5'
+    metadata = dataset.metadata
 
     nex_cmd = 'ED_nexus singla-phil '
     nex_cmd += '%s ' % phil_file

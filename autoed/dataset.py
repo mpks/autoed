@@ -5,7 +5,7 @@ import logging
 import time
 import re
 from autoed.convert import generate_nexus_file
-from autoed.process.run_slurm import run_slurm_job
+from autoed.process.pipeline import run_processing_pipelines
 from autoed.beam_position.beam_center import BeamCenterCalculator
 from autoed.misc_functions import replace_dir, is_file_fully_written
 from autoed.metadata import Metadata
@@ -47,11 +47,9 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.present_lock = False
         self.processed = False
         self.last_processed_time = 0
-        self.run_slurm = True
+        self.dummy = False
         self.data_files = []
-
-    def set_run_slurm(self, option=True):
-        self.run_slurm = option
+        self.metadata = None
 
     def search_and_update_data_files(self):
 
@@ -183,7 +181,7 @@ class SinglaDataset:                    # pylint: disable=R0902
         if time_diff > 300:
             self.processed = False
 
-    def _compute_beam_center(self):
+    def compute_beam_center(self):
 
         if len(self.data_files) > 0:
             calculator = BeamCenterCalculator(self.data_files[0])
@@ -201,7 +199,7 @@ class SinglaDataset:                    # pylint: disable=R0902
 
         return
 
-    def _fetch_metadata(self):
+    def fetch_metadata(self):
 
         metadata = Metadata()
         new_files_exist = (os.path.exists(self.master_file) and
@@ -215,24 +213,26 @@ class SinglaDataset:                    # pylint: disable=R0902
         # If fetching from JSON fails, try with the old data format
         if not success_json:
             metadata.from_txt(self)
-        return metadata
+        self.metadata = metadata
 
-    def process(self):
+    def process(self, local=False):
+
         if not self.processed:
             self.processed = True
             if not self.beam_center:
-                msg = 'Computing the beam center for %s'
-                self.logger.info(msg % self.dataset_name)
+                msg = f"Computing the beam center for {self.dataset_name}"
+                self.logger.info(msg)
 
-                self._compute_beam_center()
+                self.compute_beam_center()
 
-                msg = 'Beam center for %s' % self.dataset_name
+                msg = f"Beam center for {self.dataset_name}"
                 msg += ' = (%f, %f) ' % self.beam_center
                 self.logger.info(msg)
 
-            metadata = self._fetch_metadata()
-            success = generate_nexus_file(self, metadata)
+            self.fetch_metadata()
+            success = generate_nexus_file(self)
             if success:
                 os.makedirs(self.output_path, exist_ok=True)
-                run_slurm_job(self)
+                # run_slurm_job(self)
+                run_processing_pipelines(self, local)
             self.last_processed_time = time.time()

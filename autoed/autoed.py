@@ -29,9 +29,14 @@ def main():
                         default=False,
                         help='Run observer with inotify.')
 
-    parser.add_argument('--no_slurm', action='store_true',
-                        default=False,
-                        help='Do not run slurm (used for testing).')
+    msg = 'Do not run xia2 or DIALS (used for testing).'
+    parser.add_argument('--dummy', action='store_true', default=False,
+                        help=msg)
+
+    msg = 'If set, AutoED will run all the processes locally, without '
+    msg += 'submitting a SLURM request for the cluster.'
+    parser.add_argument('--local', action='store_true', default=False,
+                        help=msg)
 
     parser.add_argument('-t', '--time_sleep', type=float,
                         default=None,
@@ -62,7 +67,8 @@ def main():
             use_inotify=args.inotify,
             sleep_time=args.time_sleep,
             log_dir=args.log_dir,
-            no_slurm=args.no_slurm
+            dummy=args.dummy,
+            local=args.local
         )
     elif args.command == "list":
         autoed_daemon.list_directories()
@@ -215,7 +221,8 @@ class AutoedDaemon:
               use_inotify=False,
               sleep_time=None,
               log_dir=None,
-              no_slurm=False,
+              dummy=False,
+              local=False,
               ):
 
         if not os.path.exists(self.lock_file):
@@ -244,8 +251,10 @@ class AutoedDaemon:
                 command += '-i '
             if sleep_time:
                 command += '-s %.1f ' % sleep_time
-            if no_slurm:
-                command += '--no_slurm '
+            if local:
+                command += '--local '
+            if dummy:
+                command += '--dummy '
             if log_dir:
                 log_path = os.path.abspath(log_dir)
                 command += '--log-dir ' + log_path + ' '
