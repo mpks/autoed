@@ -82,17 +82,29 @@ class Pipeline(ABC):
             cmd += "\n"
         elif self.method == 'user':
             option = ''
+
+            # If the user does not supply either a unit cell or a space group
+            # the is no point in processing this pipeline
+            process_user = False
+
             if is_unit_cell_OK(self.dataset.metadata.unit_cell):
                 a, b, c, alpha, beta, gamma = self.dataset.metadata.unit_cell
                 unit_cell = f"{a},{b},{c},{alpha},{beta},{gamma}"
                 option += f"xia2.settings.unit_cell={unit_cell} "
+                process_user = True
 
             if self.dataset.metadata.space_group:
                 sg = self.dataset.metadata.space_group
                 option += f"xia2.settings.space_group={sg} "
+                process_user = True
 
             cmd += option
             cmd += "\n"
+
+            if not process_user:
+                cmd = "echo No unit cell nor space group provided\n "
+                cmd += "echo Pipeline with user parameters empty \n "
+                return cmd
 
         elif self.method == 'real_space_indexing':
 
