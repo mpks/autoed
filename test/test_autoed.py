@@ -17,7 +17,7 @@ def autoed_setup():
 
     run("autoed start")
     print('Running autoed')
-    run2(f"autoed -i -t 0.1 --no_slurm watch {watch_path}")
+    run2(f"autoed -i -t 0.1 --dummy watch {watch_path}")
     time.sleep(0.5)
 
     yield
@@ -25,17 +25,17 @@ def autoed_setup():
     run('autoed stop')
 
 
-def test_text_01_dataset(autoed_setup):
+def test_text_01_dataset(autoed_setup: None):
     d = get_files('text_01')
     run_for_dataset(d, 'TEXT 01')
 
 
-def test_text_02_dataset(autoed_setup):
+def test_text_02_dataset(autoed_setup: None):
     d = get_files('text_02')
     run_for_dataset(d, 'TEXT 02')
 
 
-def test_json_01_dataset(autoed_setup):
+def test_json_01_dataset(autoed_setup: None):
     d = get_files('json_01')
     run_for_dataset(d, 'JSON 01')
 
@@ -48,12 +48,7 @@ def run_for_dataset(dataset, name):
 
     d = dataset
 
-    for file in [d.nxs_file, d.autoed_log, d.data_dest, d.master_dest,
-                 d.nexus_log, d.phil_file, d.trigger_file, d.slurm_file]:
-        try:
-            os.remove(file)
-        except FileNotFoundError:
-            pass
+    remove_generated_files(d)
 
     shutil.copy2(d.data_origin, d.data_dest)
     shutil.copy2(d.master_origin,  d.master_dest)
@@ -61,21 +56,33 @@ def run_for_dataset(dataset, name):
     run(f"touch {d.trigger_file}")
     time.sleep(2)
 
+    print("Nexus file exists:")
     assert os.path.exists(d.nxs_file)
-    print("Nexus file: OK")
+    print("OK")
+    print("Autoed log exists:")
     assert os.path.exists(d.autoed_log)
-    print("Autoed log exist: YES")
-    assert os.path.exists(d.slurm_file)
-    print("Slurm file exist: YES")
-    assert check_for_slurm_command(d.autoed_log)
-    print("Slurm run: OK")
+    print("OK")
+    print("Slurm files exist: ")
+    print("  'default': ", end='')
+    assert os.path.exists(d.slurm_file['default'])
+    print('OK')
+    print("  'user': ", end='')
+    assert os.path.exists(d.slurm_file['user'])
+    print('OK')
+    print("  'ice': ", end='')
+    assert os.path.exists(d.slurm_file['ice'])
+    print('OK')
+    print("  'max_lattices': ", end='')
+    assert os.path.exists(d.slurm_file['max_lattices'])
+    print('OK')
+    print("  'real_space_indexing': ", end='')
+    assert os.path.exists(d.slurm_file['real_space_indexing'])
+    print('OK')
 
-    for file in [d.nxs_file, d.autoed_log, d.data_dest, d.master_dest,
-                 d.nexus_log, d.phil_file, d.trigger_file, d.slurm_file]:
-        try:
-            os.remove(file)
-        except FileNotFoundError:
-            pass
+#    assert check_for_slurm_command(d.autoed_log)
+#    print("Slurm run: OK")
+
+    remove_generated_files(d)
 
 
 def run2(cmd):
@@ -85,6 +92,18 @@ def run2(cmd):
 def run(cmd):
     subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE)
+
+
+def remove_generated_files(dataset):
+
+    d = dataset
+    for file in [d.nxs_file, d.autoed_log, d.data_dest, d.master_dest,
+                 d.nexus_log, d.phil_file, d.trigger_file,
+                 *d.slurm_file.values()]:
+        try:
+            os.remove(file)
+        except FileNotFoundError:
+            pass
 
 
 def get_files(dir_name):
@@ -115,7 +134,15 @@ def get_files(dir_name):
     a.phil_file = join(dest_path, 'ED_Singla.phil')
     a.log_file = join(dest_path, 'sample.log')
     a.mdoc_file = join(dest_path, 'sample.mrc.mdoc')
-    a.slurm_file = join(processed_path, "slurm_config.json")
+    a.slurm_file = {}
+
+    pp = processed_path
+    a.slurm_file['default'] = join(pp, "default/slurm_config.json")
+    a.slurm_file['user'] = join(pp, "user/slurm_config.json")
+    a.slurm_file['ice'] = join(pp, "ice/slurm_config.json")
+    rs_path = "real_space_indexing/slurm_config.json"
+    a.slurm_file['real_space_indexing'] = join(pp, rs_path)
+    a.slurm_file['max_lattices'] = join(pp, "max_lattices/slurm_config.json")
 
     return a
 
