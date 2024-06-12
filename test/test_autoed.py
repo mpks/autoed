@@ -2,6 +2,7 @@
 """Module used to test the entire autoed processing pipeline"""
 import shutil
 import subprocess
+import autoed
 from autoed.constants import trigger_file
 import pytest
 import time
@@ -12,7 +13,8 @@ import os
 def autoed_setup():
     """Run autoed and start watching the data directory"""
 
-    test_path = os.getcwd()
+    test_path = os.path.dirname(autoed.__path__[0])
+    test_path = os.path.join(test_path, 'test/')
     watch_path = os.path.join(test_path, 'data')
 
     run("autoed start")
@@ -25,7 +27,7 @@ def autoed_setup():
     run('autoed stop')
 
 
-def test_text_01_dataset(autoed_setup: None):
+def test_text_01_dataset(autoed_setup):
     d = get_files('text_01')
     run_for_dataset(d, 'TEXT 01')
 
@@ -116,7 +118,8 @@ def get_files(dir_name):
         pass
 
     a = Simple()
-    path = os.getcwd()
+    path = os.path.dirname(autoed.__path__[0])
+    path = os.path.join(path, 'test/')
     join = os.path.join
     dest_path = join(path, f"data/ED/{dir_name}")
     processed_path = join(path, f"data/processed/{dir_name}")
