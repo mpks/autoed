@@ -3,13 +3,14 @@ import os
 import autoed
 import json
 from abc import ABC, abstractmethod
+from autoed.constants import xia2_pipelines, dials_pipelines, all_pipelines
 import subprocess
 
 
 class Pipeline(ABC):
 
     @abstractmethod
-    def __init__(self, dataset, method='default'):
+    def __init__(self, dataset, method=xia2_pipelines[0]):
         """
         A pipeline to process diffraction data
 
@@ -37,9 +38,9 @@ class Pipeline(ABC):
     def generate_pipeline_cmd(self):
         """Generate the command to process the pipeline"""
 
-        if self.method in ['max_lattices']:
+        if self.method in dials_pipelines:
             cmd = self.generate_dials_cmd()
-        elif self.method in ['default', 'user', 'ice', 'real_space_indexing']:
+        elif self.method in xia2_pipelines:
             cmd = self.generate_xia2_cmd()
         else:
             cmd = f"echo Unknown method provided: '{self.method}'\n "
@@ -136,7 +137,7 @@ class Pipeline(ABC):
 class LocalPipeline(Pipeline):
     """Pipeline that runs processes locally using a bash script"""
 
-    def __init__(self, dataset, method='default'):
+    def __init__(self, dataset, method=xia2_pipelines[0]):
         super().__init__(dataset, method)
         self.bash_file = os.path.join(self.out_dir, 'run_pipeline.sh')
 
@@ -263,7 +264,7 @@ def is_unit_cell_OK(unit_cell):
 
 def run_processing_pipelines(dataset, local):
 
-    methods = ['default', 'user', 'ice', 'real_space_indexing', 'max_lattices']
+    methods = all_pipelines
     pipelines = []
 
     for method in methods:

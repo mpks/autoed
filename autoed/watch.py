@@ -90,6 +90,7 @@ def main():
     event_handler = DirectoryHandler(watch_path,
                                      processing_script,
                                      watch_logger,
+                                     report_dir=log_directory,
                                      dummy=args.dummy,
                                      local=args.local)
 
@@ -116,7 +117,8 @@ def main():
 
 class DirectoryHandler(FileSystemEventHandler):
 
-    def __init__(self, watch_path, script, logger, dummy=False, local=False):
+    def __init__(self, watch_path, script, logger, report_dir,
+                 dummy=False, local=False):
 
         """
         Parameters
@@ -128,6 +130,8 @@ class DirectoryHandler(FileSystemEventHandler):
             The path to the processing script used to
             convert and process data.
         logger : logger object
+        report_dir : Path
+            The path where to save the report HTML file.
         dummy: boolean
             If True, the AutoED will not run xia2 or dials. This is used
             for testing.
@@ -192,8 +196,8 @@ class DirectoryHandler(FileSystemEventHandler):
                                 if dataset.all_files_present():
                                     info('Processing: %s' % dataset.base)
                                     dataset.process(self.local)
-                                    info('Finished processing: %s'
-                                         % dataset.base)
+                                    ms = f"Finished processing: {dataset.base}"
+                                    info(ms)
                                 else:
                                     msg = 'Not all files present, ignoring: %s'
                                     info(msg % dataset.base)
