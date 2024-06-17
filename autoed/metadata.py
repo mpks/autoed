@@ -4,7 +4,7 @@ import re
 import json
 
 
-from autoed.misc_functions import (
+from autoed.utility.misc_functions import (
     electron_wavelength, scrap, get_detector_distance,
     is_file_fully_written,
 )

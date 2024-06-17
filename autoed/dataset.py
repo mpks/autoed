@@ -7,7 +7,7 @@ import re
 from autoed.convert import generate_nexus_file
 from autoed.process.pipeline import run_processing_pipelines
 from autoed.beam_position.beam_center import BeamCenterCalculator
-from autoed.misc_functions import replace_dir, is_file_fully_written
+from autoed.utility.misc_functions import replace_dir, is_file_fully_written
 from autoed.metadata import Metadata
 
 

@@ -2,7 +2,7 @@
 import subprocess
 import os
 
-from autoed.misc_functions import is_file_fully_written, overwrite_mask
+from autoed.utility.misc_functions import is_file_fully_written, overwrite_mask
 
 
 def generate_nexus_file(dataset):
