@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoED</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <h1 id="page_title">AutoED data summary</h1>
+
+    <p id="page_text"> 
+       Year: 
+    <select id="colorSelect">
+        <option value="2024" selected>2024</option>
+    </select>
+    &nbsp; Session: 
+    <select id="colorSelect">
+        <option value="nt34283-20" selected>nt34283-20</option>
+        <option value="nt34824-22">nt34824-22</option>
+        <option value="nt34824-27">nt34824-27</option>
+    </select>
+    </p>
+    <div class="table-container">
+        <table id="expandableTable">
+            <thead>
+                <tr>
+        <th class="frozen-corner">N</th>
+        <th class="frozen-corner1">Dataset / Pipeline</th>
+        <th id="default_id"
+            class="expandable frozen_row"
+            onclick="toggleColumns('default_id')">default</th>
+        <th id="user_id" 
+            class="expandable frozen_row"
+            onclick="toggleColumns('user_id')">user</th>
+        <th id="ice_id" 
+            class="expandable frozen_row"
+            onclick="toggleColumns('ice_id')">ice</th>
+        <th id="max_lattices_id" 
+            class="expandable frozen_row"
+            onclick="toggleColumns('max_lattices_id')">max latt.</th>
+        <th id="real_space_indexing_id" 
+            class="expandable frozen_row"
+            onclick="toggleColumns('real_space_indexing_id')">rs index</th>
+                    <!-- Add extra columns -->
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Add 100 rows for testing -->
+                <script>
+                    for (let i = 1; i <= 100; i++) {
+//    document.write('<tr><td class="frozen">Row ' + i + '</td><td class="valueA">Data ' + i + 'A</td><td class="valueB">Data ' + i + 'B</td>');
+                        let row_template = '<tr>';
+                        row_template += `<td class="frozen_col"> ${i}  </td>`;
+                        row_template += `<td class="frozen_col1">  2024/nt34824-22/20240511_nav7_540._-205/sweep0/202404 ${i} </td>`;
+                        row_template += `<td class="value"> <i title="Warning: Detector distance not read properly" class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
+                        row_template += `<td class="value"> <i class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
+                        row_template += `<td class="value"> <i class="fa-regular fa-snowflake" style="color: #4d8dff;"></i></td>`;
+                        row_template += `<td class="value"> <i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
+                        row_template += `<td class="value"> <i title='Error: Unable to process data' class="fa-solid fa-triangle-exclamation" style="color: red;"></i></td>`;
+                        document.write(row_template);
+                        document.write('</tr>');
+                    }
+                </script>
+            </tbody>
+        </table>
+    </div>
+
+    <p id="page_text"> 
+       Stats (default): &nbsp;
+    <i title="Total number of datasets" class="fa-solid fa-database info"></i>125  &nbsp;&nbsp;&nbsp;
+    <i title='Processed successfully' class="fa-solid fa-square-check info" style="color: green;"></i> 25 &nbsp; 
+    <i title='Processed successfully (got ice unit cell)' class="fa-solid fa-square-check info" style="color: #4d8dff;"> </i>  25   &nbsp; 
+    <i title='Ice' class="fa-regular fa-snowflake info" style="color: #4d8dff;"></i> 25 &nbsp; 
+    <i title="Failed to process" class="fa-solid fa-triangle-exclamation info" style="color: red;"></i> 17 &nbsp;
+    <i title="Missing data" class="fa-solid fa-database info" style='color: gray;'></i> 3 &nbsp;
+    <i title="Failed to parse output" class="fa-solid fa-circle-question" style='color: gray;'></i> 0 &nbsp;&nbsp;&nbsp;
+    </p>
+    <script src="scripts.js"></script>
+</body>
+</html>
+

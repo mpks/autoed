@@ -1,0 +1,181 @@
+/* Basic table styling */
+table {
+    border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    box-sizing: border-box;  /* Include padding in border */ 
+    overflow-x: auto;
+}
+
+#expandableTable {
+   /* table-layout: fixed; */
+}
+
+.table-container {
+    position: relative;
+    width: 85%;
+    margin-left: 7%;
+    max-height: 500px;
+    overflow: auto;
+    border: 1px solid #BEBEBE;
+}
+
+th, td {
+    border: 1px solid #DDDDDD;
+    padding: 1px;
+    text-align: center;
+} 
+
+
+th {
+    height: 60px;
+}
+
+
+.expandable {
+    background-color: #444444;
+    color: white;
+}
+
+[class*="_extra"] {
+    background-color: #CECECE;
+    color: black;
+}
+
+.expanded_data {
+    background-color: #fcf8de;
+}
+
+.frozen_row.space_group {
+    background-color: #BEBEBE;
+}
+
+.unit_cell {
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.frozen_row {
+  min-width: 60px;
+  max-width: 50px;
+  text-overflow: clip;
+}
+
+.frozen_row {
+    position: sticky;
+}
+
+/*
+.frozen_col .frozen_col1 {
+   white-space: nowrap;
+   overflow-x: auto; 
+}
+*/
+
+.frozen_row {
+    top: -1px;
+}
+
+.frozen-corner1 {
+    position: sticky;
+    top: -1px;
+    background-color: #333333;
+    color: white;
+    z-index: 20;
+    left: 69px;
+    min-width: 300px;
+    max-width: 300px;
+    overflow: auto;
+    
+}
+
+.frozen_col1 {
+   white-space: nowrap;
+   position: sticky;
+   background-color: white;
+   left: 69px;
+   min-width: 300px;
+   max-width: 300px;
+   overflow: hidden;
+}
+
+.frozen-corner {
+    position: sticky;
+    top: -1px;
+    left: -1px;
+    max-width: 70px;
+    min-width: 70px;
+    overflow: clip;
+    background-color: #222222;
+    color: white;
+    z-index: 20;
+    padding: 0px;
+}
+
+.frozen_col {
+  position: sticky;
+  left: -1px;
+  min-width: 70px;
+  max-width: 70px;
+  overflow: clip;
+  background-color: white;
+  z-index: 10;
+  padding: 0px;
+}
+
+.space_group {
+  min-width: 50px;
+  max-width: 50px;
+  text-overflow: clip;
+  padding: 0px;
+}
+
+/* Setting the color for all unit cell cells */
+.expanded_data.unit_cell {
+    background-color: #fffbe5;
+}
+
+/* Setting the color for all space group cells */
+.expanded_data.space_group {
+    background-color:  #fff2b3;
+}
+
+
+
+/* Setting the color for even unit cell cells */
+tr:not(.frozen_row):nth-child(even) .unit_cell {
+    background-color: #fff6cc;
+}
+
+/* Setting the color for even space group cells */
+tr:not(.frozen_row):nth-child(even) .space_group {
+    background-color: #ffed94;
+}
+
+tr:not(.frozen_row):nth-child(even) .value {
+    background-color: #e6e6e6; 
+}
+
+tr:not(.frozen_row):nth-child(even) .frozen_col {
+    background-color: #e6e6e6; 
+}
+
+/* Show tooltip when howering of cell data */
+.fa-solid.fa-triangle-exclamation {
+  cursor: help;
+}
+
+.info {
+  cursor: help;
+}
+
+#page_title {
+  margin-left: 7%;
+  padding-top: 30px; 
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#page_text {
+  margin-left: 7%;
+  font-family: Arial, Helvetica, sans-serif;
+}
