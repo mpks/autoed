@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoED</title>
@@ -9,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <h1 id="page_title">AutoED data summary</h1>
+    <h1 id="page_title">AutoED Processing Summary</h1>
 
     <p id="page_text"> 
        Year: 
@@ -27,8 +30,8 @@
         <table id="expandableTable">
             <thead>
                 <tr>
-        <th class="frozen-corner">N</th>
-        <th class="frozen-corner1">Dataset / Pipeline</th>
+        <th id='data_index_id' class="frozen-corner">N</th>
+        <th id='dataset_name_id' class="frozen-corner1 resizable">Dataset / Pipeline</th>
         <th id="default_id"
             class="expandable frozen_row"
             onclick="toggleColumns('default_id')">default</th>
@@ -50,19 +53,18 @@
             <tbody>
                 <!-- Add 100 rows for testing -->
                 <script>
-                    for (let i = 1; i <= 100; i++) {
-//    document.write('<tr><td class="frozen">Row ' + i + '</td><td class="valueA">Data ' + i + 'A</td><td class="valueB">Data ' + i + 'B</td>');
-                        let row_template = '<tr>';
-                        row_template += `<td class="frozen_col"> ${i}  </td>`;
-                        row_template += `<td class="frozen_col1">  2024/nt34824-22/20240511_nav7_540._-205/sweep0/202404 ${i} </td>`;
-                        row_template += `<td class="value"> <i title="Warning: Detector distance not read properly" class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
-                        row_template += `<td class="value"> <i class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
-                        row_template += `<td class="value"> <i class="fa-regular fa-snowflake" style="color: #4d8dff;"></i></td>`;
-                        row_template += `<td class="value"> <i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
-                        row_template += `<td class="value"> <i title='Error: Unable to process data' class="fa-solid fa-triangle-exclamation" style="color: red;"></i></td>`;
-                        document.write(row_template);
-                        document.write('</tr>');
-                    }
+//                    for (let i = 1; i <= 100; i++) {
+//                        let row_template = '<tr>';
+//                        row_template += `<td class="frozen_col"> ${i}  </td>`;
+//                        row_template += `<td class="frozen_col1">  2024/nt34824-22/20240511_nav7_540._-205/sweep0/202404 ${i} </td>`;
+//                        row_template += `<td class="value"> <i title="Warning: Detector distance not read properly" class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
+//                        row_template += `<td class="value"> <i class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
+//                        row_template += `<td class="value"> <i class="fa-regular fa-snowflake" style="color: #4d8dff;"></i></td>`;
+//                        row_template += `<td class="value"> <i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
+//                        row_template += `<td class="value"> <i title='Error: Unable to process data' class="fa-solid fa-triangle-exclamation" style="color: red;"></i></td>`;
+//                        document.write(row_template);
+//                        document.write('</tr>');
+//                   }
                 </script>
             </tbody>
         </table>

@@ -1,29 +1,24 @@
 import os
-from autoed.constants import database_json_file, report_dir
+from autoed.constants import database_json_file
 import json
 
 
 class JsonDatabase:
 
-    def __init__(self, global_log_path):
+    def __init__(self, full_path_to_database_dir):
         """
         Creates a json database file if it does not exists already
 
-        global_log_path : path of string
+        full_path_to_database_file : path of string
             The json database is generated in the autoed report directory,
-            along with the html report with processing statistics. The
-            report directory is generated in the same directory as the global
-            autoed log file.
+            along with the html report with processing statistics.
         """
 
-        report_path = os.path.join(global_log_path, report_dir)
-
-        self.json_file = os.path.join(report_path, database_json_file)
+        self.json_file = os.path.join(full_path_to_database_dir,
+                                      database_json_file)
         self.data = {}
 
         if not os.path.exists(self.json_file):
-            if not os.path.exists(report_path):
-                os.makedirs(report_path, exist_ok=True)
             with open(self.json_file, 'w') as file:
                 json.dump({}, file)
 
@@ -49,4 +44,4 @@ class JsonDatabase:
 
     def save_data(self):
         with open(self.json_file, 'w') as file:
-            json.dump(self.data, file)
+            json.dump(self.data, file, indent=4)

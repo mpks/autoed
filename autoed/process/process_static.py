@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 from autoed.dataset import SinglaDataset
+from autoed.utility.filesytem import gather_master_files
 
 
 def main():
@@ -61,18 +62,6 @@ def process_dir(dir_name, force=False):
                 else:
                     print('Ignoring. Nexgen file exist in ',
                           dataset.base)
-
-
-def gather_master_files(directory):
-    master_files = []
-
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if file_path.endswith('_master.h5'):
-                master_files.append(file_path)
-
-    return master_files
 
 
 if __name__ == '__main__':

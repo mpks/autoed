@@ -16,6 +16,7 @@ class PipelineEntry:
         out = {}
         out['title'] = self.title
         out['success'] = self.success
-        self['warnings'] = self.warnings
-        self['tooltip'] = self.tooltip
-        self['link'] = self.link
+        out['warnings'] = self.warnings
+        out['tooltip'] = self.tooltip
+        out['link'] = self.link
+        return out

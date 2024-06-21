@@ -3,34 +3,36 @@
 from autoed.report.table_entry import PipelineEntry
 from autoed.constants import xia2_pipelines
 from autoed.constants import xia2_output_file
+from autoed.report.json_database import JsonDatabase
 import re
 import os
 
 
 class Xia2OutputParser:
 
-    def __init__(self, dataset):
+    def __init__(self, dataset, database: JsonDatabase):
 
         self.dataset = dataset
+        self.database = database
 
-    def add_to_database(self, database):
+    def add_to_database(self):
 
         dataset_name = self.dataset.base
+
         for pipeline_name in xia2_pipelines:
 
-            xia2_path = os.join(self.dataset.output_path, pipeline_name)
-            xia2_file = os.join(xia2_path, xia2_output_file)
+            xia2_path = os.path.join(self.dataset.output_path, pipeline_name)
+            xia2_file = os.path.join(xia2_path, xia2_output_file)
 
             table_entry = self._parse_output(xia2_file, pipeline_name)
             table_entry = table_entry.to_dict()
-            database.add_entry(dataset_name, table_entry)
-            database.save_data()
+            self.database.add_entry(dataset_name, table_entry)
+            self.database.save_data()
 
     def _parse_output(self, xia2_file, pipeline):
 
-        if not os.path.exists(self.xia2_file):
-            return PipelineEntry(title=pipeline,
-                                 success=None,
+        if not os.path.exists(xia2_file):
+            return PipelineEntry(title=pipeline, success=None,
                                  tooltip='No xia2 output file')
 
         if is_xia2_output_ok(xia2_file):

@@ -6,6 +6,8 @@ all_pipelines = xia2_pipelines + dials_pipelines
 
 xia2_output_file = 'xia2.txt'
 
+report_path_env_var = 'AUTOED_REPORT_PATH'
+
 report_dir = 'autoed_report'
 report_html_file = 'autoed_overview.html'
 database_json_file = 'autoed_database.json'        # Keeps processing summaries
