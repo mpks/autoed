@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    <!-- [<] Header -->
 <head>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -8,69 +9,281 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoED</title>
     <link rel="icon" href="favicon.png" type="image/png">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+    <!--[>] End Header-->
 <body>
-    <h1 id="page_title">AutoED Processing Summary</h1>
 
-    <p id="page_text"> 
-       Year: 
+  <!-- [<] Page Header -->
+  <h1 id="page_title">AutoED Processing Summary</h1>
+
+  <p id="page_text"> 
+    Year: 
     <select id="colorSelect">
-        <option value="2024" selected>2024</option>
+      <option value="2024" selected>2024</option>
     </select>
     &nbsp; Session: 
     <select id="colorSelect">
-        <option value="nt34283-20" selected>nt34283-20</option>
-        <option value="nt34824-22">nt34824-22</option>
-        <option value="nt34824-27">nt34824-27</option>
+      <option value="nt34283-20" selected>nt34283-20</option>
+      <option value="nt34824-22">nt34824-22</option>
+      <option value="nt34824-27">nt34824-27</option>
     </select>
     </p>
-    <div class="table-container">
-        <table id="expandableTable">
-            <thead>
-                <tr>
-        <th id='data_index_id' class="frozen-corner">N</th>
-        <th id='dataset_name_id' class="frozen-corner1 resizable">Dataset / Pipeline</th>
-        <th id="default_id"
-            class="expandable frozen_row"
-            onclick="toggleColumns('default_id')">default</th>
-        <th id="user_id" 
-            class="expandable frozen_row"
-            onclick="toggleColumns('user_id')">user</th>
-        <th id="ice_id" 
-            class="expandable frozen_row"
-            onclick="toggleColumns('ice_id')">ice</th>
-        <th id="max_lattices_id" 
-            class="expandable frozen_row"
-            onclick="toggleColumns('max_lattices_id')">max latt.</th>
-        <th id="real_space_indexing_id" 
-            class="expandable frozen_row"
-            onclick="toggleColumns('real_space_indexing_id')">rs index</th>
-                    <!-- Add extra columns -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Add 100 rows for testing -->
-                <script>
-//                    for (let i = 1; i <= 100; i++) {
-//                        let row_template = '<tr>';
-//                        row_template += `<td class="frozen_col"> ${i}  </td>`;
-//                        row_template += `<td class="frozen_col1">  2024/nt34824-22/20240511_nav7_540._-205/sweep0/202404 ${i} </td>`;
-//                        row_template += `<td class="value"> <i title="Warning: Detector distance not read properly" class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
-//                        row_template += `<td class="value"> <i class="fa-solid fa-triangle-exclamation" style="color: orange;"></i>&nbsp;&nbsp;<i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
-//                        row_template += `<td class="value"> <i class="fa-regular fa-snowflake" style="color: #4d8dff;"></i></td>`;
-//                        row_template += `<td class="value"> <i class="fa-solid fa-square-check" style="color: green;"> </i> </td>`;
-//                        row_template += `<td class="value"> <i title='Error: Unable to process data' class="fa-solid fa-triangle-exclamation" style="color: red;"></i></td>`;
-//                        document.write(row_template);
-//                        document.write('</tr>');
-//                   }
-                </script>
-            </tbody>
-        </table>
+  <!-- [>] Page Header -->
+
+  <div class="table-container">
+    <div class='row'>
+    <div id='col1' class="column">
+        <div class="cell header"> N </div>
+        <div class="cell "> 1 </div> 
+        <div class="cell "> 2 </div> 
+        <div class="cell "> 3 </div> 
+        <div class="cell"> 4 </div> 
+        <div class="cell"> 5 </div> 
+        <div class="cell"> 6 </div> 
+        <div class="cell"> 7 </div> 
+        <div class="cell"> 8 </div> 
+        <div class="cell"> 9 </div> 
+        <div class="cell"> 10 </div> 
+        <div class="cell"> 11 </div> 
+        <div class="cell"> 12 </div> 
+        <div class="cell"> 13 </div> 
+        <div class="cell"> 14 </div> 
+        <div class="cell"> 15 </div> 
+        <div class="cell"> 16 </div> 
+        <div class="cell"> 17 </div> 
+        <div class="cell"> 18 </div> 
+        <div class="cell"> 19 </div> 
+        <div class="cell"> 20 </div> 
+        <div class="cell"> 21 </div> 
+        <div class="cell"> 22 </div> 
+        <div class="cell"> 23 </div> 
+        <div class="cell"> 24 </div> 
+    </div>
+    <div id='col2' class="column resizable">
+        <div class="cell header column_02"> Dataset / Pipeline
+        </div> 
+        <div class="cell column_02" > 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="cell column_02"> 20240322_nav7_504.sweep1 </div> 
+        <div class="resizer"></div>
+    </div>
+    <div id='default' class="column">
+        <div class="cell expandable header"> default </div>
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
     </div>
 
-    <p id="page_text"> 
+    <div id='user' class="column">
+        <div class="cell expandable header" onclick="toggleColumn()"> user </div>
+        <div class="cell"> OK </div> 
+        <div class="cell"> OK </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+    </div>
+
+    <div id='ice' class="column">
+        <div class="cell expandable header"> ice </div>
+        <div class="cell"> OK </div> 
+        <div class="cell"> OK </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+    </div>
+    <div id='ice' class="column">
+        <div class="cell expandable header"> ice </div>
+        <div class="cell"> OK </div> 
+        <div class="cell"> OK </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+    </div>
+    <div id='ice' class="column">
+        <div class="cell expandable header"> ice </div>
+        <div class="cell"> OK </div> 
+        <div class="cell"> OK </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+    </div>
+    <div id='ice' class="column">
+        <div class="cell expandable header"> ice </div>
+        <div class="cell"> OK </div> 
+        <div class="cell"> OK </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+    </div>
+    <div id='ice' class="column">
+        <div class="cell expandable header"> ice </div>
+        <div class="cell"> OK </div> 
+        <div class="cell"> OK </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+        <div class="cell"> DEF </div> 
+    </div>
+    </div>
+  </div> <!-- Close Container -->
+
+  <!-- [<] Page stats -->
+  <p id="page_text"> 
        Stats (default): &nbsp;
     <i title="Total number of datasets" class="fa-solid fa-database info"></i>125  &nbsp;&nbsp;&nbsp;
     <i title='Processed successfully' class="fa-solid fa-square-check info" style="color: green;"></i> 25 &nbsp; 
@@ -79,7 +292,11 @@
     <i title="Failed to process" class="fa-solid fa-triangle-exclamation info" style="color: red;"></i> 17 &nbsp;
     <i title="Missing data" class="fa-solid fa-database info" style='color: gray;'></i> 3 &nbsp;
     <i title="Failed to parse output" class="fa-solid fa-circle-question" style='color: gray;'></i> 0 &nbsp;&nbsp;&nbsp;
-    </p>
+  </p>
+  <!-- [>] Page stats -->
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="scripts.js"></script>
 </body>
 </html>
