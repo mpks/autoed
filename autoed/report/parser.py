@@ -32,7 +32,8 @@ class Xia2OutputParser:
     def _parse_output(self, xia2_file, pipeline):
 
         if not os.path.exists(xia2_file):
-            return PipelineEntry(title=pipeline, success=None,
+            return PipelineEntry(title=pipeline,
+                                 status='no_data',
                                  tooltip='No xia2 output file')
 
         if is_xia2_output_ok(xia2_file):
@@ -40,21 +41,29 @@ class Xia2OutputParser:
             values = parse_xia2_txt_file(xia2_file)
 
             if len(values) != 7:
-                return PipelineEntry(title=pipeline, success=None,
+                return PipelineEntry(title=pipeline,
+                                     status='parse_error',
                                      tooltip='Failed to parse xia2 output')
 
             tooltip = "unit cell: "
             tooltip += f"{values[0]:.2f}  {values[1]:.2f}  {values[2]:.2f} \n"
-            tooltip = "angles: "
+            tooltip += "angles: "
             tooltip += f"{values[3]:.2f}  {values[4]:.2f}  {values[5]:.2f} \n"
             tooltip += f"space group: {values[6]}"
 
-            return PipelineEntry(title=pipeline, success=True, tooltip=tooltip)
+            return PipelineEntry(title=pipeline,
+                                 status='OK',
+                                 indexed=None,
+                                 unit_cell=values[0:6],
+                                 space_group=values[-1],
+                                 tooltip=tooltip)
 
         # Catch with which error it failed
         error_msg = parse_xia2_error(xia2_file)
 
-        return PipelineEntry(title=pipeline, success=False, tooltip=error_msg)
+        return PipelineEntry(title=pipeline,
+                             status='process_error',
+                             tooltip=error_msg)
 
     def update_database(self):
         pass
@@ -106,7 +115,7 @@ def parse_xia2_txt_file(xia2_file):
     angles = extract_floats(angles_str)
     space_group = extract_space_group(space_group_str)
     vectors.extend(angles)
-    vectors.extend(space_group)
+    vectors.extend([space_group])
 
     return vectors
 
@@ -117,7 +126,7 @@ def extract_space_group(string):
     test_str = 'Assuming spacegroup:'
     if test_str in string:
         parts = string.split(':', 1)
-        return parts[1].split()
+        return parts[1]
     return None
 
 

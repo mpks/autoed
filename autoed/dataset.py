@@ -210,7 +210,7 @@ class SinglaDataset:                    # pylint: disable=R0902
         if new_files_exist:
             success_json = metadata.from_json(self)
 
-        # If fetching from JSON fails, try with the old data format
+        # If fetching from JSON fails, try with the old (textual) format
         if not success_json:
             metadata.from_txt(self)
         self.metadata = metadata
