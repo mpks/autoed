@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 import time
-# import subprocess
 import autoed
 import os
 import re

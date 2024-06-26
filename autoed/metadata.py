@@ -1,4 +1,4 @@
-"""Module containing a class that deals with metadata"""
+"""Everything related to reading metadata files"""
 from __future__ import annotations
 import re
 import json

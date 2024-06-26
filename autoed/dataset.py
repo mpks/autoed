@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Module that defines a Singla dataset class"""
+"""Define Singla dataset class"""
 import os
 import logging
 import time

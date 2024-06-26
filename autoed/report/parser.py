@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Here we keep clases that parse xia2 and DIALS output files"""
 from autoed.report.table_entry import PipelineEntry
 from autoed.constants import xia2_pipelines
