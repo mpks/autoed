@@ -108,22 +108,22 @@ class Metadata:
         with open(dataset.json_file, 'r') as json_file:
             json_data = json.load(json_file)
 
-        if not json_data['wavelength']:
+        if 'wavelength' not in json_data:
             dataset.logger.error('wavelength set to None in JSON file')
             return False
         self.wavelength = json_data['wavelength']
 
-        if not json_data['angle_increment']:
+        if 'angle_increment' not in json_data:
             dataset.logger.error('angle_increment set to None in JSON file')
             return False
         self.angle_increment = json_data['angle_increment']
 
-        if not json_data['start_angle']:
+        if 'start_angle' not in json_data:
             dataset.logger.error('start_angle set to None in JSON file')
             return False
         self.start_angle = json_data['start_angle']
 
-        if not json_data['detector_distance']:
+        if 'detector_distance' not in json_data:
             dataset.logger.error('detector_distance set to None in JSON file')
             return False
         self.detector_distance = json_data['detector_distance']
