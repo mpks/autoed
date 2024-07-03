@@ -195,12 +195,30 @@ function add_checkmark(cell, values, name) {
             cell.innerHTML = check_icon(title=tooltip);
             }
         } else if (status == 'process_error') {
+            if (name == 'ice'){
+            cell.innerHTML = ` `;
+            } else {
             cell.innerHTML = error_icon(title=tooltip);
+            }
         } else if (status == 'no_data') {
-            cell.innerHTML = `  `;
+            cell.innerHTML = `<i title="Missing data" class="fa-solid fa-circle-xmark" style="color: #BFBFBF;"> </i>`;
+
         } else {
-            cell.innerHTML = `?`;
+            cell.innerHTML = `<i title="Failed to parse output" class="fa-solid fa-circle-question" style='color: gray;'></i>`;
+
         }
+}
+
+function formatNumber(num, decimals, width) {
+    // Convert the number to a string with one decimal place
+    let formatted = num.toFixed(decimals);
+
+    // Pad the string with a space if it's less than 4 characters long
+    while (formatted.length < width) {
+        formatted = '&nbsp;'.repeat(width - formatted.length) + formatted;
+    }
+
+    return formatted;
 }
 
 function add_expandable_info(column_name, values) { 
@@ -217,14 +235,15 @@ function add_expandable_info(column_name, values) {
 
   if (result['status'] == 'OK') {
     var uc = result.unit_cell
-    let uc_str = `${uc[0].toFixed(1)}&nbsp; `;
-    uc_str += `${uc[1].toFixed(1)}&nbsp; `;
-    uc_str += `${uc[2].toFixed(1)}\&nbsp; `;
-    uc_str += `\(${uc[3].toFixed(0)} `;
-    uc_str += `${uc[4].toFixed(0)} `;
-    uc_str += `${uc[5].toFixed(0)}\)`;
+    let uc_str = `&nbsp;${formatNumber(uc[0], 1, 4)}&nbsp; `;
+    uc_str += `${formatNumber(uc[1], 1, 4)}&nbsp; `;
+    uc_str += `${formatNumber(uc[2], 1, 4)}\&nbsp; `;
+    uc_str += `\(${formatNumber(uc[3], 0, 3)} `;
+    uc_str += `${formatNumber(uc[4], 0, 3)} `;
+    uc_str += `${formatNumber(uc[5], 0, 3)}\)`;
     uc_cell.innerHTML = uc_str;
-    space_group.innerHTML = result.space_group;
+    console.log('UNIT', uc_str);
+    space_group.innerHTML = `&nbsp;` + result.space_group;
     indexed.innerHTML = 'NONE';
   } else {
     let uc_str = `---&nbsp; `;

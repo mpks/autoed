@@ -111,13 +111,11 @@
 }
 
 [id*='_space_group'] {
-  text-align: center;
-  width: 80px;
+  width: 110px;
 }
 
 [id*='_unit_cell'] {
-  text-align: center;
-  width: 220px;
+  width: 270px;
 }
 
 [id*='_indexed'] {
@@ -133,11 +131,13 @@
 [id$='space_group'] :not(.header) {
   font-family: Monospace, sans-serif;
   font-size: 10pt; 
+  text-align: left;
 }
 
 [id$='_unit_cell'] :not(.header) {
   font-family: Monospace, sans-serif;
   font-size: 10pt; 
+  text-align: left;
 }
 
 

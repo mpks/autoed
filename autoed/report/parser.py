@@ -130,9 +130,13 @@ def extract_space_group(string):
 
 
 def extract_floats(string):
-    """Return all the floats in a string in a list"""
+    """Return all floats in a string as a list"""
 
-    float_pattern = r'\d+\.\d+'
-    matches = re.findall(float_pattern, string)
+    # Remove all blocks with brackets containing numbers
+    modified_string = re.sub(r'\(\d+\)', ' ', string)
+
+    # Find all floats or ints
+    float_pattern = r'\b\d+\.\d+|\b\d+'
+    matches = re.findall(float_pattern, modified_string)
 
     return [float(match) for match in matches]
