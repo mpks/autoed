@@ -1,6 +1,13 @@
 """Keeps some useful functions that operate on the filesystem"""
 import os
+import fnmatch
 from autoed.dataset import SinglaDataset
+
+
+def find_files_in_directory(directory, pattern):
+    """Returns a list of all files in a directory matching a pattern"""
+    files = [f for f in os.listdir(directory) if fnmatch.fnmatch(f, pattern)]
+    return files
 
 
 def gather_master_files(directory):

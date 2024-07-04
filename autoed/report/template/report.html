@@ -17,15 +17,11 @@
   <h1 id="page_title">AutoED Processing Summary</h1>
 
   <p id="page_text"> 
-    Year: 
-    <select id="colorSelect">
-      <option value="2024" selected>2024</option>
-    </select>
-    &nbsp; Session: 
-    <select id="colorSelect">
-      <option value="nt34283-20" selected>nt34283-20</option>
-      <option value="nt34824-22">nt34824-22</option>
-      <option value="nt34824-27">nt34824-27</option>
+    Session: 
+    <select id="session_select">
+      <option value="2024-nt34283-20" selected>2024/nt34283-20</option>
+      <option value="2024-nt34824-22">2024/nt34824-22</option>
+      <option value="2024-nt34824-27">2024/nt34824-27</option>
     </select>
     </p>
   <!-- [>] Page Header -->
@@ -37,7 +33,7 @@
         <!-- <div class="cell "> 1 </div> -->
     </div>
     <div id='col2' class="column resizable">
-        <div class="cell header frozen_column_02"> Dataset / Pipeline
+        <div class="cell header frozen_column_02"> Dataset
         </div> 
         <!-- <div class="cell column_02"> 20240322_nav7_504.sweep01 </div> -->
         <div class="resizer"></div> 
@@ -133,10 +129,12 @@
        Stats (default): &nbsp;
     <i title="Total number of datasets" class="fa-solid fa-database info"></i>125  &nbsp;&nbsp;&nbsp;
     <i title='Processed successfully' class="fa-solid fa-square-check info" style="color: green;"></i> 25 &nbsp; 
-    <i title='Processed successfully (got ice unit cell)' class="fa-solid fa-square-check info" style="color: #4d8dff;"> </i>  25   &nbsp; 
+    <!-- <i title='Processed successfully (got ice unit cell)' class="fa-solid fa-square-check info" style="color: #4d8dff;"> </i>  25   &nbsp; -->
     <i title='Ice' class="fa-regular fa-snowflake info" style="color: #4d8dff;"></i> 25 &nbsp; 
     <i title="Failed to process" class="fa-solid fa-triangle-exclamation info" style="color: red;"></i> 17 &nbsp;
-    <i title="Missing data" class="fa-solid fa-database info" style='color: gray;'></i> 3 &nbsp;
+    <!-- <i title="Missing data" class="fa-solid fa-database info" style='color: gray;'></i> 3 &nbsp; -->
+    <i title="Missing data" class="fa-solid fa-circle-xmark" style="color: gray;"></i> 4 &nbsp;
+
     <i title="Failed to parse output" class="fa-solid fa-circle-question" style='color: gray;'></i> 0 &nbsp;&nbsp;&nbsp;
   </p>
   <!-- [>] Page stats -->

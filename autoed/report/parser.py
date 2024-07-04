@@ -2,7 +2,9 @@
 from autoed.report.table_entry import PipelineEntry
 from autoed.constants import xia2_pipelines
 from autoed.constants import xia2_output_file
+from autoed.constants import xia2_dials_report_path
 from autoed.report.json_database import JsonDatabase
+from autoed.utility.filesytem import find_files_in_directory
 import re
 import os
 
@@ -38,6 +40,7 @@ class Xia2OutputParser:
         if is_xia2_output_ok(xia2_file):
 
             values = parse_xia2_txt_file(xia2_file)
+            n_tot, n_indexed = parse_xia2_indexed_stats(xia2_file)
 
             if len(values) != 7:
                 return PipelineEntry(title=pipeline,
@@ -52,7 +55,8 @@ class Xia2OutputParser:
 
             return PipelineEntry(title=pipeline,
                                  status='OK',
-                                 indexed=None,
+                                 indexed=n_indexed,
+                                 total_spots=n_tot,
                                  unit_cell=values[0:6],
                                  space_group=values[-1],
                                  tooltip=tooltip)
@@ -88,6 +92,97 @@ def parse_xia2_error(xia2_file):
             if error_status in line:
                 return line
     return 'Error not parsed correctely.'
+
+
+def parse_dials_indexed_stats(dials_index_file):
+    """Returns the total number of spots, and the number of indexed"""
+
+    with open(dials_index_file, 'r') as file:
+        lines = file.readlines()
+
+    search_str = 'Saving refined experiments to'
+
+    found = False
+    for index, line in enumerate(lines):
+        if search_str in line:
+            found = True
+            break
+
+    if not found:
+        return None
+
+    stat_line = lines[index - 2]
+
+    vals = stat_line.split("|")
+    try:
+        indexed = int(vals[2])
+        unindexed = int(vals[3])
+    except ValueError:
+        return None
+
+    return indexed + unindexed, indexed
+
+
+def parse_xia2_indexed_stats(xia2_file):
+
+    dials_index_file = find_xia2_dials_indexed_log_file(xia2_file)
+
+    if dials_index_file:
+        if os.path.exists(dials_index_file):
+            stats = parse_dials_indexed_stats(dials_index_file)
+            if stats:
+                n_tot, n_indexed = stats
+
+                if n_tot == 0:
+                    return None, None
+
+                return n_tot, n_indexed
+            else:
+                return None, None
+        return None, None
+    return None, None
+
+
+def sort_dials_index_files(dials_index_files):
+    """Given a list of files with names ##_dials.index.log it sorts them
+    according to the number they start with
+    """
+
+    if len(dials_index_files) == 0:
+        return None
+    if len(dials_index_files) == 1:
+        return dials_index_files[0]
+
+    if 'dials.index.log' in dials_index_files:
+        dials_index_files.remove('dials.index.log')
+        indices = []
+        for file in dials_index_files:
+            index = int(file.split('_')[0])
+            indices.append(index)
+
+        combined = list(zip(indices, dials_index_files))
+        combined_sorted = sorted(combined)
+        indices_sorted, index_files_sorted = zip(*combined_sorted)
+        return index_files_sorted[-1]
+
+
+def find_xia2_dials_indexed_log_file(xia2_file):
+    """Searches the xia2 output for the last dials indexing log file"""
+
+    xia2_path = os.path.dirname(xia2_file)
+    dials_output_path = os.path.join(xia2_path, xia2_dials_report_path)
+
+    if os.path.exists(dials_output_path):
+
+        dials_index_files = find_files_in_directory(dials_output_path,
+                                                    '*dials.index.log')
+        dials_index_file = sort_dials_index_files(dials_index_files)
+
+        dials_index_file = os.path.join(dials_output_path, dials_index_file)
+
+        return dials_index_file
+
+    return None
 
 
 def parse_xia2_txt_file(xia2_file):

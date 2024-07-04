@@ -1,6 +1,11 @@
+var missing_data_icon = `<i class="fa-solid fa-circle-xmark" style="color: #BFBFBF;"></i>`;
+var failed_to_parse_icon = `<i class="fa-solid fa-circle-question" style='color: gray;'></i>`;
+
 function switch_extra_columns_by_default(){
-//    toggleColumn('default');
-//    toggleColumn('user');
+    toggleColumn('default');
+    toggleColumn('user');
+    toggleColumn('ice');
+    toggleColumn('real_space_indexing');
 }
 
 function toggleColumn(column_id) {
@@ -232,9 +237,19 @@ function add_expandable_info(column_name, values) {
   uc_cell.classList.add('cell');
   space_group.classList.add('cell');
   indexed.classList.add('cell');
+  indexed.classList.add('info');
 
   if (result['status'] == 'OK') {
     var uc = result.unit_cell
+    
+    if  (result.indexed !== null && result.total_spots !== null){
+        var index_percent = result.indexed * 100. / result.total_spots;
+        var index_str = `${formatNumber(index_percent, 0, 3)}%`;
+        var index_tooltip = `${result.indexed} / ${result.total_spots}`;
+    } else {
+        var index_str = ` ??`;
+        var index_tooltip = `? / ?`;
+    }
     let uc_str = `&nbsp;${formatNumber(uc[0], 1, 4)}&nbsp; `;
     uc_str += `${formatNumber(uc[1], 1, 4)}&nbsp; `;
     uc_str += `${formatNumber(uc[2], 1, 4)}\&nbsp; `;
@@ -242,22 +257,16 @@ function add_expandable_info(column_name, values) {
     uc_str += `${formatNumber(uc[4], 0, 3)} `;
     uc_str += `${formatNumber(uc[5], 0, 3)}\)`;
     uc_cell.innerHTML = uc_str;
-    console.log('UNIT', uc_str);
     space_group.innerHTML = `&nbsp;` + result.space_group;
-    indexed.innerHTML = 'NONE';
+
+    indexed.innerHTML = index_str;
+    indexed.title = index_tooltip;
+
   } else {
-    let uc_str = `---&nbsp; `;
-    uc_str += `---&nbsp; `;
-    uc_str += `---&nbsp; `;
-    uc_str += `\(---`;
-    uc_str += `---`;
-    uc_str += `---\)`;
-    // uc_cell.innerHTML = uc_str;
-    // space_group.innerHTML = '---';
     uc_cell.innerHTML = ` `;
     indexed.innerHTML = ` `;
   }
-  console.log('VALS', result.unit_cell);
+
   var indexed_column = document.getElementById(`${column_name}_indexed`);
   var uc_column = document.getElementById(`${column_name}_unit_cell`);
   var sg_column = document.getElementById(`${column_name}_space_group`);
@@ -308,11 +317,11 @@ async function initializeTable() {
 }
 
 
-  // switch_extra_columns_by_default();
   activate_resizable();
   initializeTable();
   // adjust_column_height();
   // clearTable();
+  switch_extra_columns_by_default();
   console.log('Done')
 
 
