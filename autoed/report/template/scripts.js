@@ -25,6 +25,27 @@ function toggle_div(someDiv) {
     }
 }
 
+function sort_by_index_percent(key) {
+
+    let sorted_data = sort_data_by_key(key);
+
+    if (sortedAscending == null) {
+        sortedAscending = true;
+        clearTable();
+        populateTable(sorted_data);
+        console.log('SORTED', sorted_data);
+        console.log('ORIGINAL', global_data);
+    } else if (sortedAscending == true) {
+        sortedAscending = false;
+        clearTable();
+        populateTable(global_data);
+    } else if (sortedAscending == false) {
+        sortedAscending = true;
+        clearTable();
+        populateTable(sorted_data);
+    };
+}
+
 function activate_resizable(){
     const resizable = document.querySelector('.resizable');
     const resizer = document.querySelector('.resizer');
@@ -76,12 +97,10 @@ function adjust_column_height() {
 
 function clearTable(){
 
-  console.log('In clear table');
+  console.log('Clearing the table');
   var cells = document.querySelectorAll('.cell:not(.header)');
-  console.log('Selected cells: ', cells);
 
   cells.forEach(function(cell) {
-    console.log('Removing', cell);
     cell.parentNode.removeChild(cell);
   });
 }
@@ -97,13 +116,21 @@ function error_icon(title = null){
     return err_icon;
 }
 
-function check_icon(title = null){
+function check_icon(title = null, location = null){
 
     let chck_icon;
     if (title) {
-        chck_icon = `<i title="${title}" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        if (location) {
+            chck_icon = ` <a href="${location}" target="_blank"><i title="${title}" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        } else {
+            chck_icon = ` <i title="${title}" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        }
     } else {
-        chck_icon = '<i title="None" class="fa-solid fa-square-check info" style="color: green;"> </i>';
+        if (location) {
+        chck_icon = `<a href="${location}" target="_blank"><i title="None" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        } else {
+        chck_icon = `<i title="None" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        }
     } 
     return chck_icon;
 }
@@ -192,12 +219,19 @@ function add_checkmark(cell, values, name) {
 
         const status = values[name]['status'];
         const tooltip = values[name]['tooltip'];
+        const link = values[name]['link'];
+        
+        let xia2_report_location = null;
+
+        if (link !== null && typeof link === 'string') {
+            xia2_report_location = 'xia2_reports/' + link.replace(/\//g, '_');
+        }
 
         if (status == 'OK') {
             if (name == 'ice'){
             cell.innerHTML = snow_icon(title=tooltip);
             } else {
-            cell.innerHTML = check_icon(title=tooltip);
+            cell.innerHTML = check_icon(title=tooltip, xia2_report_location);
             }
         } else if (status == 'process_error') {
             if (name == 'ice'){
@@ -307,21 +341,58 @@ async function fetchData(url) {
     }
 }
 
+function get_percent(entry, pipeline) {
+    
+    let percent = 100. * entry[pipeline].indexed / entry[pipeline].total_spots;
+    if (isNaN(percent)) {
+        percent = 0;
+    }
+    return percent;
+}
+
+function sort_data_by_key(key) {
+    let original_data = Object.entries(global_data);
+    // let indices = original_data.map((_, index) => index);
+    
+    let indices = [];
+    let percents = [];
+    var index = -1;
+    for (let key in global_data) {
+         index = index + 1;
+         percent = get_percent(global_data[key], 'default')
+         indices.push(index);
+         percents.push(percent);
+    }
+    original_data.sort(([, a], [, b]) => get_percent(b, 'default') - get_percent(a, 'default')) 
+    
+    let sorted_data = Object.fromEntries(original_data);
+    return sorted_data;
+    
+    // indices.sort((a, b) => percents[a] - percents[b]);
+}
+
 
 async function initializeTable() {
     console.log('Initializing table');
-    const data = await fetchData('autoed_database.json');
-    console.log('Data', data);
-    populateTable(data);
+    global_data = await fetchData('autoed_database.json');
+
+    populateTable(global_data);
     console.log('Table populated');
 }
 
 
   activate_resizable();
+  var global_data = null;
   initializeTable();
+  // populateTable(global_data);
   // adjust_column_height();
-  // clearTable();
+  var sortedAscending = null;
   switch_extra_columns_by_default();
+  const sort_button = document.getElementById('sort_default_11');
+  sort_button.addEventListener('click', function() {
+    sort_by_index_percent('default');
+  }); 
+
   console.log('Done')
 
 

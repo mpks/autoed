@@ -1,6 +1,7 @@
 import os
 from autoed.constants import database_json_file
 import json
+import shutil
 
 
 class JsonDatabase:
@@ -16,6 +17,10 @@ class JsonDatabase:
 
         self.json_file = os.path.join(full_path_to_database_dir,
                                       database_json_file)
+        self.xia2_report_dir = os.path.join(full_path_to_database_dir,
+                                            'xia2_reports')
+        os.makedirs(self.xia2_report_dir, exist_ok=True)
+
         self.data = {}
 
         if not os.path.exists(self.json_file):
@@ -38,9 +43,17 @@ class JsonDatabase:
         """
         if dataset_name in self.data:         # Overwrite existing data
             self.data[dataset_name][value['title']] = value
+
         else:
             self.data[dataset_name] = {}
             self.data[dataset_name][value['title']] = value
+
+        # Copy the xia2 report if it exists
+        if value['link']:
+            link = value['link'].replace('/', '_')
+            destination = os.path.join(self.xia2_report_dir, link)
+            if os.path.exists(value['link']):
+                shutil.copy(value['link'], destination)
 
     def save_data(self):
         with open(self.json_file, 'w') as file:

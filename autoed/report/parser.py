@@ -53,12 +53,15 @@ class Xia2OutputParser:
             tooltip += f"{values[3]:.2f}  {values[4]:.2f}  {values[5]:.2f} \n"
             tooltip += f"space group: {values[6]}"
 
+            report_file = xia2_file.replace('txt', 'html')
+
             return PipelineEntry(title=pipeline,
                                  status='OK',
                                  indexed=n_indexed,
                                  total_spots=n_tot,
                                  unit_cell=values[0:6],
                                  space_group=values[-1],
+                                 link=report_file,
                                  tooltip=tooltip)
 
         # Catch with which error it failed
