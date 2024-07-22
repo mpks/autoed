@@ -224,5 +224,13 @@
 .clickable-span {
       cursor: pointer; /* Makes the span appear clickable */
       color: blue; /* Optional: styling for the span */
-      text-decoration: underline; /* Optional: underline the text */
+      /* text-decoration: underline; /* Optional: underline the text */
+}
+
+#N_index {
+ padding: 2px 0;
+}
+
+#dataset {
+ padding: 2px 0;
 }

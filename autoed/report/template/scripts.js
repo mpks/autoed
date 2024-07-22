@@ -25,27 +25,6 @@ function toggle_div(someDiv) {
     }
 }
 
-function sort_by_index_percent(key) {
-
-    let sorted_data = sort_data_by_key(key);
-
-    if (sortedAscending == null) {
-        sortedAscending = true;
-        clearTable();
-        populateTable(sorted_data);
-        console.log('SORTED', sorted_data);
-        console.log('ORIGINAL', global_data);
-    } else if (sortedAscending == true) {
-        sortedAscending = false;
-        clearTable();
-        populateTable(global_data);
-    } else if (sortedAscending == false) {
-        sortedAscending = true;
-        clearTable();
-        populateTable(sorted_data);
-    };
-}
-
 function activate_resizable(){
     const resizable = document.querySelector('.resizable');
     const resizer = document.querySelector('.resizer');
@@ -116,20 +95,20 @@ function error_icon(title = null){
     return err_icon;
 }
 
-function check_icon(title = null, location = null){
+function check_icon(title = null, location = null, color="green"){
 
     let chck_icon;
     if (title) {
         if (location) {
-            chck_icon = ` <a href="${location}" target="_blank"><i title="${title}" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+            chck_icon = ` <a href="${location}" target="_blank"><i title="${title}" class="fa-solid fa-square-check info" style="color: ${color};"> </i>`;
         } else {
-            chck_icon = ` <i title="${title}" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+            chck_icon = ` <i title="${title}" class="fa-solid fa-square-check info" style="color: ${color};"> </i>`;
         }
     } else {
         if (location) {
-        chck_icon = `<a href="${location}" target="_blank"><i title="None" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        chck_icon = `<a href="${location}" target="_blank"><i title="None" class="fa-solid fa-square-check info" style="color: ${color};"> </i>`;
         } else {
-        chck_icon = `<i title="None" class="fa-solid fa-square-check info" style="color: green;"> </i>`;
+        chck_icon = `<i title="None" class="fa-solid fa-square-check info" style="color: ${color};"> </i>`;
         }
     } 
     return chck_icon;
@@ -215,11 +194,39 @@ function add_cell(column_name, dataset_name, index, values) {
     column.appendChild(cell);
 }
 
+function check_for_ice(uc) {
+    // 001 
+    let com1 = Math.abs(uc[0] - 4.4) < 0.2 &&
+                Math.abs(uc[1] - 4.4) < 0.2 &&
+                Math.abs(uc[2] - 7.2) < 0.6 &&
+                Math.abs(uc[3] - 90) < 2 &&
+                Math.abs(uc[4] - 90) < 2 &&
+                Math.abs(uc[5] - 120) < 9
+
+    // 010 
+    let com2 = Math.abs(uc[0] - 4.4) < 0.2 &&
+                Math.abs(uc[1] - 7.2) < 0.6 &&
+                Math.abs(uc[2] - 4.4) < 0.2 &&
+                Math.abs(uc[3] - 90) < 2 &&
+                Math.abs(uc[4] - 120) < 9 &&
+                Math.abs(uc[5] - 90) < 2
+    // 100 
+    let com3 = Math.abs(uc[0] - 7.2) < 0.6 &&
+                Math.abs(uc[1] - 4.4) < 0.2 &&
+                Math.abs(uc[2] - 4.4) < 0.2 &&
+                Math.abs(uc[3] - 120) < 9 &&
+                Math.abs(uc[4] - 90) < 2 &&
+                Math.abs(uc[5] - 90) < 2
+    
+    return com1 || com2 || com3
+}
+
 function add_checkmark(cell, values, name) {
 
         const status = values[name]['status'];
         const tooltip = values[name]['tooltip'];
         const link = values[name]['link'];
+        
         
         let xia2_report_location = null;
 
@@ -231,7 +238,16 @@ function add_checkmark(cell, values, name) {
             if (name == 'ice'){
             cell.innerHTML = snow_icon(title=tooltip);
             } else {
-            cell.innerHTML = check_icon(title=tooltip, xia2_report_location);
+
+            // Check if unit cell is close to that of ice
+            let uc = values[name]['unit_cell']
+            let color = "green"
+
+            if (check_for_ice(uc)) {
+                color = "#4d8dff";
+            };
+
+            cell.innerHTML = check_icon(title=tooltip, xia2_report_location, color=color);
             }
         } else if (status == 'process_error') {
             if (name == 'ice'){
@@ -350,6 +366,89 @@ function get_percent(entry, pipeline) {
     return percent;
 }
 
+
+function sort_by_index_percent(key) {
+
+    let sorted_data = sort_data_by_key(key);
+
+    let reversed = Object.entries(sorted_data).reverse();
+    let reversed_data = Object.fromEntries(reversed);
+
+    if (sortedAscending == null) {
+        sortedAscending = true;
+        clearTable();
+        populateTable(sorted_data);
+    } else if (sortedAscending == true) {
+        sortedAscending = false;
+        clearTable();
+        populateTable(reversed_data);
+    } else if (sortedAscending == false) {
+        sortedAscending = true;
+        clearTable();
+        populateTable(sorted_data);
+    };
+}
+
+function sort_by_written() {
+
+    let original_data = Object.entries(global_data);
+    let odata = Object.fromEntries(original_data);
+
+    let oreversed_temp = Object.entries(odata).reverse();
+    let original_reversed = Object.fromEntries(oreversed_temp);
+
+    if (sorted_dataset_ascending == null) {
+        sorted_dataset_ascending = true;
+        clearTable();
+        populateTable(odata);
+
+    } else if (sorted_dataset_ascending == true) {
+        sorted_dataset_ascending = false;
+        clearTable();
+        populateTable(original_reversed);
+    } else if (sorted_dataset_ascending == false) {
+        sorted_dataset_ascending = true;
+        clearTable();
+        populateTable(odata);
+    }
+}
+
+function sort_by_abc(){
+
+    let sorted_by_abc = sort_data_by_name();
+
+    let reversed_abc_temp = Object.entries(sorted_by_abc).reverse();
+    let reversed_abc = Object.fromEntries(reversed_abc_temp);
+
+    if (sorted_abc_ascending == null) {
+        sorted_abc_ascending = true;
+        clearTable();
+        populateTable(sorted_by_abc);
+    } else if (sorted_abc_ascending == true) {
+        sorted_abc_ascending = false;
+        clearTable();
+        populateTable(reversed_abc);
+    } else if (sorted_abc_ascending == false) {
+        sorted_abc_ascending = true;
+        clearTable();
+        populateTable(sorted_by_abc);
+    }
+
+}
+
+function sort_data_by_name() {
+    let original_data = Object.entries(global_data);
+    original_data.sort((a, b) => {
+        let str1 = strip_dataset_name(a[0]);
+        let str2 = strip_dataset_name(b[0]);
+        return str1.localeCompare(str2, undefined, { numeric: true });
+    });
+    
+    let sorted_data = Object.fromEntries(original_data);
+    return sorted_data;
+}
+
+
 function sort_data_by_key(key) {
     let original_data = Object.entries(global_data);
     // let indices = original_data.map((_, index) => index);
@@ -387,10 +486,25 @@ async function initializeTable() {
   // populateTable(global_data);
   // adjust_column_height();
   var sortedAscending = null;
+  var sorted_dataset_ascending = null;
+  var sorted_abc_ascending = null;
+
   switch_extra_columns_by_default();
+
+
   const sort_button = document.getElementById('sort_default_11');
   sort_button.addEventListener('click', function() {
     sort_by_index_percent('default');
+  }); 
+
+  const sort_N_button = document.getElementById('sort_button_N');
+  sort_N_button.addEventListener('click', function() {
+    sort_by_written();
+  }); 
+
+  const sort_dataset_button = document.getElementById('sort_button_dataset');
+  sort_dataset_button.addEventListener('click', function() {
+    sort_by_abc();
   }); 
 
   console.log('Done')
