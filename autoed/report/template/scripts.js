@@ -339,10 +339,45 @@ function strip_dataset_name(dataset_name) {
          }
     }
 
-    const filtered_string = path_array.slice(index+3, -1).join('/')
-    return filtered_string
+    // const filtered_string = path_array.slice(index+3, -1).join('/')
+    //
+    let selectElement = document.getElementById("session_select");
+    if (selectElement.value == 'all') {
+      const filtered_string = path_array.slice(index+1, -1).join('/')
+      return filtered_string
+    } else {
+      const filtered_string = path_array.slice(index+3, -1).join('/')
+      return filtered_string
+    }
 }
 
+function update_session_selection(uniqueDatasetNames) {
+  let selectElement = document.getElementById("session_select");
+  uniqueDatasetNames.forEach(option => {
+    const newOption = document.createElement('option');
+    newOption.value = option;
+    newOption.textContent = option;
+    selectElement.appendChild(newOption);
+    // selectElement.value = option;
+  });
+}
+
+function filter_selection(data) {
+
+  let selectElement = document.getElementById("session_select");
+  console.log('Filtering', selectElement.value);
+
+  if (selectElement.value == 'all') {
+     console.log('In 1', selectElement.value);
+     return data;
+  } else {
+    console.log('In 2', selectElement.value);
+    let data_object = Object.entries(data);
+    let selected = data_object.filter(([key, value]) => key.includes(selectElement.value));
+  //   return Object.entries(selected);
+    return Object.fromEntries(selected);
+  }
+}
 
 async function fetchData(url) {
     try {
@@ -350,7 +385,15 @@ async function fetchData(url) {
         if (!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
         }
-        return await response.json();
+
+        const data = await response.json();
+
+        // Extract unique dataset names
+        const uniqueDatasetNames = extractUniqueDatasetNames(data);
+        update_session_selection(uniqueDatasetNames);
+
+        return data;
+
     } catch (error) {
         console.error('Failed to fetch data:', error);
         return null;
@@ -471,17 +514,45 @@ function sort_data_by_key(key) {
 }
 
 
-async function initializeTable() {
-    console.log('Initializing table');
-    global_data = await fetchData('autoed_database.json');
+function extractUniqueDatasetNames(in_data) {
 
-    populateTable(global_data);
-    console.log('Table populated');
+  let data = Object.entries(in_data);
+  const uniqueNames = new Set();
+
+  data.forEach(([key, value]) => {
+    const parts = key.split('/');
+    
+    // Find the first occurence of the year in the path
+    // This is considered a starting point for the session
+    const yearRegex = /\b\d{4}\b/;
+    let yearIndex = parts.findIndex(part => yearRegex.test(part));
+    if (yearIndex !== -1 && yearIndex + 1 < parts.length) {
+      // Extract the dataset name from the year part, and the next part
+      const datasetName = `${parts[yearIndex]}/${parts[yearIndex + 1]}`;
+      // Add the extracted dataset name to the set
+      uniqueNames.add(datasetName);
+    }
+  });
+
+  return Array.from(uniqueNames);
 }
 
 
+
+async function initializeTable() {
+    console.log('Initializing table');
+    all_data = await fetchData('autoed_database.json');
+    global_data = all_data;
+    populateTable(global_data);
+    console.log('Table populated');
+
+}
+
+
+  var session_filter = 'all';
   activate_resizable();
-  var global_data = null;
+  var all_data = null;         // All data read from the database
+  var global_data = null;      // Data selected by session filter
   initializeTable();
   // populateTable(global_data);
   // adjust_column_height();
@@ -506,6 +577,17 @@ async function initializeTable() {
   sort_dataset_button.addEventListener('click', function() {
     sort_by_abc();
   }); 
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const selectElement = document.getElementById("session_select");
+
+    selectElement.addEventListener("change", (event) => {
+      const selectedValue = event.target.value;
+      global_data = filter_selection(all_data);
+      clearTable();
+      populateTable(global_data);
+  });
+  });
 
   console.log('Done')
 
