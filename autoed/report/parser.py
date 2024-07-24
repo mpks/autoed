@@ -23,6 +23,15 @@ class Xia2OutputParser:
         for pipeline_name in xia2_pipelines:
 
             xia2_path = os.path.join(self.dataset.output_path, pipeline_name)
+
+            # For older datasets, the output of default pipeline went
+            # directly in the processed directory and not in a separate
+            # (e.g. 'default') directory. The folowing line is just to process
+            # those datasets
+            if pipeline_name == 'default':
+                if not os.path.exists(xia2_path):
+                    xia2_path = self.dataset.output_path
+
             xia2_file = os.path.join(xia2_path, xia2_output_file)
 
             table_entry = self._parse_output(xia2_file, pipeline_name)
