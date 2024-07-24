@@ -112,7 +112,8 @@ class BeamCenterCalculator:
                          filename=out_file)
         return x0, y0
 
-    def center_from_midpoint(self, every=20, plot=False, verbose=False):
+    def center_from_midpoint(self, every=20, verbose=False,
+                             plot_filename=None):
 
         image = self.dataset[::every, :, :].mean(axis=0)
         image[self.mask > 0] = 0
@@ -122,10 +123,10 @@ class BeamCenterCalculator:
             convolution_width=20,
             exclude_range_x=None,
             exclude_range_y=(510, 550),
-            plot=plot,
             per_image=False)
 
-        x0, y0 = beam_position_midpoint(image, mid_params, verbose=verbose)
+        x0, y0 = beam_position_midpoint(image, mid_params, verbose=verbose,
+                                        plot_filename=plot_filename)
 
         return x0, y0
 

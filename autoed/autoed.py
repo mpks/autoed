@@ -234,7 +234,7 @@ class AutoedDaemon:
             print(f'No path found: {full_path}')
             sys.exit(0)
         if full_path in self.directories:
-            print(r'Directory {dirname} already watched.')
+            print(f'Directory {dirname} already watched.')
             sys.exit(1)
         elif self.is_subdirectory(full_path):
             print(f'Can not watch {dirname}.')

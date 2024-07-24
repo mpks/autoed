@@ -33,6 +33,7 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.json_file = self.base + '.json'
         self.mdoc_file = self.base + '.mrc.mdoc'
         self.patch_file = os.path.join(self.path, 'PatchMaster.sh')
+        self.beam_figure = os.path.join(self.path, 'beam_position.png')
 
         in_path = os.path.dirname(self.base)
         out_path = replace_dir(in_path, 'ED', 'processed')
@@ -183,8 +184,9 @@ class SinglaDataset:                    # pylint: disable=R0902
     def compute_beam_center(self):
 
         if len(self.data_files) > 0:
-            calculator = BeamCenterCalculator(self.data_files[0])
-            x, y = calculator.center_from_midpoint(every=50)
+            calc = BeamCenterCalculator(self.data_files[0])
+            x, y = calc.center_from_midpoint(every=50,
+                                             plot_filename=self.beam_figure)
             if not x:
                 msg = 'Beam position along x is None. Setting beam_x to 514'
                 self.logger.error(msg)
@@ -194,7 +196,7 @@ class SinglaDataset:                    # pylint: disable=R0902
                 self.logger.error(msg)
                 y = 531
             self.beam_center = (x, y)
-            calculator.file.close()
+            calc.file.close()
 
         return
 

@@ -40,6 +40,7 @@ class PlotParams:
     beam_position: Tuple[float, float]
     span_xy: Optional[Tuple[float, float, float, float]]  # Highlighted region
     filename: str = "fig.png"
+    label: str = None
     mask: Optional[np.ndarray] = None
 
 
@@ -63,11 +64,12 @@ def decorate_plot(image: np.ndarray,
     ax_y.set_ylim(ny_half - width_y, ny_half + width_y)
 
     beam_x, beam_y = beam_position
-    ax_x.set_ylim(-0.07, 1.2)
+    ax_x.set_ylim(-0.15, 1.2)
     ax_y.set_xlim(-0.15, 1.2)
+    ax.set_xticks([0, 200, 400, 600, 800])
 
-    ax.set_xlabel(r"\rm Pixel index X")
-    ax.set_ylabel(r"\rm Pixel index Y")
+    ax.set_xlabel(r"Pixel index X")
+    ax.set_ylabel(r"Pixel index Y", labelpad=5)
 
     # Mark the beam position with a dot
     ax.plot([beam_x], [beam_y], marker="o", ms=1.0, c="white", lw=0)
@@ -100,8 +102,8 @@ def plot_profile(params: PlotParams):
     as a PNG file.
     """
 
-    fig = plt.figure(figsize=(4, 4))
-    gs = gridspec.GridSpec(2, 2, top=0.94, bottom=0.09, left=0.13, right=0.98,
+    fig = plt.figure(figsize=(6, 6))
+    gs = gridspec.GridSpec(2, 2, top=0.92, bottom=0.07, left=0.11, right=0.98,
                            wspace=0, hspace=0, width_ratios=[3, 1],
                            height_ratios=[1, 3])
     ax_x = plt.subplot(gs[0, 0])
@@ -119,11 +121,17 @@ def plot_profile(params: PlotParams):
               rasterized=True, interpolation="none")
 
     bx, by = params.beam_position
-    ax_x.text(0.0, 1.05, f"({bx:.0f}, {by:.0f})", transform=ax_x.transAxes)
-    ax_x.text(0.4, 1.05, f"max: {params.image.max():.2f}",
-              transform=ax_x.transAxes)
-    ax_x.text(0.9, 1.05, f"avg: {params.image.mean():.2f}",
-              transform=ax_x.transAxes)
+    ax_x.text(0.0, 1.05, f"beam position xy = ({bx:.0f}, {by:.0f})",
+              transform=ax_x.transAxes, fontfamily='serif',
+              fontsize=10)
+    if params.label:
+        ax_x.text(0.11, 0.99, f"dataset: {params.label}", va='top', ha='left',
+                  transform=fig.transFigure, fontsize=8,
+                  fontfamily='sans-serif')
+#    ax_x.text(0.4, 1.05, f"max: {params.image.max():.2f}",
+#              transform=ax_x.transAxes)
+#    ax_x.text(0.9, 1.05, f"avg: {params.image.mean():.2f}",
+#              transform=ax_x.transAxes)
 
     # Plot projected profiles
     for px in params.profiles_x:

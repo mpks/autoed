@@ -13,3 +13,4 @@ report_html_file = 'autoed_overview.html'
 database_json_file = 'autoed_database.json'        # Keeps processing summaries
 xia2_html_report_dir = 'xia2_html'                 # Keeps xia2 html reports
 xia2_dials_report_path = 'DEFAULT/NATIVE/SWEEP1/index'
+ed_root_dir = 'ED'
