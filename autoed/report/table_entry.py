@@ -21,7 +21,7 @@ class PipelineEntry:
         self.unit_cell = unit_cell
         self.space_group = space_group
         self.warnings = warnings
-        self.link = link
+        self.link = link        # This is a link to xia2 reports
         self.tooltip = tooltip
 
     def to_dict(self):

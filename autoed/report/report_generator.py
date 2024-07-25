@@ -73,6 +73,5 @@ def generate_json_database(path_to_watched_dir):
     database.load_data()
 
     for dataset in datasets:
-
         parser = Xia2OutputParser(dataset, database)
         parser.add_to_database()

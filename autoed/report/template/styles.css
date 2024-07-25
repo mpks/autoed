@@ -72,6 +72,11 @@
   user-select: none;
 }
 
+#beam .cell:not(.header):nth-child(even) {
+   /* background-color: #f9def4; */
+   background-color: #e6e6e6;
+}
+
 #col1 .cell:not(.header):nth-child(even) {
     background-color: #e6e6e6;
 }
@@ -116,6 +121,15 @@
 
 [id*='_unit_cell'] {
   width: 270px;
+}
+
+#beam {
+  width: 50px;
+  border-right: 1px solid black;
+}
+
+#beam_string {
+  background-color: #1f0e4e;
 }
 
 [id*='_indexed'] {

@@ -95,6 +95,14 @@ function error_icon(title = null){
     return err_icon;
 }
 
+function image_icon(file_location){
+    img_icon = ` <a href="${file_location}" target="_blank"><i class="fa-solid fa-camera info" style="color: #aebafb;"> </i>`;
+    // img_icon = `<a href="#" class="info" onclick="openImagePopup(${file_location})">
+    //            <i class="fa-solid fa-camera" style="color: #aebafb;"></i></a>`;
+
+    return img_icon;
+}
+
 function check_icon(title = null, location = null, color="green"){
 
     let chck_icon;
@@ -139,6 +147,7 @@ function populateTable(data) {
         
         add_cell('col1', dataset_name, index, values);
         add_cell('col2', dataset_name, index, values);
+        add_cell('beam', dataset_name, index, values);
         add_cell('default', dataset_name, index, values);
         add_cell('user', dataset_name, index, values);
         add_cell('ice', dataset_name, index, values);
@@ -165,6 +174,14 @@ function add_cell(column_name, dataset_name, index, values) {
 
         cell.classList.add("frozen_column_02");
         cell.innerHTML = strip_dataset_name(dataset_name);
+
+    } else if (column_name == 'beam') {
+
+        if (values['beam_image'] != null) {
+            cell.innerHTML = image_icon(values['beam_image']);
+        } else {
+            cell.innerHTML = ' ';
+        }
 
     } else if (column_name == 'default') {
 
@@ -546,6 +563,46 @@ async function initializeTable() {
     populateTable(global_data);
     console.log('Table populated');
 
+}
+
+function openImagePopup(imageUrl) {
+        // Define the dimensions of the popup window
+        const width = 600;
+        const height = 400;
+        const left = (screen.width / 2) - (width / 2);
+        const top = (screen.height / 2) - (height / 2);
+
+        // Open a new window with the specified dimensions
+        const popup = window.open("", "ImagePopup", `width=${width},height=${height},top=${top},left=${left}`);
+
+        // Write HTML content to the new window
+        popup.document.write(`
+            <html>
+            <head>
+                <title>Image Popup</title>
+                <style>
+                    body {
+                        margin: 0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        background-color: #000;
+                    }
+                    img {
+                        max-width: 100%;
+                        max-height: 100%;
+                    }
+                </style>
+            </head>
+            <body>
+                <img src="${imageUrl}" alt="Image">
+            </body>
+            </html>
+        `);
+
+        // Close the document to finish loading the content
+        popup.document.close();
 }
 
 

@@ -36,7 +36,8 @@ class Xia2OutputParser:
 
             table_entry = self._parse_output(xia2_file, pipeline_name)
             table_entry = table_entry.to_dict()
-            self.database.add_entry(dataset_name, table_entry)
+            self.database.add_entry(dataset_name, table_entry,
+                                    self.dataset.beam_figure)
             self.database.save_data()
 
     def _parse_output(self, xia2_file, pipeline):
