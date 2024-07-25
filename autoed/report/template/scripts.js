@@ -247,9 +247,9 @@ function add_checkmark(cell, values, name) {
         
         let xia2_report_location = null;
 
-        if (link !== null && typeof link === 'string') {
-            xia2_report_location = 'xia2_reports/' + link.replace(/\//g, '_');
-        }
+        // if (link !== null && typeof link === 'string') {
+        //     xia2_report_location = 'xia2_reports/' + link.replace(/\//g, '_');
+        // }
 
         if (status == 'OK') {
             if (name == 'ice'){
@@ -264,7 +264,7 @@ function add_checkmark(cell, values, name) {
                 color = "#4d8dff";
             };
 
-            cell.innerHTML = check_icon(title=tooltip, xia2_report_location, color=color);
+            cell.innerHTML = check_icon(title=tooltip, link, color=color);
             }
         } else if (status == 'process_error') {
             if (name == 'ice'){

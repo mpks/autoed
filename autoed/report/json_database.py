@@ -6,6 +6,20 @@ import shutil
 import hashlib
 
 
+def overwrite_xia2_report(xia2_report_file, added_line):
+    """ This function will just add a line with the dataset
+        name to xia2 report
+    """
+    with open(xia2_report_file, 'r') as file:
+        lines = file.readlines()
+
+    with open(xia2_report_file, 'w') as file:
+        for line in lines:
+            file.write(line)
+            if '<h1>xia2 processing report' in line:
+                file.write(f"<p>{added_line}</p>\n")
+
+
 class JsonDatabase:
 
     def __init__(self, full_path_to_database_dir):
@@ -48,19 +62,28 @@ class JsonDatabase:
         beam_image : string or path
             The location of the beam position image for that dataset
         """
+
+        # Copy the xia2 report if it exists
+        # and also overwrite the destination of the copied file
+        if value['link']:
+            md5 = hashlib.md5()
+            md5.update(value['link'].encode('utf-8'))
+            link_hash = md5.hexdigest()[0:10] + '.html'
+            destination = os.path.join(self.xia2_report_dir, link_hash)
+            if os.path.exists(value['link']):
+                shutil.copy(value['link'], destination)
+                # Write the dataset name in the xia2 report
+                overwrite_xia2_report(destination, value['link'])
+                value['link'] = os.path.join(xia2_report_dir, link_hash)
+            else:
+                value['link'] = None
+
         if dataset_name in self.data:         # Overwrite existing data
             self.data[dataset_name][value['title']] = value
 
         else:
             self.data[dataset_name] = {}
             self.data[dataset_name][value['title']] = value
-
-        # Copy the xia2 report if it exists
-        if value['link']:
-            link = value['link'].replace('/', '_')
-            destination = os.path.join(self.xia2_report_dir, link)
-            if os.path.exists(value['link']):
-                shutil.copy(value['link'], destination)
 
         # Copy the beam image if it exists
         if beam_image:
@@ -80,7 +103,7 @@ class JsonDatabase:
             else:
                 self.data[dataset_name]['beam_image'] = None
         else:
-            print('NO BEAM')
+          self.data[dataset_name]['beam_image'] = None
 
     def save_data(self):
         with open(self.json_file, 'w') as file:
