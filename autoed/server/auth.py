@@ -14,7 +14,12 @@ router = APIRouter(prefix="/api/v1")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
 
-AUTH_KEY = os.environ.get("AUTOED_AUTH_KEY") or secrets.token_hex(32)
+if os.environ.get("AUTOED_CREDENTIALS"):
+    with open(os.environ["AUTOED_CREDENTIALS"], "r") as fs:
+        creds = yaml.safe_load(fs)
+    AUTH_KEY = creds.get("auth_key") or secrets.token_hex(32)
+else:
+    AUTH_KEY = secrets.token_hex(32)
 
 
 def get_creds() -> dict:
