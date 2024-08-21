@@ -1,11 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
 from autoed.autoed import AutoedDaemon, kill_process_and_children
-
-router = APIRouter(prefix='/api/v1')
+from autoed.server.auth import validate_token
 
 autoed_daemon = AutoedDaemon()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+router = APIRouter(prefix="/api/v1", dependencies=[Depends(validate_token)])
 
 
 class Watcher(BaseModel):
@@ -13,11 +17,10 @@ class Watcher(BaseModel):
     pid: int
 
 
-@router.get('/watchers')
-def get_watchers() -> list[Watcher]:
+@router.get("/watchers")
+async def get_watchers() -> list[Watcher]:
     return [
-        {'path': d, 'pid': autoed_daemon.pids[d]}
-        for d in autoed_daemon.directories.values()
+        {"path": d, "pid": autoed_daemon.pids[d]} for d in autoed_daemon.directories
     ]
 
 
@@ -25,8 +28,8 @@ class PID(BaseModel):
     pid: int
 
 
-@router.get('/watchers/{path:path}/pid')
-def get_watcher_pid(path: str) -> PID:
+@router.get("/watchers/{path:path}/pid")
+async def get_watcher_pid(path: str) -> PID:
     return autoed_daemon.pids[path]
 
 
@@ -34,12 +37,12 @@ class WatcherSetup(BaseModel):
     path: str
     inotify: bool = False
     sleep_time: float = 30
-    log_dir: str = ''
+    log_dir: str = ""
     slurm: bool = False
 
 
-@router.post('/watcher')
-def start_watcher(watcher_setup: WatcherSetup):
+@router.post("/watcher")
+async def start_watcher(watcher_setup: WatcherSetup):
     autoed_daemon.watch(
         dirname=watcher_setup.path,
         use_inotify=watcher_setup.inotify,
@@ -49,7 +52,7 @@ def start_watcher(watcher_setup: WatcherSetup):
     )
 
 
-@router.delete('/watchers/{pid}')
-def stop_watcher(pid: int):
+@router.delete("/watchers/{pid}")
+async def stop_watcher(pid: int):
     if pid in autoed_daemon.pids.values():
         kill_process_and_children(pid)

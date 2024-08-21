@@ -28,6 +28,10 @@ setup(
         'psutil'
     ],
     extras_require={
-        'server': ['fastapi'],
+        'server': [
+            'fastapi[standard]',
+            'pyyaml',
+            'python-jose',
+            ],
     },
 )
