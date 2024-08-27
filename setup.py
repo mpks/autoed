@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autoed',
-    version='0.2.0',
+    version='0.2.1',
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
@@ -16,7 +16,7 @@ setup(
     },
     setup_requires=['argcomplete'],
     packages=find_packages(),
-    package_data={'autoed': ['data/*']},
+    package_data={'autoed': ['data/*', 'report/template/*']},
     install_requires=[
         'argcomplete',
         'watchdog==4.0.0',
