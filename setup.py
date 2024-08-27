@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autoed',
-    version='0.1.4',
+    version='0.2.0',
     entry_points={
         'console_scripts': [
             'autoed_watch = autoed.watch:main',
@@ -18,15 +18,20 @@ setup(
     packages=find_packages(),
     package_data={'autoed': ['data/*']},
     install_requires=[
-        'watchdog',
-        'numpy>=1.10.0',
+        'argcomplete',
+        'watchdog==4.0.0',
+        'numpy',
         'nexgen>=0.8.5',
         'h5py',
         'argparse',
         'python-daemon',
         'pathlib',
-        'argcomplete',
-        'psutil'
+        'psutil',
+        'attr',
+        'hdf5plugin',
+        'matplotlib',
+        'pydantic',
+        'uvicorn',
     ],
     extras_require={
         'server': [

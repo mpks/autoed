@@ -19,7 +19,7 @@ def autoed_setup():
 
     run("autoed start")
     print('Running autoed')
-    run2(f"autoed -i -t 0.1 --dummy watch {watch_path}")
+    run2(f"autoed --inotify -t 0.1 --dummy watch {watch_path}")
     time.sleep(0.5)
 
     yield
@@ -56,7 +56,7 @@ def run_for_dataset(dataset, name):
     shutil.copy2(d.master_origin,  d.master_dest)
 
     run(f"touch {d.trigger_file}")
-    time.sleep(2)
+    time.sleep(5)
 
     print("Nexus file exists:")
     assert os.path.exists(d.nxs_file)

@@ -7,11 +7,12 @@ from typing import List, Optional, Tuple
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from attr import dataclass
+from dataclasses import dataclass
 from matplotlib import gridspec
 from matplotlib.patches import Circle
 
 matplotlib.use('Agg')
+
 
 @dataclass
 class Line2D:
