@@ -9,7 +9,8 @@ setup(
             'autoed_watch = autoed.watch:main',
             'autoed = autoed.autoed:main',
             'autoed_beam_center = autoed.beam_position.beam_center:main',
-            'autoed_process = autoed.process.process_static:main'
+            'autoed_process = autoed.process.process_static:main',
+            'autoed_server = autoed.server:run',
         ]
     },
     setup_requires=['argcomplete'],
@@ -25,5 +26,12 @@ setup(
         'pathlib',
         'argcomplete',
         'psutil'
-    ]
+    ],
+    extras_require={
+        'server': [
+            'fastapi[standard]',
+            'pyyaml',
+            'python-jose',
+            ],
+    },
 )
