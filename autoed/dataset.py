@@ -213,8 +213,15 @@ class SinglaDataset:                    # pylint: disable=R0902
 
         # If fetching from JSON fails, try with the old (textual) format
         if not success_json:
-            metadata.from_txt(self)
+            self.logger.error('Failed to fetch metadata from JSON')
+            self.logger.info('Trying to fetch metadata from txt')
+            success_txt = metadata.from_txt(self)
+            if not success_txt:
+                self.logger.error('Failed to fetch metadata from txt files')
+                return False
+
         self.metadata = metadata
+        return True
 
     def process(self, local=False):
 
@@ -230,10 +237,25 @@ class SinglaDataset:                    # pylint: disable=R0902
                 msg += ' = (%f, %f) ' % self.beam_center
                 self.logger.info(msg)
 
-            self.fetch_metadata()
-            success = generate_nexus_file(self)
-            if success:
-                os.makedirs(self.output_path, exist_ok=True)
-                # run_slurm_job(self)
-                run_processing_pipelines(self, local)
-            self.last_processed_time = time.time()
+            succes_metadata = self.fetch_metadata()
+            if not succes_metadata:
+                msg = 'Failed to fetch metadata from JSON and TXT.\n'
+                msg += 'No conversion/processing'
+                self.logger.error(msg)
+                return False
+            else:
+                success = generate_nexus_file(self)
+                if success:
+                    msg = 'Nexus file generated'
+                    self.logger.info(msg)
+                    os.makedirs(self.output_path, exist_ok=True)
+                    # run_slurm_job(self)
+                    run_processing_pipelines(self, local)
+                    self.last_processed_time = time.time()
+                    return True
+                else:
+                    msg = 'Failed to generate nexus file'
+                    self.logger.error(msg)
+                    self.last_processed_time = time.time()
+                    return False
+        return False

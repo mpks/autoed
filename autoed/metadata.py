@@ -94,6 +94,10 @@ class Metadata:
             return False
         self.detector_distance = get_detector_distance(dataset.patch_file)
 
+        if self.detector_distance is None:
+            dataset.logger.error('Detector distance is None.')
+            return False
+
         return True
 
     def from_json(self, dataset):
@@ -120,17 +124,32 @@ class Metadata:
 
         if 'start_angle' not in json_data:
             dataset.logger.error('start_angle set to None in JSON file')
-            return False
-        self.start_angle = json_data['start_angle']
+            dataset.logger.info('Trying to fetch start_angle from log file')
 
-        if 'detector_distance' not in json_data:
-            dataset.logger.error('detector_distance set to None in JSON file')
-            return False
-        self.detector_distance = json_data['detector_distance']
+            success, start_angle = scrap(dataset.log_file, 'start angle',
+                                         float, -60)
+            if not success:
+                return False
+            else:
+                dataset.logger.info(f"start_angle set to {start_angle}")
+                self.start_angle = start_angle
+        else:
+            self.start_angle = json_data['start_angle']
 
         self.sample_type = json_data['sample_type']
         self.unit_cell = json_data['unit_cell']
-        self.space_group = json_data['space_group']
+        space_group = json_data['space_group']
+        if space_group == "undefined":
+            space_group = None
+        self.space_group = space_group
+
+        if 'detector_distance' not in json_data:
+            dataset.logger.error('detector_distance not in JSON file')
+            return False
+        self.detector_distance = json_data['detector_distance']
+        if self.detector_distance is None:
+            dataset.logger.error('detector_distance set to None in JSON file')
+            return False
 
         return True
 

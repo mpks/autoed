@@ -6,7 +6,7 @@ all_pipelines = xia2_pipelines + dials_pipelines
 
 xia2_output_file = 'xia2.txt'
 
-report_path_env_var = 'AUTOED_REPORT_PATH'
+report_path = 'AUTO'            # Generated at the same level as 'processed'
 
 report_dir = 'autoed_report'
 report_html_file = 'autoed_overview.html'

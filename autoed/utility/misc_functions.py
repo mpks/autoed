@@ -80,7 +80,7 @@ def get_detector_distance(path):
     """Read detector distance from PatchMaster.sh"""
 
     pattern = r'detector.starts=(\d+(\.\d*)?)'
-    distance = 785.91
+    distance = None
     with open(path, 'r') as file:
         for line in file:
             ln_match = re.search(pattern, line.strip())

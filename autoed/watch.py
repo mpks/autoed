@@ -189,13 +189,18 @@ class DirectoryHandler(FileSystemEventHandler):
                             info(msg % dataset.base)
 
                             if not dataset.processed:
-                                msg = 'Checking if all files present: %s'
-                                info(msg % dataset.base)
                                 if dataset.all_files_present():
+                                    msg = 'All files present: %s'
+                                    info(msg % dataset.base)
                                     info('Processing: %s' % dataset.base)
-                                    dataset.process(self.local)
-                                    ms = f"Finished processing: {dataset.base}"
-                                    info(ms)
+                                    success = dataset.process(self.local)
+                                    base = dataset.base
+                                    if success:
+                                        ms = f"Processed: {base}"
+                                        info(ms)
+                                    else:
+                                        ms = f"Failed to process: {base}"
+                                        info(ms)
                                 else:
                                     msg = 'Not all files present, ignoring: %s'
                                     info(msg % dataset.base)

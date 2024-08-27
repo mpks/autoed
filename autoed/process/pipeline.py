@@ -103,7 +103,9 @@ class Pipeline(ABC):
             cmd += "\n"
 
             if not process_user:
-                cmd = "echo No unit cell nor space group provided\n "
+                cmd = "echo Wrong unit cell or space group provided\n "
+                cmd += f"echo Unit cell: {self.dataset.metadata.unit_cell}\n "
+                cmd += f"echo SG: {self.dataset.metadata.space_group}\n "
                 cmd += "echo Pipeline with user parameters empty \n "
                 return cmd
 
@@ -255,7 +257,7 @@ class SlurmPipeline(Pipeline):
 def is_unit_cell_OK(unit_cell):
     """Checks if unit cell parameter is of the proper format and type"""
     if isinstance(unit_cell, (list, tuple)):
-        if not len(unit_cell) == 6:
+        if len(unit_cell) == 6:
             conds = [isinstance(a, (float, int)) for a in unit_cell]
             return all(conds)
         return False

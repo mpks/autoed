@@ -509,7 +509,7 @@ function sort_data_by_name() {
 }
 
 
-function sort_data_by_key(key) {
+function sort_data_by_key(pipeline) {
     let original_data = Object.entries(global_data);
     // let indices = original_data.map((_, index) => index);
     
@@ -518,11 +518,11 @@ function sort_data_by_key(key) {
     var index = -1;
     for (let key in global_data) {
          index = index + 1;
-         percent = get_percent(global_data[key], 'default')
+         percent = get_percent(global_data[key], pipeline)
          indices.push(index);
          percents.push(percent);
     }
-    original_data.sort(([, a], [, b]) => get_percent(b, 'default') - get_percent(a, 'default')) 
+    original_data.sort(([, a], [, b]) => get_percent(b, pipeline) - get_percent(a, pipeline)) 
     
     let sorted_data = Object.fromEntries(original_data);
     return sorted_data;
@@ -623,6 +623,21 @@ function openImagePopup(imageUrl) {
   const sort_button = document.getElementById('sort_default_11');
   sort_button.addEventListener('click', function() {
     sort_by_index_percent('default');
+  }); 
+
+  const sort_button_user = document.getElementById('sort_button_user');
+  sort_button_user.addEventListener('click', function() {
+    sort_by_index_percent('user');
+  }); 
+
+  const sort_button_ice = document.getElementById('sort_button_ice');
+  sort_button_ice.addEventListener('click', function() {
+    sort_by_index_percent('ice');
+  }); 
+
+  const sort_button_rs = document.getElementById('sort_button_rs');
+  sort_button_rs.addEventListener('click', function() {
+    sort_by_index_percent('real_space_indexing');
   }); 
 
   const sort_N_button = document.getElementById('sort_button_N');
