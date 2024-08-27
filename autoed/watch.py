@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 import time
-# import subprocess
 import autoed
 import os
 import re
@@ -37,8 +35,13 @@ def main():
     parser.add_argument('--sleep_time', '-s', type=float,
                         default=None, help=hmsg)
 
-    msg = 'Run watchdog without slurm submission (for testing)'
-    parser.add_argument('--no_slurm', action='store_true', default=False,
+    msg = 'Run watchdog without running xia2 or dials (for testing)'
+    parser.add_argument('--dummy', action='store_true', default=False,
+                        help=msg)
+
+    msg = 'If used, it runs xia2 and DIALS processing locally with bash, '
+    msg += 'instead of submitting the job request to cluster using SLURM.'
+    parser.add_argument('--local', action='store_true', default=False,
                         help=msg)
     parser.add_argument('--log-dir', type=str, default=None,
                         help='A directory to store autoed log file.')
@@ -82,11 +85,12 @@ def main():
                                     args.inotify,
                                     sleep_time)
 
-    run_slurm = not args.no_slurm
     event_handler = DirectoryHandler(watch_path,
                                      processing_script,
                                      watch_logger,
-                                     run_slurm=run_slurm)
+                                     report_dir=log_directory,
+                                     dummy=args.dummy,
+                                     local=args.local)
 
     if args.inotify:
         observer = Observer()
@@ -111,7 +115,8 @@ def main():
 
 class DirectoryHandler(FileSystemEventHandler):
 
-    def __init__(self, watch_path, script, logger, run_slurm=True):
+    def __init__(self, watch_path, script, logger, report_dir,
+                 dummy=False, local=False):
 
         """
         Parameters
@@ -123,6 +128,14 @@ class DirectoryHandler(FileSystemEventHandler):
             The path to the processing script used to
             convert and process data.
         logger : logger object
+        report_dir : Path
+            The path where to save the report HTML file.
+        dummy: boolean
+            If True, the AutoED will not run xia2 or dials. This is used
+            for testing.
+        local: boolean
+            If True, the AutoED will run xia2 and DIALS on the local machine
+            using bash, instead of submitting a SLURM request to the cluster.
         """
 
         self.watch_path = watch_path
@@ -131,7 +144,8 @@ class DirectoryHandler(FileSystemEventHandler):
         self.datasets = dict()
         self.queue = dict()
         self.logger = logger
-        self.run_slurm = run_slurm
+        self.dummy = dummy
+        self.local = local
 
         self.script = script
         self.last_triggered = 0
@@ -165,7 +179,7 @@ class DirectoryHandler(FileSystemEventHandler):
                                 self.dataset_names.add(basename)
                                 dataset = SinglaDataset.from_basename(basename)
                                 dataset.search_and_update_data_files()
-                                dataset.set_run_slurm(self.run_slurm)
+                                dataset.dummy = self.dummy
                                 self.datasets[dataset.base] = dataset
                             else:
                                 dataset = self.datasets[basename]
@@ -175,13 +189,18 @@ class DirectoryHandler(FileSystemEventHandler):
                             info(msg % dataset.base)
 
                             if not dataset.processed:
-                                msg = 'Checking if all files present: %s'
-                                info(msg % dataset.base)
                                 if dataset.all_files_present():
+                                    msg = 'All files present: %s'
+                                    info(msg % dataset.base)
                                     info('Processing: %s' % dataset.base)
-                                    dataset.process()
-                                    info('Finished processing: %s'
-                                         % dataset.base)
+                                    success = dataset.process(self.local)
+                                    base = dataset.base
+                                    if success:
+                                        ms = f"Processed: {base}"
+                                        info(ms)
+                                    else:
+                                        ms = f"Failed to process: {base}"
+                                        info(ms)
                                 else:
                                     msg = 'Not all files present, ignoring: %s'
                                     info(msg % dataset.base)

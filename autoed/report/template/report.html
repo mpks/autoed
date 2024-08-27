@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- [<] Header -->
+<head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoED</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+    <!--[>] End Header-->
+<body>
+
+  <!-- [<] Page Header -->
+  <h1 id="page_title">AutoED Processing Summary</h1>
+
+  <p id="page_text"> 
+    Session: 
+    <select id="session_select">
+      <option value="all" selected>all</option>
+      <!--<option value="2024-nt34824-22">2024/nt34824-22</option> -->
+    </select>
+    </p>
+  <!-- [>] Page Header -->
+
+  <div class="table-container">
+    <div class='table'>
+
+    <div id='col1' class="column">
+        <div class="cell header" id='N_index'> N <br>
+            <span class="sort-icon clickable-span" id="sort_button_N" style="color: orange; font-size:9pt; ">&#x25B2;&#x25BC;</span> 
+        </div>
+        <!-- <div class="cell "> 1 </div> -->
+    </div>
+    <div id='col2' class="column resizable">
+        <div class="cell header frozen_column_02"  id="dataset"> Dataset <br>
+            <span class="sort-icon clickable-span" id="sort_button_dataset" style="color: orange; font-size:9pt; ">&#x25B2;&#x25BC;</span> 
+        </div> 
+        <!-- <div class="cell column_02"> 20240322_nav7_504.sweep01 </div> -->
+        <div class="resizer"></div> 
+        <div></div> 
+    </div>
+    <div id='beam' class="column">
+        <div class="cell header" id='beam_string'> beam <br>
+        </div> 
+        <!-- <div class="cell column_02"> 20240322_nav7_504.sweep01 </div> -->
+    </div>
+    <div id='default_indexed' class="column">
+        <div class="cell header"> 
+            Indexed <br>
+            <span class="sort-icon clickable-span" id="sort_default_11" style="color: orange;">&#x25B2;&#x25BC;</span> 
+        </div>
+        <!-- <div class="cell "> 12.7 </div> -->
+    </div>
+    <div id='default_unit_cell' class="column">
+        <div class="cell header"> Unit cell </div>
+        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
+    </div>
+    <div id='default_space_group' class="column">
+        <div class="cell header"> Space<br>group </div>
+        <!-- <div class="cell "> P01 </div> --> 
+    </div>
+    <div id='default' class="column expandable">
+        <div class="cell header" onclick="toggleColumn('default')"> default </div>
+        <!-- <div class="cell"> DEF </div> -->
+    </div>
+
+    <div id='user_indexed' class="column">
+        <div class="cell header"> 
+            Indexed <br>
+            <span class="sort-icon clickable-span" id="sort_button_user" style="color: orange;">&#x25B2;&#x25BC;</span> 
+        </div>
+        <!-- <div class="cell "> 12.7 </div> -->
+    </div>
+    <div id='user_unit_cell' class="column">
+        <div class="cell header"> Unit cell </div>
+        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
+    </div>
+    <div id='user_space_group' class="column">
+        <div class="cell header"> Space<br>group </div>
+        <!-- <div class="cell "> P01 </div> --> 
+    </div>
+
+    <div id='user' class="column expandable">
+        <div class="cell header" onclick="toggleColumn('user')"> user </div>
+        <!-- <div class="cell"> OK </div> --> 
+    </div>
+
+
+    <div id='ice_indexed' class="column">
+        <div class="cell header"> 
+            <span id='indx'>Indexed</span> <br>
+            <span class="sort-icon" id="sort_button_ice" style="color: orange;">&#x25B2;&#x25BC;</span> 
+        </div>
+        <!-- <div class="cell "> 12.7 </div> -->
+    </div>
+    <div id='ice_unit_cell' class="column">
+        <div class="cell header"> Unit cell </div>
+        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
+    </div>
+    <div id='ice_space_group' class="column">
+        <div class="cell header"> Space<br>group </div>
+        <!-- <div class="cell "> P01 </div> --> 
+    </div>
+    <div id='ice' class="column expandable">
+        <div class="cell header" onclick="toggleColumn('ice')"> ice </div>
+        <!-- <div class="cell"> OK </div> --> 
+    </div>
+
+    <div id='real_space_indexing_indexed' class="column">
+        <div class="cell header"> 
+            Indexed <br>
+            <span class="sort-icon" id="sort_button_rs" style="color: orange;">&#x25B2;&#x25BC;</span> 
+        </div>
+        <!-- <div class="cell "> 12.7 </div> -->
+    </div>
+
+    <div id='real_space_indexing_unit_cell' class="column">
+        <div class="cell header"> Unit cell </div>
+        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
+    </div>
+    <div id='real_space_indexing_space_group' class="column">
+        <div class="cell header"> Space<br>group </div>
+        <!-- <div class="cell "> P01 </div> --> 
+    </div>
+    <div id='real_space_indexing' class="column expandable">
+        <div class="cell header" onclick="toggleColumn('real_space_indexing')"> rs index </div>
+        <!-- <div class="cell"> OK </div> --> 
+    </div>
+    </div>
+  </div> <!-- Close Container -->
+
+  <!-- [<] Page stats -->
+  <!-- 
+    <p id="page_text"> 
+       Stats (default): &nbsp;
+    <i title="Total number of datasets" class="fa-solid fa-database info"></i>125  &nbsp;&nbsp;&nbsp;
+    <i title='Processed successfully' class="fa-solid fa-square-check info" style="color: green;"></i> 25 &nbsp; 
+    <i title='Ice' class="fa-regular fa-snowflake info" style="color: #4d8dff;"></i> 25 &nbsp; 
+    <i title="Failed to process" class="fa-solid fa-triangle-exclamation info" style="color: red;"></i> 17 &nbsp;
+    <i title="Missing data" class="fa-solid fa-database info" style='color: gray;'></i> 3 &nbsp;
+    <i title="Missing data" class="fa-solid fa-circle-xmark" style="color: gray;"></i> 4 &nbsp;
+
+    <i title="Failed to parse output" class="fa-solid fa-circle-question" style='color: gray;'></i> 0 &nbsp;&nbsp;&nbsp;
+  </p>
+  -->
+
+  <!-- [>] Page stats -->
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="scripts.js"></script>
+</body>
+</html>
+

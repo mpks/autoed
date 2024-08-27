@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
-"""Module that defines a Singla dataset class"""
+"""Define Singla dataset class"""
 import os
 import logging
 import time
 import re
 from autoed.convert import generate_nexus_file
-from autoed.process.run_slurm import run_slurm_job
+from autoed.process.pipeline import run_processing_pipelines
 from autoed.beam_position.beam_center import BeamCenterCalculator
-from autoed.misc_functions import replace_dir, is_file_fully_written
+from autoed.utility.misc_functions import replace_dir, is_file_fully_written
 from autoed.metadata import Metadata
 
 
@@ -34,6 +33,7 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.json_file = self.base + '.json'
         self.mdoc_file = self.base + '.mrc.mdoc'
         self.patch_file = os.path.join(self.path, 'PatchMaster.sh')
+        self.beam_figure = os.path.join(self.path, 'beam_position.png')
 
         in_path = os.path.dirname(self.base)
         out_path = replace_dir(in_path, 'ED', 'processed')
@@ -47,11 +47,9 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.present_lock = False
         self.processed = False
         self.last_processed_time = 0
-        self.run_slurm = True
+        self.dummy = False
         self.data_files = []
-
-    def set_run_slurm(self, option=True):
-        self.run_slurm = option
+        self.metadata = None
 
     def search_and_update_data_files(self):
 
@@ -183,11 +181,12 @@ class SinglaDataset:                    # pylint: disable=R0902
         if time_diff > 300:
             self.processed = False
 
-    def _compute_beam_center(self):
+    def compute_beam_center(self):
 
         if len(self.data_files) > 0:
-            calculator = BeamCenterCalculator(self.data_files[0])
-            x, y = calculator.center_from_midpoint(every=50)
+            calc = BeamCenterCalculator(self.data_files[0])
+            x, y = calc.center_from_midpoint(every=50,
+                                             plot_filename=self.beam_figure)
             if not x:
                 msg = 'Beam position along x is None. Setting beam_x to 514'
                 self.logger.error(msg)
@@ -197,11 +196,11 @@ class SinglaDataset:                    # pylint: disable=R0902
                 self.logger.error(msg)
                 y = 531
             self.beam_center = (x, y)
-            calculator.file.close()
+            calc.file.close()
 
         return
 
-    def _fetch_metadata(self):
+    def fetch_metadata(self):
 
         metadata = Metadata()
         new_files_exist = (os.path.exists(self.master_file) and
@@ -212,27 +211,51 @@ class SinglaDataset:                    # pylint: disable=R0902
         if new_files_exist:
             success_json = metadata.from_json(self)
 
-        # If fetching from JSON fails, try with the old data format
+        # If fetching from JSON fails, try with the old (textual) format
         if not success_json:
-            metadata.from_txt(self)
-        return metadata
+            self.logger.error('Failed to fetch metadata from JSON')
+            self.logger.info('Trying to fetch metadata from txt')
+            success_txt = metadata.from_txt(self)
+            if not success_txt:
+                self.logger.error('Failed to fetch metadata from txt files')
+                return False
 
-    def process(self):
+        self.metadata = metadata
+        return True
+
+    def process(self, local=False):
+
         if not self.processed:
             self.processed = True
             if not self.beam_center:
-                msg = 'Computing the beam center for %s'
-                self.logger.info(msg % self.dataset_name)
+                msg = f"Computing the beam center for {self.dataset_name}"
+                self.logger.info(msg)
 
-                self._compute_beam_center()
+                self.compute_beam_center()
 
-                msg = 'Beam center for %s' % self.dataset_name
+                msg = f"Beam center for {self.dataset_name}"
                 msg += ' = (%f, %f) ' % self.beam_center
                 self.logger.info(msg)
 
-            metadata = self._fetch_metadata()
-            success = generate_nexus_file(self, metadata)
-            if success:
-                os.makedirs(self.output_path, exist_ok=True)
-                run_slurm_job(self)
-            self.last_processed_time = time.time()
+            succes_metadata = self.fetch_metadata()
+            if not succes_metadata:
+                msg = 'Failed to fetch metadata from JSON and TXT.\n'
+                msg += 'No conversion/processing'
+                self.logger.error(msg)
+                return False
+            else:
+                success = generate_nexus_file(self)
+                if success:
+                    msg = 'Nexus file generated'
+                    self.logger.info(msg)
+                    os.makedirs(self.output_path, exist_ok=True)
+                    # run_slurm_job(self)
+                    run_processing_pipelines(self, local)
+                    self.last_processed_time = time.time()
+                    return True
+                else:
+                    msg = 'Failed to generate nexus file'
+                    self.logger.error(msg)
+                    self.last_processed_time = time.time()
+                    return False
+        return False

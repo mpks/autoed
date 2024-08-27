@@ -1,6 +1,6 @@
 import pytest
 import os
-from autoed.misc_functions import scrap
+from autoed.utility.misc_functions import scrap
 
 
 @pytest.fixture

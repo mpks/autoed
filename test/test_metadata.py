@@ -3,20 +3,21 @@ from autoed.metadata import (
     get_angle_increment_old, get_angle_increment_new, Metadata
 )
 from autoed.dataset import SinglaDataset
+import autoed
 import os
 
 
 @pytest.fixture(scope='session')
 def datasets():
 
-    path = os.getcwd()
-    data_path_old = os.path.join(path, 'data/ED/text_01/')
+    path = os.path.dirname(autoed.__path__[0])
+    data_path_old = os.path.join(path, 'test/data/ED/text_01/')
     dataset_01 = SinglaDataset(data_path_old, 'sample')
 
-    data_path_new = os.path.join(path, 'data/ED/text_02/')
+    data_path_new = os.path.join(path, 'test/data/ED/text_02/')
     dataset_02 = SinglaDataset(data_path_new, 'sample')
 
-    data_path_json = os.path.join(path, 'data/ED/json_01/')
+    data_path_json = os.path.join(path, 'test/data/ED/json_01/')
     dataset_03 = SinglaDataset(data_path_json, 'sample')
 
     return dataset_01, dataset_02, dataset_03

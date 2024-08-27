@@ -1,0 +1,250 @@
+.table-container {
+  width: 90%;
+  height: 400px;
+  margin-left: 50px;
+  border: 1px solid #BEBEBE;
+  padding: 0px;
+  overflow: auto; 
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11pt;
+}
+
+.table {
+  display: flex;
+  flex-direction: row;
+  width: 200%;
+  
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  z-index: 0;
+}
+
+.cell {
+  /* border: 1px solid #CECECE; */
+  border: 1px solid #CECECE00;
+  box-sizing: border-box;  /* Include padding in border */ 
+  user-select: none;
+  height: 18px;
+  text-align: center;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+}
+
+.resizable {
+  /* background-color: lightblue; */
+}
+
+.resizer {
+  width: 10px;
+  position: absolute;
+  right: 0px;
+  height: 100%; 
+  top: 0;
+  z-index: 1;
+  cursor: ew-resize;
+  background-color: none;
+}
+
+
+#col1 {
+  position: sticky;
+  left: 0;
+  width: 25px;
+  z-index: 5;
+  text-align: center;
+}
+
+#col2 {
+  position: sticky;
+  left: 25px;
+  z-index: 20;
+}
+
+.frozen_column_02 {
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+}
+
+#beam .cell:not(.header):nth-child(even) {
+   /* background-color: #f9def4; */
+   background-color: #e6e6e6;
+}
+
+#col1 .cell:not(.header):nth-child(even) {
+    background-color: #e6e6e6;
+}
+
+.column .cell:not(.header):nth-child(even) {
+    background-color: #e6e6e6;
+}
+
+.column .cell:not(.header):nth-child(odd) {
+    background-color: white;
+}
+
+
+.header {
+  background-color: #444444;
+  color: white;
+  height: 40px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+
+[id*='_space_group'] .header{
+  padding: 3px 0;
+  background-color: #BBBBBB;
+  color: black;
+}
+
+[id*='_unit_cell'] .header{
+  background-color: #CCCCCC;
+  color: black;
+}
+
+[id*='_indexed'] .header{
+  background-color: #DDDDDD;
+  color: black;
+}
+
+[id*='_space_group'] {
+  width: 110px;
+}
+
+[id*='_unit_cell'] {
+  width: 270px;
+}
+
+#beam {
+  width: 50px;
+  border-right: 1px solid black;
+}
+
+#beam_string {
+  background-color: #1f0e4e;
+}
+
+[id*='_indexed'] {
+  text-align: left;
+  width: 60px;
+}
+
+[id$='_indexed'] :not(.header) {
+  font-family: Monospace, sans-serif;
+  font-size: 10pt; 
+}
+
+[id$='space_group'] :not(.header) {
+  font-family: Monospace, sans-serif;
+  font-size: 10pt; 
+  text-align: left;
+}
+
+[id$='_unit_cell'] :not(.header) {
+  font-family: Monospace, sans-serif;
+  font-size: 10pt; 
+  text-align: left;
+}
+
+
+[id*='_indexed'] .header {
+  padding: 2px 0;
+}
+
+
+[id*='_space_group'] .cell:not(.header):nth-child(odd) {
+    background-color: white;
+    
+}
+
+[id*='_space_group'] .cell:not(.header):nth-child(even) {
+    background-color: #ffe9a6;
+}
+
+[id*='_unit_cell'] .cell:not(.header):nth-child(odd) {
+    background-color: white;
+    
+}
+
+[id*='_unit_cell'] .cell:not(.header):nth-child(even) {
+    background-color: #e1ecfe;
+}
+
+[id*='_indexed'] .cell:not(.header):nth-child(odd) {
+    background-color: #white;
+    
+}
+
+[id*='_indexed'] .cell:not(.header):nth-child(even) {
+  background-color: #d8f6ec;
+    
+}
+
+#col1 .header {
+  background-color: #444444;
+  color: white;
+}
+
+#col2 .header {
+  background-color: #444444;
+}
+
+#col2 {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+#col2 .frozen_column_02 {
+  text-align: left;
+  padding-left: 3px;
+  padding-right: 10px;
+}
+
+.expandable {
+  border-right: 1px solid black;
+}
+
+.info {
+  cursor: help;
+}
+
+
+.expandable {
+  width: 60px;
+}
+
+#default .header, #ice .header,  #user .header, #real_space_indexing .header {
+ background-color: #700a02;
+}
+
+#page_title {
+  margin-left: 50px;
+  padding-top: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#page_text {
+  margin-left: 50px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.clickable-span {
+      cursor: pointer; /* Makes the span appear clickable */
+      color: blue; /* Optional: styling for the span */
+      /* text-decoration: underline; /* Optional: underline the text */
+}
+
+#N_index {
+ padding: 2px 0;
+}
+
+#dataset {
+ padding: 2px 0;
+}

@@ -34,7 +34,7 @@ def run_slurm_job(dataset):
     cmd += '8443/slurm/v0.0.38/job/submit '
     cmd += '-d@' + dataset.slurm_file
 
-    if dataset.run_slurm:
+    if not dataset.dummy:
         p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE, cwd=dataset.path)
         if p.stderr:

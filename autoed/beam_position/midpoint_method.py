@@ -9,6 +9,7 @@ import numpy as np
 from autoed.beam_position.plot import Line2D, PlotParams, plot_profile
 
 from autoed.beam_position.misc import normalize, remove_percentiles, smooth
+from autoed.constants import ed_root_dir
 
 
 @dataclass
@@ -71,7 +72,7 @@ def beam_position_midpoint(
     image: np.ndarray,
     params: MidpointMethodParams,
     discard_percentile: float = 0.01,
-    plot_filename: Optional[str] = "beam_position_from_midpoint.png",
+    plot_filename: Optional[str] = None,
     verbose=False,
 ) -> Tuple[float, float]:
     """
@@ -110,7 +111,7 @@ def beam_position_midpoint(
     if verbose:
         print(f"From midpoint: ({x0:.2f}, {y0:.2f})")
 
-    if params.plot:
+    if plot_filename:
 
         indices_x = np.arange(len(profile_x))
         line_x = [Line2D(indices_x, profile_x)]
@@ -132,6 +133,16 @@ def beam_position_midpoint(
             line_y.append(Line2D(levels, midpoints, c=rand_color,
                                  lw=0.0, marker="o", ms=0.5))
 
+        temp = plot_filename.split('/')
+        ind = temp.index(ed_root_dir)
+        if (ind > 0) and (ind < len(temp)):
+            temp_list = [temp[ind-1]] + temp[ind+1:-1]
+            label = r''
+            for dir_name in temp_list:
+                label += r'/' + dir_name
+        else:
+            label = r'???'
+
         p = PlotParams(
             image,
             profiles_x=line_x,
@@ -139,6 +150,7 @@ def beam_position_midpoint(
             beam_position=(x0, y0),
             span_xy=None,
             filename=plot_filename,
+            label=label
         )
 
         plot_profile(p)
