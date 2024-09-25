@@ -37,7 +37,7 @@ def gather_datasets(dir_path):
     master_files = gather_master_files(dir_path)
     for master_file in master_files:
         basename = master_file[:-10]
-        dataset = SinglaDataset.from_basename(basename)
+        dataset = SinglaDataset.from_basename(basename, make_out_path=False)
 
         dataset.search_and_update_data_files()
 

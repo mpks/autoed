@@ -13,14 +13,16 @@ from autoed.metadata import Metadata
 class SinglaDataset:                    # pylint: disable=R0902
     """A class to keep all data relevant to single experimental dataset"""
 
-    def __init__(self, path, dataset_name):
+    def __init__(self, path, dataset_name, make_out_path=True):
         """
         path : Path
             Path of the dataset.
         dataset_name : str
-            Name of the dataset. Usually, if given a
-            master file 'abc.__master.h5', the dataset
-            will have name 'abc'
+            Name of the dataset. Usually, if given a master file
+            'abc.__master.h5', the dataset will have name 'abc'.
+        make_out_path: boolean
+            If True, the AutoED will create a path in the processed directory,
+            and the log file in the data directory.
         """
 
         self.path = path
@@ -37,11 +39,17 @@ class SinglaDataset:                    # pylint: disable=R0902
 
         in_path = os.path.dirname(self.base)
         out_path = replace_dir(in_path, 'ED', 'processed')
-        os.makedirs(out_path, exist_ok=True)
+
+        # We use dataset object in report generator. We do not want
+        # to create output paths or write logs when generating reports.
+        # Also, the report generation would fail if used by someone without
+        # write permissions in out_path.
+        if make_out_path:
+            os.makedirs(out_path, exist_ok=True)
+            self.set_logger()
 
         self.output_path = out_path
         self.slurm_file = os.path.join(out_path, 'slurm_config.json')
-        self.set_logger()
         self.status = 'NEW'
         self.beam_center = None
         self.present_lock = False
@@ -62,28 +70,24 @@ class SinglaDataset:                    # pylint: disable=R0902
                     data_files.append(file_path)
         self.data_files = data_files
 
-    def set_logger(self):
+    def set_logger(self, clear=True):
 
         self.logger = logging.getLogger(self.base)
         self.logger.setLevel(logging.DEBUG)
 
-        # Clear the log file if it exists
-        with open(self.autoed_log_file, 'w'):
-            pass
+        if clear:          # Clear the log file if it exists
+            with open(self.autoed_log_file, 'w'):
+                pass
 
         file_handler = logging.FileHandler(self.autoed_log_file)
-        # stream_handler = logging.StreamHandler()
 
         fmt = '%(asctime)s.%(msecs)03d %(levelname)s - %(message)s'
         formatter = logging.Formatter(fmt, datefmt='%d-%m-%Y %H:%M:%S')
-        # stream_handler.setFormatter(formatter)
         file_handler.setFormatter(formatter)
 
-        # stream_handler.setLevel(logging.DEBUG)
         file_handler.setLevel(logging.DEBUG)
 
         self.logger.addHandler(file_handler)
-        # self.logger.addHandler(stream_handler)
 
     def all_files_present(self):
         """Checks if all files for the current dataset are present"""
@@ -166,10 +170,10 @@ class SinglaDataset:                    # pylint: disable=R0902
             return False
 
     @classmethod
-    def from_basename(cls, basename):
+    def from_basename(cls, basename, make_out_path=True):
         path = os.path.dirname(basename)
         dataset_name = os.path.basename(basename)
-        return cls(path, dataset_name)
+        return cls(path, dataset_name, make_out_path=make_out_path)
 
     def update_processed(self):
         """
