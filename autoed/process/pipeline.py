@@ -151,6 +151,10 @@ class LocalPipeline(Pipeline):
     def generate_bash_script(self):
         start = "#!/bin/bash\n"
         start += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'):\"\n"
+        start += "if command -v module &> /dev/null; then\n"
+        start += "    module load ccp4 || true\n"
+        start += "    module load dials || true\n"
+        start += "fi\n"
 
         command = self.generate_pipeline_cmd()
 
@@ -164,7 +168,8 @@ class LocalPipeline(Pipeline):
 
             p = subprocess.run('bash ' + self.bash_file,
                                shell=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, cwd=self.out_dir)
+                               stderr=subprocess.PIPE, cwd=self.out_dir,
+                               env=os.environ)
             if p.stderr:
                 msg = "Failed to process data with local pipeline "
                 msg += f"'{self.method}'"
