@@ -201,7 +201,8 @@ class SinglaDataset:                    # pylint: disable=R0902
                 return
 
             x, y = calc.center_from_mixed(every=50,
-                                          plot_file=self.beam_figure)
+                                          plot_file=self.beam_figure,
+                                          title=self.beam_figure)
 
             if not x:
                 msg = 'Beam position along x is None. Setting beam_x to 514'

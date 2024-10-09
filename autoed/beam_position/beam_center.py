@@ -8,6 +8,7 @@ from autoed.beam_position.midpoint_method import (MidpointMethodParams,
 from autoed.beam_position.maximum_method import MaxMethodParams, find_max
 from autoed.beam_position.plot import plot_profile
 import argparse
+from autoed.constants import ed_root_dir
 import time
 
 
@@ -65,7 +66,9 @@ def main():
 
     elif args.method == 'mixed':
 
-        x0, y0 = cal.center_from_mixed(every=args.every, title=args.title)
+        x0, y0 = cal.center_from_mixed(every=args.every,
+                                       title=args.title,
+                                       plot_file='beam_from_mixed.png')
 
         print('From mixed: (%.2f, %.2f)' % (x0, y0))
 
@@ -163,9 +166,24 @@ class BeamCenterCalculator:
         if plot_file:
             plot_params.filename = plot_file
         else:
-            plot_params.filename = 'beam_position.from_mixed.png'
+            plot_params.filename = 'beam_position_from_mixed.png'
 
-        plot_params.label = title
+        if title:   # Otherwise the title will be pased from midpoint method
+
+            try:
+                temp = title.split('/')
+                ind = temp.index(ed_root_dir)
+                if (ind > 0) and (ind < len(temp)):
+                    temp_list = [temp[ind-1]] + temp[ind+1:-1]
+                    label = r''
+                    for dir_name in temp_list:
+                        label += r'/' + dir_name
+                else:
+                    label = title
+            except Exception:
+                label = title
+
+            plot_params.label = label
 
         edge = 0
         if y_mid > 550 - edge or y_mid < 510 + edge:
