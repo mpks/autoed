@@ -1,13 +1,12 @@
 import h5py
 import hdf5plugin
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 import autoed
-import matplotlib.gridspec as gridspec
-from matplotlib.patches import Circle
 from autoed.beam_position.midpoint_method import (MidpointMethodParams,
-                                                  beam_position_midpoint)
+                                                  position_from_midpoint)
+from autoed.beam_position.maximum_method import MaxMethodParams, find_max
+from autoed.beam_position.plot import plot_profile
 import argparse
 import time
 
@@ -20,16 +19,24 @@ def main():
     info = 'A script to determine the beam center'
     parser = argparse.ArgumentParser(description=info)
 
-    parser.add_argument('filename', help='The input file')
+    parser.add_argument('filename', help='The HDF5 input file.')
     parser.add_argument('-p', '--plot', action='store_true',
                         help='Plot results')
     msg = """
           Method used to determine the beam position.
-          Options include: midpoint, mid_old, maximum, inversion.
+          Options include: midpoint, maximum, and mixed.
+
+          The mixed method combines midpoint and maximum method. It uses
+          maximum for the x, and midpoint or maximum for the y direction.
+          It first computes the beam position along the y direction using
+          the midpoint method, and if the beam position outside of the
+          beam stop (the central stripe in a Singla image) it switches to
+          maximum.
           """
-    parser.add_argument('--method', choices=['maximum', 'midpoint', 'mid_old',
-                        'inversion'], default='midpoint',
-                        help=msg)
+
+    choices = ['maximum', 'midpoint', 'mixed']
+    parser.add_argument('--method', choices=choices,
+                        default='midpoint', help=msg)
 
     parser.add_argument('--every', type=int, default=20,
                         help='Use `every` image when computing the average.')
@@ -38,16 +45,32 @@ def main():
                         help='Compute beam center from stacks')
     parser.add_argument('-a', '--all', action='store_true',
                         help='Compute beam center from all stacks')
+    parser.add_argument('--title', type=str, default=None,
+                        help='A title to put in the graph')
     args = parser.parse_args()
 
     cal = BeamCenterCalculator(args.filename)
 
-    if args.method == 'mid_old':
-        x0, y0 = cal.center_from_average(verbose=True, plot=args.plot)
-    elif args.method == 'midpoint':
-        x0, y0 = cal.center_from_midpoint(plot=args.plot, verbose=True,
+    if cal.problem_reading:
+        print(f"The data file {args.filename}\ncan not be read properly.")
+        print("Aborting beam position calculation.")
+        return
+
+    if args.method == 'midpoint':
+
+        x0, y0 = cal.center_from_midpoint(verbose=True,
+                                          plot_file='beam_from_midpoint.png',
                                           every=args.every)
+        print('From midpoint: (%.2f, %.2f)' % (x0, y0))
+
+    elif args.method == 'mixed':
+
+        x0, y0 = cal.center_from_mixed(every=args.every, title=args.title)
+
+        print('From mixed: (%.2f, %.2f)' % (x0, y0))
+
     elif args.method == 'maximum':
+
         if args.stack or args.all:
 
             if args.all:
@@ -71,408 +94,112 @@ class BeamCenterCalculator:
         mask_data = np.load(mask_path)
         self.mask = mask_data['mask']
 
-        while True:
+        index = 0
+        self.problem_reading = True
+
+        while index < 3:
+            index += 1
             try:
                 self.file = h5py.File(filename, 'r')
                 self.dataset = self.file['/entry/data/data']
+                self.problem_reading = False
                 break
             except OSError:
                 time.sleep(1)
 
-    def center_from_average(self, every=100,
-                            bad_pixel_treshold=20000,
-                            plot=False,
-                            verbose=False):
-        """ Compute beam center using average electron distribution
-
-            Parameters
-            ----------
-            every: int
-                Take every n-th image from the dataset.
-            bad_pixel_treshold : int
-                Set any pixel above this value to zero
-        """
-
-        average_image = self.dataset[::every, :, :].mean(axis=0)
-
-        average_image[self.mask > 0] = 0
-        average_image[average_image > bad_pixel_treshold] = 0
-        profile_x, x0 = find_x0_from_avg(average_image)
-        profile_y, y0 = find_y0_from_avg(average_image)
-
-        if verbose:
-            print('From average: (%.2f, %.2f)' % (x0, y0))
-        if plot:
-            out_file = 'beam_center.png'
-            plot_profile(average_image,
-                         profile_x,
-                         profile_y,
-                         x0, y0,
-                         plot_circles=True,
-                         filename=out_file)
-        return x0, y0
-
-    def center_from_midpoint(self, every=20, verbose=False,
-                             plot_filename=None):
+    def center_from_midpoint(self, every=20, verbose=False, plot_file=None):
 
         image = self.dataset[::every, :, :].mean(axis=0)
         image[self.mask > 0] = 0
 
         mid_params = MidpointMethodParams(
-            data_slice=(0.2, 0.9, 0.02),
+            data_slice=(0.35, 0.9, 0.02),
             convolution_width=20,
             exclude_range_x=None,
             exclude_range_y=(510, 550),
             per_image=False)
 
-        x0, y0 = beam_position_midpoint(image, mid_params, verbose=verbose,
-                                        plot_filename=plot_filename)
-
+        x0, y0, plot_params = position_from_midpoint(image, mid_params,
+                                                     verbose=False,
+                                                     plot_filename=plot_file)
         return x0, y0
 
-    def centre_from_max(self, x0, y0,
-                        pixel_range=10,
-                        images_in_stack=20,
-                        number_of_stacks=3,
-                        bad_pixel_treshold=2000,
-                        plot=False,
-                        verbose=False):
-        """ Compute beam center using peaks of maximal pixels
+    def center_from_mixed(self, every=20, bad_pixel_threshold=20000,
+                          convolution_width=3,
+                          plot_file=None, title=None):
 
-            Parameters
-            ----------
-            x0: int
-                Initial guess for the beam center.
-                Pixel index in the x-direction.
-            y0: int
-                Initial guess for the beam center.
-                Pixel index in the y-direction.
-            pixel_range: int
-                Beam center is searched in the range
-                [x0 - pixel_range, x0 + pixel_range]
-                and
-                [y0 - pixel_range, y0 + pixel_range]
-            images_in_stack: int
-                To get maximal pixels, a certain number of
-                images are stacked together to compute pixel
-                maximums.
-            number_of_stacks: int
-                Compute the average beam center by averaging
-                over different stacks. If number is -1, compute
-                the average over all stacks.
-            bad_pixel_treshold: int
-                Disregard pixels with values above this one
-            verbose: boolean
-                Print the beam center for each stack
-            plot: boolean
-                Plot estimated beam position for each stack
-        """
+        image = self.dataset[::every, :, :].mean(axis=0)
+        image[self.mask > 0] = 0
+        image[image > bad_pixel_threshold] = 0
 
-        x0_int = int(np.round(x0))
-        y0_int = int(np.round(y0))
+        # First try midpoint method
+        mid_params = MidpointMethodParams(
+            data_slice=(0.35, 0.9, 0.02),
+            convolution_width=20,
+            exclude_range_x=None,
+            exclude_range_y=(510, 550),
+            per_image=False)
 
-        average_x = []
-        average_y = []
+        x_mid, y_mid, plot_params = position_from_midpoint(image, mid_params,
+                                                           verbose=False,
+                                                           plot_filename=None)
+        # Next, try maximum pixel method
+        max_params = MaxMethodParams(convolution_width=convolution_width)
+        data_x = find_max(image, max_params, axis='x')
+        data_y = find_max(image, max_params, axis='y')
 
-        nimages, ny, nx = self.dataset.shape
+        line_max_x, line_smooth_x = data_x['profiles']
+        line_max_y, line_smooth_y = data_y['profiles']
 
-        if number_of_stacks == -1:
-            nmax = nimages
-        elif number_of_stacks > 0:
-            nmax = number_of_stacks * images_in_stack
-            if nmax > nimages:
-                nmax = nimages
+        line_max_y = flip_line(line_max_y)
+        line_smooth_y = flip_line(line_smooth_y)
 
-        for i in range(0, nmax, images_in_stack):
+        i1_x, i2_x = data_x["bin_position"]
+        i1_y, i2_y = data_y["bin_position"]
 
-            max_image = self.dataset[i:i+images_in_stack,
-                                     :, :].max(axis=0)
-            max_image[self.mask > 0] = 0
-            max_image[max_image > bad_pixel_treshold] = 0
+        x_max = data_x["beam_position"]
+        y_max = data_y["beam_position"]
 
-            data_x = beam_x_from_max(max_image, x0=x0_int,
-                                     width=pixel_range)
-            data_y = beam_y_from_max(max_image, y0=y0_int,
-                                     width=pixel_range)
-            bx = data_x['center']
-            by = data_y['center']
-            average_x.append(bx)
-            average_y.append(by)
-
-            if verbose:
-                if i == 0:
-                    print('---------------------------')
-                print('Image set %04d-%04d: (%d, %d)' %
-                      (i, i+images_in_stack, bx, by))
-
-            if plot:
-                out_file = ('fig_%04d_%04d.png' %
-                            (i, i+images_in_stack))
-                plot_profile(max_image,
-                             data_x['profile'],
-                             data_y['profile'],
-                             bx, by,
-                             indices_x=data_x['indices'],
-                             correlation_x=data_x['correlation'],
-                             indices_y=data_y['indices'],
-                             correlation_y=data_y['correlation'],
-                             plot_circles=True,
-                             filename=out_file)
-        average_x = np.array(average_x)
-        average_y = np.array(average_y)
-
-        if verbose:
-            print('---------------------------')
-            print('From peaks:   (%.2f, %.2f)' % (average_x.mean(),
-                                                  average_y.mean()))
-
-        return average_x.mean(), average_y.mean()
-
-
-def find_x0_from_avg(avg_image):
-
-    y_start = 203  # choose only rows where mask is
-    y_end = 865    # rectangular
-
-    avg_x = avg_image[y_start:y_end:1, :].sum(axis=0)
-    avg_x[avg_x > 20000] = 0            # Kill dead pixels
-    avg_x = smooth(avg_x, half_width=2)
-
-    # Normalize the distribution
-    avg_max = np.max(avg_x)
-    avg_x = avg_x / avg_max
-
-    sample = np.arange(0.3, 0.7, 0.01)
-
-    mid_points = []
-    for x_point in sample:
-        mid_point = middle(avg_x, x_point)
-        if mid_point:
-            mid_points.append(mid_point)
-    center = np.array(mid_points).mean()
-
-    return avg_x, center
-
-
-def find_y0_from_avg(avg_image):
-
-    x_start = 182  # choose only columns where mask is
-    x_end = 845    # rectangular
-    mask_start = 512
-    mask_end = 551
-    avg_y = avg_image[:, x_start:x_end:1].sum(axis=1)
-    avg_y[mask_start:mask_end] = 0      # Kill mask
-    avg_y[avg_y > 20000] = 0            # Kill dead pixels
-    avg_y = smooth(avg_y, half_width=2)
-    avg_y[mask_start:mask_end] = 0      # Kill mask
-
-    # Normalize the distribution
-    avg_max = np.max(avg_y)
-    avg_y = avg_y / avg_max
-
-    # Find value edge values around the mask
-    cut1 = np.max(avg_y[mask_start-5:mask_start])
-    cut2 = np.max(avg_y[mask_end:mask_end+5])
-    cut_min = np.min([cut1, cut2])
-    cut_max = np.max([cut1, cut2])
-
-    sample = np.arange(0.3, 0.7, 0.01)
-    sample = sample[np.where(np.logical_or(sample <= cut_min,
-                                           sample >= cut_max))]
-    mid_points = []
-    for y_point in sample:
-        mid_point = middle(avg_y, y_point)
-        if mid_point:
-            mid_points.append(mid_point)
-    center = np.array(mid_points).mean()
-
-    return avg_y, center
-
-
-def beam_x_from_max(image, x0=500, width=10):
-
-    y_start = 203  # choose only rows where mask is
-    y_end = 865    # rectangular
-    x_profile = image[y_start:y_end:1, :].max(axis=0)
-
-    x_profile_max = x_profile.max()
-    x_profile = x_profile / x_profile_max
-
-    indices = np.arange(x0-width, x0+width, 1)
-    correlations = []
-    for index in indices:
-        correlations.append(invert_and_correlate(x_profile, index))
-
-    correlations = np.array(correlations)
-    index = correlations.argmax()
-
-    data = {}
-    data['profile'] = x_profile
-    data['indices'] = indices
-    data['correlation'] = correlations
-    data['center'] = indices[0] + index
-
-    return data
-
-
-def beam_y_from_max(image, y0=500, width=10):
-
-    x_start = 182  # choose only columns where mask is
-    x_end = 845    # rectangular
-    mask_start = 512
-    mask_end = 551
-
-    y_profile = image[:, x_start:x_end:1].max(axis=1)
-    y_profile[mask_start:mask_end] = 0      # Kill the mask
-
-    y_profile_max = y_profile.max()
-    y_profile = y_profile / y_profile_max
-
-    indices = np.arange(y0-width, y0+width, 1)
-    correlations = []
-    for index in indices:
-        correlations.append(invert_and_correlate(y_profile, index))
-
-    correlations = np.array(correlations)
-    index = correlations.argmax()
-
-    data = {}
-    data['profile'] = y_profile
-    data['indices'] = indices
-    data['correlation'] = correlations
-    data['center'] = indices[0] + index
-
-    return data
-
-
-def invert_and_correlate(x, index):
-    """Given an 1D array x, compute inverted array inv_x
-       (inversion around an element with index 'index')
-       and return a sum of the x * inv_x.
-    """
-
-    inv_x = np.zeros(len(x))
-    n = len(x)
-    half = int(n/2)
-
-    # Computed the inverted 1D array
-    if index <= half:
-        left = x[0:index]
-        right = x[index:2*index]
-        inv_x[0:index] = right[::-1]
-        inv_x[index:2*index] = left[::-1]
-    else:
-        right = x[index:]
-        width = len(right)
-        left = x[index-width:index]
-        inv_x[index-width:index] = right[::-1]
-        inv_x[index:] = left[::-1]
-
-    return np.sum(x * inv_x)
-
-
-def middle(a, ymin):
-    """Compute a middle pixel of a symmetric distribution a"""
-    a = np.where(a >= ymin)[0]
-    if len(a) >= 2:
-        return 0.5*(a[0] + a[-1])
-    else:
-        return None
-
-
-def smooth(a, half_width=1):
-    """Given a 1D array a, do convolution with a rectangle
-       function of the width = 2*half_width
-    """
-
-    smooth = 0*a
-    n = len(a)
-    for i in range(n):
-        if i < half_width:
-            smooth[i] = a[0:i+half_width].mean()
-        elif i > n - half_width:
-            smooth[i] = a[i-half_width:].mean()
+        if plot_file:
+            plot_params.filename = plot_file
         else:
-            smooth[i] = a[i-half_width:i+half_width].mean()
-    return smooth
+            plot_params.filename = 'beam_position.from_mixed.png'
+
+        plot_params.label = title
+
+        edge = 0
+        if y_mid > 550 - edge or y_mid < 510 + edge:
+            # The beam is visible, switch to maximum
+            y = y_max
+            x = x_max
+            plot_params.profiles_y = [line_max_y, line_smooth_y]
+            plot_params.profiles_x = [line_max_x, line_smooth_x]
+
+            plot_params.label_x = 'method: maximum'
+            plot_params.label_y = 'method: maximum'
+        else:
+            y = y_mid
+            x = x_mid
+            plot_params.label_y = 'method: midpoint'
+            plot_params.label_x = 'method: midpoint'
+
+        plot_params.beam_position = x, y
+
+        if plot_file:
+            plot_profile(plot_params)
+
+        return x, y
 
 
-def plot_profile(image, profile_x, profile_y, beam_x, beam_y,
-                 filename='fig.png', plot_circles=False,
-                 correlation_x=None, indices_x=None,
-                 correlation_y=None, indices_y=None):
+def flip_line(line):
 
-    ny, nx = image.shape
+    x = np.array(line.x)
+    y = np.array(line.y)
 
-    gs = gridspec.GridSpec(2, 2, top=0.95, bottom=0.07,
-                           left=0.15, right=0.95,
-                           wspace=0.0, hspace=0.0,
-                           width_ratios=[2, 1],
-                           height_ratios=[1, 3])
-    ax_x = plt.subplot(gs[0, 0])
-    ax_y = plt.subplot(gs[1, 1])
-    ax = plt.subplot(gs[1, 0])
+    line.y = x
+    line.x = y
 
-    nx_half = int(nx/2)
-    ny_half = int(ny/2)
-    width_xy = 200
-    ax_x.set_xlim(nx_half-width_xy, nx_half+width_xy)
-    ax_y.set_ylim(ny_half+width_xy, ny_half-width_xy)
-
-    ax.set_xlim(nx_half-width_xy, nx_half+width_xy)
-    ax.set_ylim(ny_half+width_xy, ny_half-width_xy)
-
-    if (indices_x is not None) and (correlation_x is not None):
-        correlation_x /= correlation_x.max()
-        ax_x.plot(indices_x, correlation_x, c='C3')
-
-    if (indices_y is not None) and (correlation_y is not None):
-        correlation_y /= correlation_y.max()
-        ax_y.plot(correlation_y, indices_y, c='C3')
-    ax_x.set_ylim(0, 1.2)
-    ax_y.set_xlim(0, 1.2)
-
-    ax.set_xlabel(r'\rm Pixel index X')
-    ax.set_ylabel(r'\rm Pixel index Y')
-
-    ax.imshow(image, cmap='jet', aspect='auto',
-              origin='upper', vmin=0, vmax=50,
-              rasterized=True, interpolation='none')
-
-    ax_x.plot(profile_x, c='C0', mew=0, ms=0.5, lw=1.0)
-
-    yvals = np.arange(0, len(profile_y))
-    ax_y.plot(profile_y, yvals, lw=0.5, c='C0')
-
-    ax_x.axvline(beam_x, lw=0.5, c='C2')
-    ax.axvline(beam_x, lw=0.5, c='white')
-
-    ax_y.axhline(beam_y, lw=0.5, c='C2')
-    ax.axhline(beam_y, lw=0.5, c='white')
-
-    ax.plot([beam_x], [beam_y], marker='o', ms=1., c='white', lw=0)
-
-    if plot_circles:
-        radii = np.arange(50, 600, 25)
-        for radius in radii:
-            c = Circle((beam_x, beam_y), radius, facecolor='none',
-                       edgecolor='white', lw=0.5, ls=(1, (2, 2)))
-            ax.patches.append(c)
-
-    ax_x.tick_params(labelbottom=False)
-    ax_y.tick_params(labelleft=False)
-
-    plt.savefig(filename, dpi=800)
-
-
-def is_file_fully_copied(file_path):
-    prev_size = 0
-    while True:
-        curr_size = os.path.getsize(file_path)
-        if curr_size == prev_size:
-            return True
-        time.sleep(1)  # Adjust the interval based on your needs
-        prev_size = curr_size
+    return line
 
 
 if __name__ == '__main__':

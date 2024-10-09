@@ -188,9 +188,21 @@ class SinglaDataset:                    # pylint: disable=R0902
     def compute_beam_center(self):
 
         if len(self.data_files) > 0:
+
             calc = BeamCenterCalculator(self.data_files[0])
-            x, y = calc.center_from_midpoint(every=50,
-                                             plot_filename=self.beam_figure)
+
+            if calc.problem_reading:
+                x = 514
+                y = 531
+                msg = f"Problem reading data file {self.data_files[0]}.\n"
+                msg += "Setting beam position to default (514, 531)."
+                self.logger.error(msg)
+                self.beam_center = (x, y)
+                return
+
+            x, y = calc.center_from_mixed(every=50,
+                                          plot_file=self.beam_figure)
+
             if not x:
                 msg = 'Beam position along x is None. Setting beam_x to 514'
                 self.logger.error(msg)

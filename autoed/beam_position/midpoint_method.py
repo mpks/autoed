@@ -68,11 +68,12 @@ def pick_by_occurrence(peaks: List[List[float]]):
     return average
 
 
-def beam_position_midpoint(
+def position_from_midpoint(
     image: np.ndarray,
     params: MidpointMethodParams,
     discard_percentile: float = 0.01,
     plot_filename: Optional[str] = None,
+    label=None,
     verbose=False,
 ) -> Tuple[float, float]:
     """
@@ -88,6 +89,8 @@ def beam_position_midpoint(
         The percentage of pixels to exclude (set to zero intensity).
         For example if set to 1 then 1 % of pixels with highest intensity
         will be removed. Default is 0.1 (%).
+    label : string
+        A label to put in the figure title.
     plot_filename : str, optional
         Filename to save the plot.
 
@@ -111,51 +114,56 @@ def beam_position_midpoint(
     if verbose:
         print(f"From midpoint: ({x0:.2f}, {y0:.2f})")
 
-    if plot_filename:
+    p = None
 
-        indices_x = np.arange(len(profile_x))
-        line_x = [Line2D(indices_x, profile_x)]
+    indices_x = np.arange(len(profile_x))
+    line_x = [Line2D(indices_x, profile_x)]
 
-        for midpoints, levels in zip(midpoints_x, levels_x):
-            rand_color = (random.random(), random.random(), random.random())
-            line_x.append(
-                Line2D(midpoints, levels, c=rand_color,
-                       lw=0.0, marker="o", ms=0.5)
-            )
-
-        indices_y = np.arange(len(profile_y))
-        line_y = [Line2D(profile_y, indices_y)]
-
-        for midpoints, levels in zip(midpoints_y, levels_y):
-
-            rand_color = (random.random(), random.random(), random.random())
-
-            line_y.append(Line2D(levels, midpoints, c=rand_color,
-                                 lw=0.0, marker="o", ms=0.5))
-
-        temp = plot_filename.split('/')
-        ind = temp.index(ed_root_dir)
-        if (ind > 0) and (ind < len(temp)):
-            temp_list = [temp[ind-1]] + temp[ind+1:-1]
-            label = r''
-            for dir_name in temp_list:
-                label += r'/' + dir_name
-        else:
-            label = r'???'
-
-        p = PlotParams(
-            image,
-            profiles_x=line_x,
-            profiles_y=line_y,
-            beam_position=(x0, y0),
-            span_xy=None,
-            filename=plot_filename,
-            label=label
+    for midpoints, levels in zip(midpoints_x, levels_x):
+        rand_color = (random.random(), random.random(), random.random())
+        line_x.append(
+            Line2D(midpoints, levels, c=rand_color,
+                   lw=0.0, marker="o", ms=0.5)
         )
 
+    indices_y = np.arange(len(profile_y))
+    line_y = [Line2D(profile_y, indices_y)]
+
+    for midpoints, levels in zip(midpoints_y, levels_y):
+
+        rand_color = (random.random(), random.random(), random.random())
+
+        line_y.append(Line2D(levels, midpoints, c=rand_color,
+                             lw=0.0, marker="o", ms=0.5))
+
+    if label is None:
+        try:
+            temp = plot_filename.split('/')
+            ind = temp.index(ed_root_dir)
+            if (ind > 0) and (ind < len(temp)):
+                temp_list = [temp[ind-1]] + temp[ind+1:-1]
+                label = r''
+                for dir_name in temp_list:
+                    label += r'/' + dir_name
+            else:
+                label = r'???'
+        except Exception:
+            label = ''
+
+    p = PlotParams(
+        img_clean,
+        profiles_x=line_x,
+        profiles_y=line_y,
+        beam_position=(x0, y0),
+        span_xy=None,
+        filename=plot_filename,
+        label=label
+    )
+
+    if plot_filename:
         plot_profile(p)
 
-    return x0, y0
+    return x0, y0, p
 
 
 def add_peak_and_width(
@@ -245,7 +253,7 @@ def find_midpoint(image: np.ndarray,
 
     profile[profile < 0] = 0  # Kill negative pixels
 
-    profile = smooth(profile, width=params.convolution_width)
+    profile = smooth(profile, half_width=params.convolution_width)
     profile = normalize(profile)
 
     start, stop, step = params.data_slice

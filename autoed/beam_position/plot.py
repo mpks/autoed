@@ -43,6 +43,8 @@ class PlotParams:
     span_xy: Optional[Tuple[float, float, float, float]]  # Highlighted region
     filename: str = "fig.png"
     label: str = None
+    label_x: str = None
+    label_y: str = None
     mask: Optional[np.ndarray] = None
 
 
@@ -130,6 +132,7 @@ def plot_profile(params: PlotParams):
         ax_x.text(0.11, 0.99, f"dataset: {params.label}", va='top', ha='left',
                   transform=fig.transFigure, fontsize=8,
                   fontfamily='sans-serif')
+
 #    ax_x.text(0.4, 1.05, f"max: {params.image.max():.2f}",
 #              transform=ax_x.transAxes)
 #    ax_x.text(0.9, 1.05, f"avg: {params.image.mean():.2f}",
@@ -142,6 +145,14 @@ def plot_profile(params: PlotParams):
         ax_y.plot(py.x, py.y, c=py.c, lw=py.lw, ms=py.ms, marker=py.marker)
 
     decorate_plot(params.image, ax, ax_x, ax_y, params.beam_position)
+
+    if params.label_x:
+        ax_x.text(0.01, 0.97, params.label_x, va='top', ha='left',
+                  transform=ax_x.transAxes)
+
+    if params.label_y:
+        ax_y.text(0.97, 0.97, params.label_y, va='top', ha='right',
+                  transform=ax_y.transAxes, rotation=-90)
 
     plt.savefig(params.filename, dpi=400)
     plt.close(fig)
