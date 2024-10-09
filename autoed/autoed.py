@@ -165,7 +165,7 @@ class AutoedDaemon:
         # Kill running processes
         for indir in self.directories:
             pid = self.pids[indir]
-            kill_process_and_children(pid)
+            kill_process_and_children(int(pid))
 
         if os.path.exists(self.lock_file):
             os.remove(self.lock_file)
