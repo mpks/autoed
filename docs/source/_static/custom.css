@@ -1,0 +1,11 @@
+/* Change the color of all code blocks */
+.highlight pre {
+    color: black;  /* Text color */
+    /* background-color: #f0f0f0;  */ /* Optional: lighter background */
+}
+
+/* Specific for bash code blocks */
+.highlight-bash pre {
+    color: black;
+}
+
