@@ -16,8 +16,9 @@ sys.path.insert(0, os.path.abspath('.'))
 
 project = 'AutoED'
 copyright = '2024, Science and Technology Facilities Council (STFC)'
-author = 'Marko Petrovic'
-release = "012345"
+author = 'STFC'
+version = autoed.__version__
+release = autoed.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -29,7 +30,6 @@ extensions = [
     "sphinx.ext.napoleon",
 ]
 
-
 templates_path = ['_templates']
 exclude_patterns = []
 
@@ -38,20 +38,18 @@ pygments_style = "sphinx"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# html_theme = 'alabaster'
-
-version = "abcdef"
-
 html_context = {
-    'display_github': True,
-    'display_version': True,
-    'current_version': version,
-    'current_language': 'en'
+  'display_github': True,
+  'current_language': 'en',
+  'current_version': "1.0",
+  'myversions': [["1.0", "link to 1.0"], ["2.0", "link to 2.0"]],
+  "github_user": "mpks",
+  "github_repo": "autoed",
+  "github_version": "master",
+  "conf_py_path": "/docs/source/",
 }
 
 html_theme = 'sphinx_rtd_theme'
+# html_theme = 'alabaster'
 html_static_path = ['_static']
-# html_css_files = ['custom.css']
-html_theme_options = {
-  'version_selector': True,
-}
+html_css_files = ['custom.css']
