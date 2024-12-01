@@ -15,7 +15,8 @@ import os
 sys.path.insert(0, os.path.abspath('.'))
 
 project = 'AutoED'
-copyright = '2024, Science and Technology Facilities Council (STFC)'
+#copyright = '2024, Science and Technology Facilities Council (STFC)'
+copyright = '2024, Marko Petrovic'
 author = 'STFC'
 version = autoed.__version__
 release = autoed.__version__
