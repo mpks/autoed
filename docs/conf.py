@@ -15,9 +15,13 @@ import os
 sys.path.insert(0, os.path.abspath('.'))
 
 project = 'AutoED'
-#copyright = '2024, Science and Technology Facilities Council (STFC)'
+# copyright = '2024, Science and Technology Facilities Council (STFC)'
 copyright = '2024, Marko Petrovic'
 author = 'STFC'
+
+numfig = True
+numfig_format = {'figure': 'Fig. %s', }
+
 version = autoed.__version__
 release = autoed.__version__
 
@@ -47,7 +51,7 @@ html_context = {
   "github_user": "mpks",
   "github_repo": "autoed",
   "github_version": "master",
-  "conf_py_path": "/docs/source/",
+  "conf_py_path": "/docs/",
 }
 
 html_theme = 'sphinx_rtd_theme'

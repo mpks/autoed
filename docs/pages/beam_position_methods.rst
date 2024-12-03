@@ -235,20 +235,19 @@ Midpoint method
 ************************
 This method is suitable for datasets where direct beam is blocked by some
 obstacle (and not fully visible in the diffraction images). Fig. 3 presents
-one such dataset (obtained at eBIC). A DECTRIS Singla detector consists of two
+one such dataset. A Singla detector consists of two
 panels, with a gap between them. It is common for electron beam to be
 positioned in this gap. Determining beam position based on the maximum pixel
-intensity is not possible in this case (at least not along the *y*-direction)
-because the beam peak is blocked.
+intensity is not possible in this case because the beam is hidden.
 
 .. figure:: ../figs/singla_image.png
    :alt: Singla diffraction image
-   :width: 50%
+   :width: 75%
    :align: center
 
    A diffraction image from DECTRIS Singla detector at eBIC.
 
-First, let us run the midpoint method on this dataset without any parameters
+First, let's run the midpoint method on this dataset without any parameters. 
 
 .. code-block:: console
 
@@ -259,20 +258,150 @@ all the images in the dataset, compute the average image, project that image
 onto *x* and *y* axis, and compute the midpoints. The output of this command
 is ``beam_position.png`` file.
 
+.. _midpoint_01:
 .. figure:: ../figs/midpoint_01.png
    :alt: Midpoint method
-   :width: 50%
+   :width: 75%
    :align: center
 
    Beam position determined by the midpoint method.
+
+The midpoint method is similar to the maximum method in that the average pixel
+intensity is projected. This projected intensity is then smoothed using a
+convolution kernel (averaging intensities in a narrow window given by
+``midpoint.convolution_width``). As with the maximum method, projecting bad
+pixels will create unwanted peaks in the projected profile. To solve this, we
+introduce a parameter ``exclude_intensity_percent``. Before DIALS projects 
+the diffraction image, it will order all image pixels into a one-dimensional
+array of increasing intensity. The ``exclude_intensity_percent`` tells DIALS
+to discard the top percentage of these pixels (to set them to zero). For
+example, ``exclude_intensity_percent=0.1`` will exclude 0.1 % of these
+high-intensity pixels.
+To further explain the midpoint method we can focus only on the projection
+along the *y* axis.
+
+.. _midpoint_scheme:
 
 .. figure:: ../figs/midpoint_method.png
    :alt: Midpoint method
-   :width: 50%
+   :width: 75%
    :align: center
 
-   Beam position determined by the midpoint method.
+   How midpoint method determines the beam position. The green curve is the
+   projected average pixel intensity, while the gray shaded rectangle marks
+   the area where direct beam is blocked by some obstacle (the beam intensity
+   in that region goes to zero).
 
+:numref:`midpoint_scheme` shows the projection profile's appearance when
+some obstacle impedes the direct beam. The midpoint method will draw
+horizontal lines and
+compute the intersection points between these lines and the projected profile
+(the blue dots). Next, it will compute the midpoints between the intersections
+(the red dots). The average position of the calculated midpoints will
+correspond to the beam position (the orange vertical dashed line in 
+:numref:`midpoint_scheme`).
+
+The central assumption of the midpoint method is that the projected profile is
+a reasonably symmetric function. If the profile is skewed, the position of the
+average midpoint would not correspond to the beam position. The skewness might
+come from hitting the detector at an angle. :numref:`midpoint_scheme` 
+shows the projected profile is normalized (put in the range of values between
+zero and one). The number of lines intersecting the projected profile is set
+with the ``intersection_range`` parameter. For example, by default, the
+intersection range is set from 0.3 to 0.9 with 0.01 distance between the
+intersecting lines
+(``intersection_range=0.3,0.9,0.01``). With this setting, DIALS will draw
+around sixty intersection lines. When using this parameter, keep in mind the
+normalization, so always set it in the range between zero and one.
+
+In :numref:`midpoint_01` (the projection along the y-axis on the right), we
+see several groups of midpoints (orange, blue, green). Each of these groups
+corresponds to a local peak in the projected profile. As shown in 
+:numref:`midpoint_scheme`, each intersecting line might intersect several
+peaks in the projected profile. The question is: which peak is the direct one?
+Here, DIALS does several things. First, it groups all the midpoints into
+distinctive groups based on their proximity. The grouping is determined using
+the ``distance_threshold`` parameter (currently set to 40 pixels). The
+condition for a new midpoint to be included in an existing group is if it is 
+within the ``distance_threshold`` of any known group (that is, the group
+average position). If the midpoint is not close to any of the existing groups,
+it will be added to a new group. Next, groups are ranked based on their
+average width. The average width is computed by averaging the widths of all
+the intersection lines belonging to a group (see the red horizontal lines in
+:numref:`midpoint_scheme`). In the final step, DIALS picks the first three
+groups of midpoints with the highest average width and selects the one with
+the highest number of midpoints. This last step ensures that we do not pick a
+group with only a few intersections (in most cases, the direct beam will have
+the highest width and number of midpoints). The beam position is then
+computed as the average midpoint position of the selected group. 
+
+Dealing with gap regions
+------------------------
+
+By default, DIALS does not know which region of the image corresponds to the
+gap. For example, in the case of the Singla detector, all pixels from 512 to
+550 along the *y*-axis are in this dead region. Our result along the *y*-axis
+in :numref:`midpoint_01` was correct, but it was more a lucky coincidence. 
+The wide convolution of the projected profile filled the gap and allowed the 
+midpoint method to work as expected. However, if the convolution width was too
+narrow (or the gap was too big), the midpoint method might not work as
+expected. To explain what we mean, let's run the same command, but let's not 
+smooth the projected data. 
+
+.. code-block:: console
+
+   dials.search_beam_position method=midpoint \
+                              midpoint.convolution_width=2 imported.expt
+
+
+.. _midpoint_gap:
+
+.. figure:: ../figs/midpoint_gap.png
+   :alt: Midpoint gap
+   :width: 75%
+   :align: center
+
+   Result from the midpoint method obtained with the command above. 
+
+:numref:`midpoint_gap` shows the wrong beam position along the *y*-axis.
+The reason for this error is simple to explain. Without any convolution, 
+the projected gap region gets an intensity of zero. The problem here is that
+DIALS does not know where the gap is. It treats the two beam tails as two 
+separate peaks (that is why there are two groups of midpoints,
+orange and blue). To resolve this problem, we need to tell DIALS where the
+gap is. 
+
+.. code-block:: console
+
+   dials.search_beam_position method=midpoint \
+                              midpoint.convolution_width=2 \
+                              dead_pixel_range_y=505,555  imported.expt
+
+This will produce the correct result
+
+.. _midpoint_dead:
+
+.. figure:: ../figs/midpoint_dead.png
+   :alt: Midpoint dead pixel range along the y
+   :width: 75%
+   :align: center
+
+   Beam position corrected with ``dead_pixel_range_y`` parameter.
+
+Notice that the dead pixel range along the *y*-axis that we provided as a
+parameter is marked with the gray shaded rectangle in the *y*-projected
+profile in :numref:`midpoint_dead`. Also, we set the region of dead pixels to
+be slightly wider than the actual region (by about five pixels on both sides).
+The simple explanation of the ``dead_pixel_range_y`` is that DIALS will ignore
+all intersections within this region. This is equivalent to filling the gap
+region with infinite intensity. The intersections with the two tails of the
+original beam are now accounted for properly, and the midpoint method works
+again.  
+
+Equivalently to ``dead_pixel_range_y``, there is a parameter
+``dead_pixel_range_x``. Additionally, you can use multiple ranges like
+``dead_pixel_range_y=a,b,c,d``. This will set two regions (from ``a`` to
+``b``, and from ``c`` to ``d``).
 
 
 ************************
@@ -280,6 +409,61 @@ Inversion method
 ************************
 
 This method is suitable for datasets where one can clearly see Friedel pairs.
+
+.. _inversion_singla:
+
+.. figure:: ../figs/inversion_singla.png
+   :alt: Friedel pairs in the diffraction image
+   :width: 75%
+   :align: center
+
+   Friedel pairs (A1, A2) and (B1, B2) in the Singla diffraction image
+   obtained at eBIC.
+
+.. _inversion_method:
+
+.. figure:: ../figs/inversion_method.png
+   :alt: Sketch of the projected profile
+   :width: 75%
+   :align: center
+
+   Sketch of the projected profile with Friedel pairs (no direct beam).
+
+For example, :numref:`inversion_singla` shows the previous diffraction image
+from Singla, emphasizing two Friedel pairs. Friedel pairs are positioned
+symmetrically around the direct beam. In this case, the simplest way to
+determine the beam position is to connect a single Friedel pair with a vector
+and divide that distance in half. Another approach would be spot-finding first
+to determine the positions of Friedel pairs and then compute the midpoints. We
+plan to use projection again to simplify the problem in our implementation. To
+explain the inversion method, let us assume we make maximum projection along
+the *y*-axis
+from :numref:`inversion_singla`, and we obtain something similar to the sketch in 
+:numref:`inversion_method`. There are four peaks corresponding to two Friedel
+pairs. Because of the equal distance from the direct beam to both spots in
+every Friedel pair, the beam position becomes the center of inversion for any
+projection. The question is how to find this point for four peaks in
+:numref:`inversion_method`
+automatically. One can connect
+the peaks with lines, compute midpoints, and average them, but which peaks
+should be connected? In our approach, we use a simple observation. Let's
+assume the direct beam is positioned at some point called ``guess_position``
+(see :numref:`inversion_method`). We can then invert the projected profile
+around this point and obtain the pink curve. If ``guess_position`` is indeed
+the center of inversion, the peaks in the inverted curve and those in the
+original curve will overlap. If this is not the case, the peaks from one curve
+will overlap with some other peaks (with different intensities) or with
+low-intensity regions. One way to quantify the overlap between the original
+and the inverted curve is to multiply them for each pixel and integrate (sum)
+the product. If the overlap is significant, the integral will be large; if the
+overlap is low, the integral should be lower. Next, we repeat this procedure
+in some regions around the ``guess_position``. We move the ``guess_position``
+to every point within this region, multiply the two curves, and compute the
+integral to quantify the overlap. Ultimately, we will get a single curve that
+quantifies the overlap for a range of pixels. Picking the maximum of this
+curve as the beam position means that the computed overlap at that point is
+highest, so that point is very likely to be the center of inversion.
+
 
 
 .. _sauter:

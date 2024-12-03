@@ -9,3 +9,12 @@
     color: black;
 }
 
+span.caption-number {
+   /* color: blue */
+  font-weight: bold;
+}
+
+span.caption-number:after {
+   content: ". ";
+   margin-left: -0.20em;
+}
