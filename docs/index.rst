@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 .. meta::
-   :google-site-verification: zoXDusKXhhjeuqpxHnQm9m-fBPACDBgrjV3gWoFwTFQ
+   :google-site-verification: VMLkca76atE1P3XqKGl5PnXOGNlGCxhJx7mMC6XqBAg
 
 
 AutoED documentation
