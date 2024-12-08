@@ -12,15 +12,17 @@ AutoED documentation
 
 .. :Version: |version|
 
-AutoED is a Python package for automated processing of electron
-diffraction data collected at eBIC. These pages provide basic
-documentation explaning how to install, use, and configure the
-package, as well as its internal structure.
+AutoED is a Python package for the automated processing of electron
+diffraction data collected at Diamond Light Source's Electron Bio-Imaging
+Centre (eBIC). These pages provide essential documentation on how to install,
+use, and configure the package and its internal structure.
 
 .. meta::
     :description lang=en:
-        AutoED is a Python package for automated processing of electron
-        diffraction data collected at eBIC.
+        AutoED is a Python package for the automated processing of electron
+        diffraction data collected at Diamond Light Source's Electron
+        Bio-Imaging Centre (eBIC). 
+
 
 .. toctree::
    :maxdepth: 2

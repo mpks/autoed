@@ -7,8 +7,10 @@ from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from autoed.dataset import SinglaDataset
 from autoed.process.process_static import gather_master_files
+from autoed.utility.misc_functions import get_configuraton_from_json
 import logging
 import argparse
+
 
 """
 A watchdog script that watches a directory for file changes.
@@ -50,8 +52,14 @@ def main():
 
     args = parser.parse_args()
 
+    # Read params from the configuration file
+    global_config = get_configuraton_from_json()
+    if global_config:
+        print("Global config", global_config)
+        os.sys.exit()
+
     if args.inotify:
-        sleep_time = 1.0  # Default for inotify method
+        sleep_time = 1.0   # Default for inotify method
     else:
         sleep_time = 30.0  # Default for polling method
 

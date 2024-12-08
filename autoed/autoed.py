@@ -8,6 +8,7 @@ import time
 import subprocess
 import psutil
 import argcomplete
+import json
 
 
 # PYTHON_ARGCOMPLETE_OK
@@ -25,8 +26,7 @@ def main():
                         default=None,
                         help='PID of the process to kill')
     parser.add_argument('--inotify', '-i', action='store_true',
-                        default=False,
-                        help='Run observer with inotify.')
+                        default=None, help='Run observer with inotify.')
 
     msg = 'Do not run xia2 or DIALS (used for testing).'
     parser.add_argument('--dummy', action='store_true', default=False,
@@ -61,6 +61,7 @@ def main():
     if args.command == "start":
         autoed_daemon.start()
     elif args.command == "watch" and args.dirname:
+        
         autoed_daemon.watch(
             args.dirname,
             use_inotify=args.inotify,

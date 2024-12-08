@@ -1,4 +1,6 @@
 trigger_file = '.HiMarko'
+autoed_config_var = 'AUTOED_CONFIG_FILE'
+default_config_file = '.autoed_config.json'
 
 xia2_pipelines = ['default', 'user', 'ice', 'real_space_indexing']
 dials_pipelines = ['max_lattices']
