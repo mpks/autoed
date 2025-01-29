@@ -1,8 +1,4 @@
-"""
-   In this module, we keep some of the miscellaneous function used in other
-   parts of the code.
-
-"""
+""" Miscellaneous function used in other parts of the code """
 from __future__ import annotations
 from typing import Union
 import re
@@ -10,9 +6,7 @@ import h5py
 import os
 import numpy as np
 import time
-import json
 
-from autoed.constants import autoed_config_var, default_config_file
 
 import autoed
 
@@ -185,30 +179,3 @@ def is_file_fully_written(filename,
         time.sleep(polling_interval)
 
     return False, size, wait_time
-
-
-def get_configuraton_from_json():
-    """
-    Checks if there is an environment variable AUTOED_CONFIG_FILE that
-    contains the path to JSON configuration file. If there is no env. variable,
-    it tries to read the default configuration file."""
-
-    config_file = os.getenv(autoed_config_var)
-
-    # If no env. variable, check if there is a default configuration file
-    if not config_file:
-        home_dir = os.path.expanduser("~")
-        config_file = os.path.join(home_dir, default_config_file)
-        if not os.path.isfile(config_file):
-            config_file = None
-
-    config_data = None
-    if config_file:
-        if os.path.isfile(config_file):
-            with open(config_file, 'r') as file:
-                try:
-                    config_data = json.load(file)
-                except json.JSONDecodeError as e:
-                    print(f"Failed to decode the config file as JSON: {e}")
-
-    return config_data

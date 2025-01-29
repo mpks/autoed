@@ -1,9 +1,0 @@
-{
-"inotify": false,
-"sleep_time": 1,
-"local": true,
-"overwrite_mask": true,
-"data_dir": "ED",
-"processed_dir": "processed",
-"trigger_file": ".HiMarko"
-}

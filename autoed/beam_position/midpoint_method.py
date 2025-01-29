@@ -9,7 +9,6 @@ import numpy as np
 from autoed.beam_position.plot import Line2D, PlotParams, plot_profile
 
 from autoed.beam_position.misc import normalize, remove_percentiles, smooth
-from autoed.constants import ed_root_dir
 
 
 @dataclass
@@ -75,6 +74,7 @@ def position_from_midpoint(
     plot_filename: Optional[str] = None,
     label=None,
     verbose=False,
+    ed_root_dir='ED',
 ) -> Tuple[float, float]:
     """
     Compute beam position from a diffraction image using the midpoint method

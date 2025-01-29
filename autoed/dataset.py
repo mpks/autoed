@@ -3,6 +3,8 @@ import os
 import logging
 import time
 import re
+from autoed.constants import slurm_file
+from autoed.global_config import global_config
 from autoed.convert import generate_nexus_file
 from autoed.process.pipeline import run_processing_pipelines
 from autoed.beam_position.beam_center import BeamCenterCalculator
@@ -40,7 +42,8 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.spots_figure = os.path.join(self.path, 'spots.png')
 
         in_path = os.path.dirname(self.base)
-        out_path = replace_dir(in_path, 'ED', 'processed')
+        out_path = replace_dir(in_path, global_config.ed_root_dir,
+                               global_config.processed_dir)
 
         # We use dataset object in report generator. We do not want
         # to create output paths or write logs when generating reports.
@@ -51,13 +54,13 @@ class SinglaDataset:                    # pylint: disable=R0902
             self.set_logger()
 
         self.output_path = out_path
-        self.slurm_file = os.path.join(out_path, 'slurm_config.json')
+        self.slurm_file = os.path.join(out_path, slurm_file)
         self.status = 'NEW'
         self.beam_center = None
         self.present_lock = False
         self.processed = False
         self.last_processed_time = 0
-        self.dummy = False
+        self.dummy = None
         self.data_files = []
         self.metadata = None
 
@@ -202,9 +205,11 @@ class SinglaDataset:                    # pylint: disable=R0902
                 self.beam_center = (x, y)
                 return
 
+            ed_root = global_config.ed_root_dir
             x, y = calc.center_from_mixed(every=50,
                                           plot_file=self.beam_figure,
-                                          title=self.beam_figure)
+                                          title=self.beam_figure,
+                                          ed_root_dir=ed_root)
 
             if not x:
                 msg = 'Beam position along x is None. Setting beam_x to 514'
@@ -242,7 +247,7 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.metadata = metadata
         return True
 
-    def process(self, local=False):
+    def process(self, global_config):
 
         if not self.processed:
             self.processed = True
@@ -272,7 +277,7 @@ class SinglaDataset:                    # pylint: disable=R0902
                     self.logger.info(msg)
                     os.makedirs(self.output_path, exist_ok=True)
                     # run_slurm_job(self)
-                    run_processing_pipelines(self, local)
+                    run_processing_pipelines(self, global_config.local)
                     self.last_processed_time = time.time()
                     return True
                 else:

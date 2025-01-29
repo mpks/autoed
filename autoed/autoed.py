@@ -8,23 +8,33 @@ import time
 import subprocess
 import psutil
 import argcomplete
-import json
+from autoed import __version__
 
 
 # PYTHON_ARGCOMPLETE_OK
 def main():
 
-    msg = 'Daemon script for automatic processing of ED data'
-    parser = argparse.ArgumentParser(description=msg)
+    msg = 'AutoED: a package for automatic processing of ED data'
+    msg += f' (version: {__version__})'
+    epilog = ("""\
+    More information about the AutoED package can be found at:
+    https://autoed.readthedocs.io/en/latest/
+    """)
+
+    parser = argparse.ArgumentParser(description=msg, epilog=epilog)
+
     parser.add_argument('command',
                         choices=['start', 'watch', 'list', 'stop',
                                  'kill', 'restart'],
                         help='Commands to execute')
+
     parser.add_argument('dirname', nargs='?', default=None,
                         help='Name of the directory to watch')
+
     parser.add_argument('--pid', nargs='?', type=int,
                         default=None,
                         help='PID of the process to kill')
+
     parser.add_argument('--inotify', '-i', action='store_true',
                         default=None, help='Run observer with inotify.')
 
@@ -32,17 +42,17 @@ def main():
     parser.add_argument('--dummy', action='store_true', default=False,
                         help=msg)
 
-    msg = 'If set, AutoED will run all the processes locally, without '
+    msg = 'If set, AutoED will run all the processes localy, without '
     msg += 'submitting a SLURM request for the cluster.'
     parser.add_argument('--local', action='store_true', default=False,
                         help=msg)
 
-    parser.add_argument('-t', '--time_sleep', type=float,
-                        default=None,
-                        help='Sleep duration between filesystem checks.')
-    parser.add_argument('--log-dir', type=str,
-                        default=None,
-                        help='A directory to store autoed log file.')
+    hmsg = 'Sleep time between filesystem checks (in seconds).'
+    parser.add_argument('-t', '--sleep_time', type=float, default=None,
+                        help=hmsg)
+
+    parser.add_argument('--log-dir', type=str, default=None,
+                        help='A directory to store the AutoED log file.')
 
     argcomplete.autocomplete(parser)
 
@@ -61,11 +71,11 @@ def main():
     if args.command == "start":
         autoed_daemon.start()
     elif args.command == "watch" and args.dirname:
-        
+
         autoed_daemon.watch(
             args.dirname,
             use_inotify=args.inotify,
-            sleep_time=args.time_sleep,
+            sleep_time=args.sleep_time,
             log_dir=args.log_dir,
             dummy=args.dummy,
             local=args.local
@@ -250,7 +260,7 @@ class AutoedDaemon:
             if use_inotify:
                 command += '-i '
             if sleep_time:
-                command += '-s %.1f ' % sleep_time
+                command += '-t %.1f ' % sleep_time
             if local:
                 command += '--local '
             if dummy:

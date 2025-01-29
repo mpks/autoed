@@ -7,9 +7,10 @@ from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from autoed.dataset import SinglaDataset
 from autoed.process.process_static import gather_master_files
-from autoed.utility.misc_functions import get_configuraton_from_json
+from autoed.global_config import global_config
 import logging
 import argparse
+from autoed import __version__
 
 
 """
@@ -19,52 +20,43 @@ data if present.
 
 Run with:
 autoed_watch directory_name
-optionaly
-autoed_watch -i -s 30 directory_name
 """
 
 
 def main():
 
+    # By default, all the arguments are set to None, so we can test which
+    # argument was provided. If an argument was not provided, its value is set
+    # from the default configuration file, or from a user configuration file.
+    # If an argument is provided, it overwrites the one in the configuration
+    # file.
+
     msg = 'Watchdog script for monitoring filesystem changes'
     parser = argparse.ArgumentParser(description=msg)
-    parser.add_argument('--inotify', '-i', action='store_true',
-                        default=False,
+    parser.add_argument('--inotify', '-i', action='store_true', default=None,
                         help='Run watchdog with inotify.')
-    hmsg = "Sleep duration between filesystem checks.\n"
-    hmsg += "By default 1 sec for inotify method, "
-    hmsg += "or 30 sec for pooling method."
-    parser.add_argument('--sleep_time', '-s', type=float,
-                        default=None, help=hmsg)
 
-    msg = 'Run watchdog without running xia2 or dials (for testing)'
-    parser.add_argument('--dummy', action='store_true', default=False,
+    hmsg = "Sleep time between filesystem checks (in seconds).\n"
+    parser.add_argument('--sleep_time', '-t', type=float, default=None,
+                        help=hmsg)
+
+    msg = 'Run the watchdog script without running xia2 / DIALS (for testing).'
+    parser.add_argument('--dummy', action='store_true', default=None,
                         help=msg)
 
     msg = 'If used, it runs xia2 and DIALS processing locally with bash, '
     msg += 'instead of submitting the job request to cluster using SLURM.'
-    parser.add_argument('--local', action='store_true', default=False,
+    parser.add_argument('--local', action='store_true', default=None,
                         help=msg)
+
+    msg = 'A directory to store the AutoED log file.'
     parser.add_argument('--log-dir', type=str, default=None,
-                        help='A directory to store autoed log file.')
+                        help=msg)
+
     parser.add_argument('dirname', nargs='?', default=None,
                         help='Name of the directory to watch')
 
     args = parser.parse_args()
-
-    # Read params from the configuration file
-    global_config = get_configuraton_from_json()
-    if global_config:
-        print("Global config", global_config)
-        os.sys.exit()
-
-    if args.inotify:
-        sleep_time = 1.0   # Default for inotify method
-    else:
-        sleep_time = 30.0  # Default for polling method
-
-    if args.sleep_time:    # Overwrite the default
-        sleep_time = args.sleep_time
 
     if not args.dirname:
         msg = 'autoed_watch requires a single argument'
@@ -78,39 +70,41 @@ def main():
         msg = f'Path {watch_path} does not exist.'
         raise FileNotFoundError(msg)
 
-    if args.log_dir:
-        if not os.path.exists(args.log_dir):
-            msg = f'Path {args.log_dir} does not exist.'
-            raise FileNotFoundError(msg)
+    log_str1 = global_config.overwrite_from_local_config()
+    log_str2 = global_config.overwrite_from_commandline(args)
 
-        log_directory = args.log_dir
-    else:
-        log_directory = watch_path
+    if not global_config.log_dir:
+        global_config.log_dir = watch_path
+
+    if not os.path.exists(global_config.log_dir):
+        msg = "Error! Global log directory "
+        msg += f"'{global_config.log_dir}' does not exist."
+        raise FileNotFoundError(msg)
 
     processing_script = os.path.join(autoed.__path__[0], 'process.py')
 
-    watch_logger = set_watch_logger(log_directory,
-                                    args.inotify,
-                                    sleep_time)
+    watch_logger = set_watch_logger(global_config.log_dir)
+
+    watch_logger.info(log_str1)
+    watch_logger.info(log_str2)
+    global_config.print_to_log(watch_logger)
 
     event_handler = DirectoryHandler(watch_path,
                                      processing_script,
                                      watch_logger,
-                                     report_dir=log_directory,
-                                     dummy=args.dummy,
-                                     local=args.local)
+                                     global_config)
 
     if args.inotify:
         observer = Observer()
     else:
-        observer = PollingObserver(timeout=sleep_time)
+        observer = PollingObserver(timeout=global_config.sleep_time)
 
     observer.schedule(event_handler, watch_path, recursive=True)
     observer.start()
 
     try:
         while True:
-            time.sleep(sleep_time)
+            time.sleep(global_config.sleep_time)
 
     except KeyboardInterrupt as e:
         watch_logger.exception(str(e))
@@ -123,27 +117,18 @@ def main():
 
 class DirectoryHandler(FileSystemEventHandler):
 
-    def __init__(self, watch_path, script, logger, report_dir,
-                 dummy=False, local=False):
+    def __init__(self, watch_path, script, logger, global_config):
 
         """
         Parameters
         ----------
         watch_path : Path
             The path of the directory to be watched.
-
         script : Path
-            The path to the processing script used to
-            convert and process data.
+            The path to the processing script used to convert and process data.
         logger : logger object
-        report_dir : Path
-            The path where to save the report HTML file.
-        dummy: boolean
-            If True, the AutoED will not run xia2 or dials. This is used
-            for testing.
-        local: boolean
-            If True, the AutoED will run xia2 and DIALS on the local machine
-            using bash, instead of submitting a SLURM request to the cluster.
+        global_config: extended dict object
+            Keeps the values of all global variables.
         """
 
         self.watch_path = watch_path
@@ -152,8 +137,7 @@ class DirectoryHandler(FileSystemEventHandler):
         self.datasets = dict()
         self.queue = dict()
         self.logger = logger
-        self.dummy = dummy
-        self.local = local
+        self.global_config = global_config
 
         self.script = script
         self.last_triggered = 0
@@ -166,7 +150,8 @@ class DirectoryHandler(FileSystemEventHandler):
 
             if not event.is_directory:
 
-                if re.match(r".*\.HiMarko$", event.src_path):
+                trigger_file = self.global_config.trigger_file
+                if re.match(rf".*\{trigger_file}$", event.src_path):
 
                     info('Detected trigger file: %s' % event.src_path)
 
@@ -187,7 +172,7 @@ class DirectoryHandler(FileSystemEventHandler):
                                 self.dataset_names.add(basename)
                                 dataset = SinglaDataset.from_basename(basename)
                                 dataset.search_and_update_data_files()
-                                dataset.dummy = self.dummy
+                                dataset.dummy = self.global_config.dummy
                                 self.datasets[dataset.base] = dataset
                             else:
                                 dataset = self.datasets[basename]
@@ -201,7 +186,8 @@ class DirectoryHandler(FileSystemEventHandler):
                                     msg = 'All files present: %s'
                                     info(msg % dataset.base)
                                     info('Processing: %s' % dataset.base)
-                                    success = dataset.process(self.local)
+                                    gc = self.global_config
+                                    success = dataset.process(gc)
                                     base = dataset.base
                                     if success:
                                         ms = f"Processed: {base}"
@@ -229,7 +215,7 @@ class DirectoryHandler(FileSystemEventHandler):
         self.on_created(event)
 
 
-def set_watch_logger(watch_path, inotify, sleep):
+def set_watch_logger(watch_path):
 
     auto_logger = logging.getLogger(__name__)
     auto_logger.setLevel(logging.DEBUG)
@@ -246,9 +232,8 @@ def set_watch_logger(watch_path, inotify, sleep):
     auto_logger.addHandler(file_handler)
 
     auto_logger.info(40*'=')
-    auto_logger.info('  Starting new logger')
-    auto_logger.info('  inotify: %s' % inotify)
-    auto_logger.info('  sleep time: %.1f' % sleep)
+    auto_logger.info('  AutoED watch started')
+    auto_logger.info(f'  version: v{__version__} ')
     auto_logger.info(40*'=')
 
     return auto_logger

@@ -8,7 +8,6 @@ from autoed.beam_position.midpoint_method import (MidpointMethodParams,
 from autoed.beam_position.maximum_method import MaxMethodParams, find_max
 from autoed.beam_position.plot import plot_profile
 import argparse
-from autoed.constants import ed_root_dir
 import time
 
 
@@ -48,6 +47,8 @@ def main():
                         help='Compute beam center from all stacks')
     parser.add_argument('--title', type=str, default=None,
                         help='A title to put in the graph')
+    parser.add_argument('--ed_root_dir', type=str, default='ED',
+                        help="Data root dir (default is 'ED').")
     args = parser.parse_args()
 
     cal = BeamCenterCalculator(args.filename)
@@ -61,14 +62,16 @@ def main():
 
         x0, y0 = cal.center_from_midpoint(verbose=True,
                                           plot_file='beam_from_midpoint.png',
-                                          every=args.every)
+                                          every=args.every,
+                                          ed_root_dir=args.ed_root_dir)
         print('From midpoint: (%.2f, %.2f)' % (x0, y0))
 
     elif args.method == 'mixed':
 
         x0, y0 = cal.center_from_mixed(every=args.every,
                                        title=args.title,
-                                       plot_file='beam_from_mixed.png')
+                                       plot_file='beam_from_mixed.png',
+                                       ed_root_dir=args.ed_root_dir)
 
         print('From mixed: (%.2f, %.2f)' % (x0, y0))
 
@@ -110,7 +113,8 @@ class BeamCenterCalculator:
             except OSError:
                 time.sleep(1)
 
-    def center_from_midpoint(self, every=20, verbose=False, plot_file=None):
+    def center_from_midpoint(self, every=20, verbose=False, plot_file=None,
+                             ed_root_dir='ED'):
 
         image = self.dataset[::every, :, :].mean(axis=0)
         image[self.mask > 0] = 0
@@ -124,12 +128,13 @@ class BeamCenterCalculator:
 
         x0, y0, plot_params = position_from_midpoint(image, mid_params,
                                                      verbose=False,
-                                                     plot_filename=plot_file)
+                                                     plot_filename=plot_file,
+                                                     ed_root_dir=ed_root_dir)
         return x0, y0
 
     def center_from_mixed(self, every=20, bad_pixel_threshold=20000,
                           convolution_width=3,
-                          plot_file=None, title=None):
+                          plot_file=None, title=None, ed_root_dir='ED'):
 
         image = self.dataset[::every, :, :].mean(axis=0)
         image[self.mask > 0] = 0
@@ -143,9 +148,12 @@ class BeamCenterCalculator:
             exclude_range_y=(510, 550),
             per_image=False)
 
-        x_mid, y_mid, plot_params = position_from_midpoint(image, mid_params,
-                                                           verbose=False,
-                                                           plot_filename=None)
+        (x_mid, y_mid,
+         plot_params) = position_from_midpoint(image,
+                                               mid_params,
+                                               verbose=False,
+                                               plot_filename=None,
+                                               ed_root_dir=ed_root_dir)
         # Next, try maximum pixel method
         max_params = MaxMethodParams(convolution_width=convolution_width)
         data_x = find_max(image, max_params, axis='x')

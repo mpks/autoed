@@ -3,10 +3,12 @@
 import shutil
 import subprocess
 import autoed
-from autoed.constants import trigger_file
+from autoed.global_config import global_config
 import pytest
 import time
 import os
+
+trigger_file = global_config.trigger_file
 
 
 @pytest.fixture(scope='session')
@@ -84,7 +86,7 @@ def run_for_dataset(dataset, name):
 #    assert check_for_slurm_command(d.autoed_log)
 #    print("Slurm run: OK")
 
-    remove_generated_files(d)
+    # remove_generated_files(d)
 
 
 def run2(cmd):
