@@ -11,7 +11,8 @@ setup(
             'autoed_beam_center = autoed.beam_position.beam_center:main',
             'autoed_process = autoed.process.process_static:main',
             'autoed_server = autoed.server:run',
-            'autoed_generate_report = autoed.report.report_generator:run'
+            'autoed_generate_report = autoed.report.report_generator:run',
+            'autoed_plot_spots = autoed.process.plot_spots:main'
         ]
     },
     setup_requires=['argcomplete'],
