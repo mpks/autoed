@@ -8,6 +8,7 @@ from autoed.process.pipeline import run_processing_pipelines
 from autoed.beam_position.beam_center import BeamCenterCalculator
 from autoed.utility.misc_functions import replace_dir, is_file_fully_written
 from autoed.metadata import Metadata
+from autoed.process.plot_spots import plot_spots_from_dataset
 
 
 class SinglaDataset:                    # pylint: disable=R0902
@@ -19,7 +20,7 @@ class SinglaDataset:                    # pylint: disable=R0902
             Path of the dataset.
         dataset_name : str
             Name of the dataset. Usually, if given a master file
-            'abc.__master.h5', the dataset will have name 'abc'.
+            'abc.__master.h5', the dataset will have the name 'abc'.
         make_out_path: boolean
             If True, the AutoED will create a path in the processed directory,
             and the log file in the data directory.
@@ -244,6 +245,9 @@ class SinglaDataset:                    # pylint: disable=R0902
 
         if not self.processed:
             self.processed = True
+
+            plot_spots_from_dataset(self)
+
             if not self.beam_center:
                 msg = f"Computing the beam center for {self.dataset_name}"
                 self.logger.info(msg)

@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import h5py
-import hdf5plugin
 import os
 import json
 import argparse
 from matplotlib.colors import LogNorm
+import subprocess
 
 description = """
  ===========================================
@@ -59,12 +59,15 @@ epilog = """
  ----------------------------------------------------------
 """
 
-hdf5plugin
-
 CUT_OFF_INTENSITY = 80   # Color cut-off intensity
 
 
 def main():
+    """ Used as autoed_plot_spots command """
+
+    # NOTE: This function is used in AutoED to automatically plot spots.
+    # When changing the command line interface please check that
+    # wrapper function plot_spots_from_dataset below still works.
 
     raw_formatter = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=description,
@@ -75,7 +78,7 @@ def main():
                         help='Name of the directory containing Singla data')
 
     msg = 'Stack size (number of frames). If provided, it overrides '
-    msg += 'the default value (or the one from the metadata file.'
+    msg += 'the default value (or the one from the metadata file).'
     parser.add_argument("-s", "--stack_size", default=None, type=int, help=msg)
 
     msg = 'Color cutoff intensity for the linear scale. Overrides the default.'
@@ -83,6 +86,10 @@ def main():
                         help=msg)
     msg = 'Color cutoff intensity for the log scale. Overrides the default.'
     parser.add_argument("-cl", "--color_cutoff_log", default=None, type=int,
+                        help=msg)
+
+    msg = 'Output path (the directory where to save the figures).'
+    parser.add_argument("-p", "--figure_path", default=None, type=str,
                         help=msg)
 
     args = parser.parse_args()
@@ -175,6 +182,7 @@ def main():
 
 def plot_spots(images, dataset_name, stack_size, n_images, index, args,
                log_scale=False):
+    """Plot a four-panel figure showing four different frame stacks"""
 
     # Define stack ranges for four images to plot
     stack_ranges = []
@@ -213,7 +221,8 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
              va='top', ha='left', transform=fig.transFigure)
 
     axes = [ax1, ax2, ax3, ax4]
-    for i, (stack_range, ax) in enumerate(zip(stack_ranges, axes)):
+
+    for stack_range, ax in zip(stack_ranges, axes):
 
         start, stop = stack_range
 
@@ -271,6 +280,9 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
 
     file_name = 'spots'
 
+    if args.figure_path:
+        file_name = os.path.join(args.figure_path, file_name)
+
     for ax in axes:
         ax.set_xlim(250, 750)
         ax.set_ylim(250, 750)
@@ -288,9 +300,32 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
     file_name += '.png'
 
     print(f' Saving figure: {file_name}')
-    plt.savefig(file_name, dpi=400)
 
+    plt.savefig(file_name, dpi=400)
     plt.close(fig)
+
+
+def plot_spots_from_dataset(dataset):
+    """
+    This is a wrapper function used when AutoED processes the dataset
+    automatically. We run the main command as a subprocess to prevent
+    any unexpected exceptions from crashing the watchdog script.
+    """
+
+    success = True
+
+    cmd = 'autoed_plot_spots . '
+
+    p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE, cwd=dataset.path)
+    if p.stderr:
+        msg = 'Failed to plot spots'
+        dataset.logger.error(msg)
+        dataset.logger.error(p.stderr)
+        return not success
+    else:
+        dataset.logger.info('Plotted spots summary')
+        return success
 
 
 if __name__ == '__main__':
