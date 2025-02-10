@@ -60,6 +60,10 @@ def generate_json_database(path_to_watched_dir, report_path):
 
     database.load_data()
 
-    for dataset in datasets:
+    n = len(datasets)
+    for i, dataset in enumerate(datasets):
+        print(f' Adding dataset [{i+1}/{n}]\r', end="")
         parser = Xia2OutputParser(dataset, database)
         parser.add_to_database()
+    print(f' Adding dataset [{i+1}/{n}]      ')
+    print('HTML report generated')

@@ -37,6 +37,7 @@ class SinglaDataset:                    # pylint: disable=R0902
         self.mdoc_file = self.base + '.mrc.mdoc'
         self.patch_file = os.path.join(self.path, 'PatchMaster.sh')
         self.beam_figure = os.path.join(self.path, 'beam_position.png')
+        self.spots_figure = os.path.join(self.path, 'spots.png')
 
         in_path = os.path.dirname(self.base)
         out_path = replace_dir(in_path, 'ED', 'processed')

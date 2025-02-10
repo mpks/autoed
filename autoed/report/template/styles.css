@@ -77,6 +77,11 @@
    background-color: #e6e6e6;
 }
 
+#spots .cell:not(.header):nth-child(even) {
+   /* background-color: #f9def4; */
+   background-color: #e6e6e6;
+}
+
 #col1 .cell:not(.header):nth-child(even) {
     background-color: #e6e6e6;
 }
@@ -126,6 +131,15 @@
 #beam {
   width: 50px;
   border-right: 1px solid black;
+}
+
+#spots {
+  width: 50px;
+  border-right: 1px solid black;
+}
+
+#spots_string {
+  background-color: #3c1b97;
 }
 
 #beam_string {

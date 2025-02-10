@@ -148,6 +148,7 @@ function populateTable(data) {
         add_cell('col1', dataset_name, index, values);
         add_cell('col2', dataset_name, index, values);
         add_cell('beam', dataset_name, index, values);
+        add_cell('spots', dataset_name, index, values);
         add_cell('default', dataset_name, index, values);
         add_cell('user', dataset_name, index, values);
         add_cell('ice', dataset_name, index, values);
@@ -179,8 +180,19 @@ function add_cell(column_name, dataset_name, index, values) {
 
         if (values['beam_image'] != null) {
             cell.innerHTML = image_icon(values['beam_image']);
+            console.log('Added beam_image', values['spots_image']);
         } else {
             cell.innerHTML = ' ';
+        }
+
+    } else if (column_name == 'spots') {
+
+        if (values['spots_image'] != null) {
+            cell.innerHTML = image_icon(values['spots_image']);
+            console.log('Added element', values['spots_image']);
+        } else {
+            cell.innerHTML = ' ';
+            console.log('Empty element', values['spots_image']);
         }
 
     } else if (column_name == 'default') {
