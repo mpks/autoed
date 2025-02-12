@@ -3,6 +3,7 @@ import os
 import autoed
 import json
 from abc import ABC, abstractmethod
+from autoed.global_config import global_config
 from autoed.constants import xia2_pipelines, dials_pipelines, all_pipelines
 import subprocess
 
@@ -54,8 +55,13 @@ class Pipeline(ABC):
         refl_file = os.path.join(self.out_dir, 'strong.refl')
         nexus_file = self.dataset.nexgen_file
 
+        if 'gain' in global_config.keys():
+            gain_str = f'gain={global_config.gain} '
+        else:
+            gain_str = ''
+
         cmd = f"dials.import {nexus_file} goniometer.axis=0,-1,0; "
-        cmd += f"dials.find_spots {import_file} d_max=9; "
+        cmd += f"dials.find_spots {import_file} d_max=9 {gain_str}; "
         cmd += f"dials.index {import_file} {refl_file} "
         cmd += "detector.fix=distance "
 
@@ -74,6 +80,9 @@ class Pipeline(ABC):
         cmd = f"xia2 image={self.dataset.nexgen_file} "
         cmd += "goniometer.axis=0,-1,0 dials.fix_distance=True "
         cmd += "dials.masking.d_max=9 "
+
+        if 'gain' in global_config.keys():
+            cmd += f'input.gain={global_config.gain} '
 
         if self.method == 'default':
             cmd += "\n"

@@ -66,17 +66,22 @@ class GlobalConfig(dict):
                     local_config_data = json.load(f)
 
                 log = f"Found configuration file: '{config_file}'\n"
-                log += "Overwriting the default global parameters with the "
-                log += "ones from the configuration file."
+                msg = bfr + "Overwriting the default global parameters\n"
+                msg += bfr + "with the ones from the configuration file:"
+
+                header = False
 
                 # Go through the global variables and check which is modified
                 for key, value in self.items():
                     if key in local_config_data:
                         local_value = local_config_data[key]
                         if local_value != value:
-                            log += '\n' + bfr + f" {key}: "
+                            if not header:
+                                log += msg
+                                header = True
+                            log += '\n' + bfr + f"   {key}: "
                             log += f"{local_value}"
-                            log += f"  (old value:{value})"
+                            log += f"  (old value: {value})"
                             self[key] = local_value
         return log
 
@@ -91,12 +96,18 @@ class GlobalConfig(dict):
 
         bfr = 31*" "
         args_dict = vars(parsed_args)
-        log = "Overwriting the global parameters with the ones from "
-        log += "the command line."
+        header = False
+        log = ''
+        msg = "Overwriting global parameters with the ones from "
+        msg += "the command line."
 
         for key, value in self.items():
             if key in args_dict:
                 if args_dict[key]:      # The arg is not None (the user set it)
+
+                    if not header:
+                        log = msg
+                        header = True
                     log += '\n' + bfr + f"  {key}: {args_dict[key]}  "
                     log += f"(old value: {value})"
                     self[key] = args_dict[key]

@@ -85,8 +85,12 @@ def main():
 
     watch_logger = set_watch_logger(global_config.log_dir)
 
-    watch_logger.info(log_str1)
-    watch_logger.info(log_str2)
+    if log_str1 != '':
+        watch_logger.info(log_str1)
+
+    if log_str2 != '':
+        watch_logger.info(log_str2)
+
     global_config.print_to_log(watch_logger)
 
     event_handler = DirectoryHandler(watch_path,
