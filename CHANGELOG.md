@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A command to plot figures showing diffraction spots in different
   parts of a dataset (`autoed_plot_spots`).
 - An automatic plotting of spots figures (also included in the HTML report).
+- Global configuration file (generated with autoed_generate_config).
 
 ## [0.2.0] - 2024-08-27
 
