@@ -570,7 +570,7 @@ function extractUniqueDatasetNames(in_data) {
 
 async function initializeTable() {
     console.log('Initializing table');
-    all_data = await fetchData('autoed_database.json');
+    all_data = await fetchData('report_data/autoed_database.json');
     global_data = all_data;
     populateTable(global_data);
     console.log('Table populated');

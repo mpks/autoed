@@ -11,6 +11,9 @@ from autoed.beam_position.beam_center import BeamCenterCalculator
 from autoed.utility.misc_functions import replace_dir, is_file_fully_written
 from autoed.metadata import Metadata
 from autoed.process.plot_spots import plot_spots_from_dataset
+from autoed.report.misc import (generate_report_files,
+                                update_database_for_dataset)
+from autoed.constants import report_dir
 
 
 class SinglaDataset:                    # pylint: disable=R0902
@@ -279,6 +282,11 @@ class SinglaDataset:                    # pylint: disable=R0902
                     # run_slurm_job(self)
                     run_processing_pipelines(self, global_config.local)
                     self.last_processed_time = time.time()
+
+                    # Update the report database
+                    self.logger.info('Updating the report directory')
+                    update_database(self)
+                    self.logger.info('Report directory updated')
                     return True
                 else:
                     msg = 'Failed to generate nexus file'
@@ -286,3 +294,21 @@ class SinglaDataset:                    # pylint: disable=R0902
                     self.last_processed_time = time.time()
                     return False
         return False
+
+
+def update_database(dataset):
+
+    ed_root_dir = global_config.ed_root_dir
+    path = dataset.path
+    report_path = r''
+
+    temp_list = path.split('/')
+    for dir_name in temp_list:
+        if dir_name != ed_root_dir:
+            report_path += r'/' + dir_name
+        else:
+            break
+
+    report_path = os.path.join(report_path, report_dir)
+    generate_report_files(report_path, verbose=False)
+    update_database_for_dataset(dataset, report_path)

@@ -1,6 +1,6 @@
 import os
 from autoed.constants import database_json_file, xia2_report_dir
-from autoed.constants import beam_report_dir, spots_report_dir
+from autoed.constants import beam_report_dir, spots_report_dir, report_data_dir
 import json
 import shutil
 import hashlib
@@ -118,7 +118,10 @@ class JsonDatabase:
                 shutil.copy(value['link'], destination)
                 # Write the dataset name in the xia2 report
                 overwrite_xia2_report(destination, value['link'])
-                value['link'] = os.path.join(xia2_report_dir, link_hash)
+
+                xia2_report_path = os.path.join(report_data_dir,
+                                                xia2_report_dir)
+                value['link'] = os.path.join(xia2_report_path, link_hash)
             else:
                 value['link'] = None
 
@@ -139,7 +142,10 @@ class JsonDatabase:
                 beam_file_hash = md5.hexdigest()[0:10] + '.png'
 
                 dest = os.path.join(self.beam_report_dir, beam_file_hash)
-                link = os.path.join(beam_report_dir, beam_file_hash)
+
+                beam_report_path = os.path.join(report_data_dir,
+                                                beam_report_dir)
+                link = os.path.join(beam_report_path, beam_file_hash)
 
                 shutil.copy(beam_image, dest)
 
@@ -159,7 +165,10 @@ class JsonDatabase:
                 spots_file_hash = md5.hexdigest()[0:10] + '.png'
 
                 dest = os.path.join(self.spots_report_dir, spots_file_hash)
-                link = os.path.join(spots_report_dir, spots_file_hash)
+
+                spots_report_path = os.path.join(report_data_dir,
+                                                 spots_report_dir)
+                link = os.path.join(spots_report_path, spots_file_hash)
 
                 shutil.copy(spots_image, dest)
 

@@ -1,11 +1,9 @@
 import os
 import sys
-from autoed.constants import report_dir
-import autoed
-import shutil
-from autoed.utility.filesytem import gather_datasets
+from autoed.constants import report_dir, report_data_dir
 from autoed.report.json_database import JsonDatabase
 from autoed.report.parser import Xia2OutputParser
+from autoed.report.misc import generate_report_files
 import argparse
 
 
@@ -33,22 +31,6 @@ def run():
     generate_json_database(watch_dir, report_full_path)
 
 
-def generate_report_files(report_path):
-
-    os.makedirs(report_path, exist_ok=True)
-    print("Generating HTML report in")
-    print(f" {report_path} ")
-
-    autoed_path = autoed.__path__[0]
-    template_path = os.path.join(autoed_path, 'report/template')
-    template_files = ['report.html', 'scripts.js', 'styles.css', 'favicon.png']
-
-    for file in template_files:
-        source_path = os.path.join(template_path, file)
-        destination_path = os.path.join(report_path, file)
-        shutil.copy(source_path, destination_path)
-
-
 def generate_json_database(path_to_watched_dir, report_path):
     """
     Goes through the watched directory recursively gathering all the datasets
@@ -56,7 +38,8 @@ def generate_json_database(path_to_watched_dir, report_path):
     """
 
     datasets = gather_datasets(path_to_watched_dir)
-    database = JsonDatabase(report_path)
+    report_data_path = os.path.join(report_path, report_data_dir)
+    database = JsonDatabase(report_data_path)
 
     database.load_data()
 
@@ -67,3 +50,21 @@ def generate_json_database(path_to_watched_dir, report_path):
         parser.add_to_database()
     print(f' Adding dataset [{i+1}/{n}]      ')
     print('HTML report generated')
+
+
+def gather_datasets(dir_path):
+    """ Given a directory path return all the Singla datasets in that path """
+    from autoed.utility.filesytem import gather_master_files
+    from autoed.dataset import SinglaDataset
+
+    datasets = []
+    master_files = gather_master_files(dir_path)
+    for master_file in master_files:
+        basename = master_file[:-10]
+        dataset = SinglaDataset.from_basename(basename, make_out_path=False)
+
+        dataset.search_and_update_data_files()
+
+        datasets.append(dataset)
+
+    return datasets

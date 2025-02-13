@@ -11,3 +11,4 @@ xia2_report_dir = 'xia2_reports'              # Keeps xia2 html reports
 beam_report_dir = 'beam_positions'                 # Keeps beam images
 spots_report_dir = 'spots'                         # Keeps spots
 xia2_dials_report_path = 'DEFAULT/NATIVE/SWEEP1/index'
+report_data_dir = 'report_data'
