@@ -152,3 +152,5 @@ def save_default():
     msg = f' export {autoed_config_var}=/path/to/{autoed_config_file}\n'
     print(msg)
     print(' in your .bashrc to enable AutoED to find your config file.')
+    print(' For more details on the config parameters see the docs: ')
+    print(' https://autoed.readthedocs.io/en/latest/pages/configuring_autoed.html')
