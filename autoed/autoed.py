@@ -14,18 +14,18 @@ from autoed import __version__
 # PYTHON_ARGCOMPLETE_OK
 def main():
 
-    msg = 'AutoED: a package for automatic processing of ED data'
-    msg += f' (version: {__version__})'
+    des = 'AutoED: a package for automatic processing of ED data'
+    des += f' (version: {__version__})'
     epilog = ("""\
     More information about the AutoED package can be found at:
     https://autoed.readthedocs.io/en/latest/
     """)
 
-    parser = argparse.ArgumentParser(description=msg, epilog=epilog)
+    parser = argparse.ArgumentParser(description=des, epilog=epilog)
 
-    parser.add_argument('command',
+    parser.add_argument('command', nargs='?',
                         choices=['start', 'watch', 'list', 'stop',
-                                 'kill', 'restart'],
+                                 'kill', 'restart'], default=None,
                         help='Commands to execute')
 
     parser.add_argument('dirname', nargs='?', default=None,
@@ -37,6 +37,8 @@ def main():
 
     parser.add_argument('--inotify', '-i', action='store_true',
                         default=None, help='Run observer with inotify.')
+    parser.add_argument('--version', '-v', action='store_true',
+                        default=None, help='Print AutoED version number.')
 
     msg = 'Do not run xia2 or DIALS (used for testing).'
     parser.add_argument('--dummy', action='store_true', default=False,
@@ -57,6 +59,10 @@ def main():
     argcomplete.autocomplete(parser)
 
     args = parser.parse_args()
+
+    if args.version:
+        print(__version__)
+        sys.exit()
 
     autoed_daemon = AutoedDaemon()
 

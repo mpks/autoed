@@ -111,6 +111,15 @@ class GlobalConfig(dict):
                     log += '\n' + bfr + f"  {key}: {args_dict[key]}  "
                     log += f"(old value: {value})"
                     self[key] = args_dict[key]
+
+        if self['dummy']:
+            # For 'dummy' run we want to run with default arguments
+            log += "\n" + bfr
+            log += "Argument 'dummy' is True. Setting all back to defaults."
+            for key, value in default_global_config.items():
+                if key in self and key != 'dummy':
+                    self[key] = value
+
         return log
 
     def __getattr__(self, key):

@@ -33,7 +33,10 @@ the configuration file can be set via the command line when you call the
 AutoED watch command (e.g., ``autoed --inotify watch`` would set the option
 ``inotify`` to ``True``). In that case, the option from the command line will
 overwrite both the default and the one set in the user configuration file.
-Again, this change will be recorded in the log file.
+Again, this change will be recorded in the log file. In case you set the
+parameter ``dummy`` to ``true`` (either in the global config file or on the
+command line) AutoED will assume you are running tests, and will reset all the
+parameters (except ``dummy``) to their default values.
 
 
 A list of global parameters (their default value) and their description is given below. 
@@ -55,7 +58,9 @@ A list of global parameters (their default value) and their description is given
      To process each dataset, AutoED creates a processing script (with DIALS or
      xia2 commands) and executes them. If this parameter is set to ``true``,
      AutoED will create the processing scripts, but it will not execute them.
-     This parameter is used mainly for testing.
+     This parameter is used mainly for testing. Note that if you set it to 
+     ``true`` AutoED will assume you are running tests, and will reset all the
+     other parameters to their default values.
     
    - ``local: false``
 
