@@ -236,7 +236,7 @@ def set_watch_logger(watch_path):
     auto_logger.addHandler(file_handler)
 
     auto_logger.info(40*'=')
-    auto_logger.info('  AutoED watch started')
+    auto_logger.info('  AutoED')
     auto_logger.info(f'  version: v{__version__} ')
     auto_logger.info(40*'=')
 

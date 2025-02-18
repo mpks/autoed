@@ -69,6 +69,7 @@ to stop watching the first directory. Alternatively, you can run
 to kill all the watchdog processes and terminate the autoed daemon.
     
 
+.. _inotify-note:
 
 .. important::
 
@@ -78,13 +79,14 @@ to kill all the watchdog processes and terminate the autoed daemon.
    disadvantage of the polling method is that it might require more
    computational resources. If you are working on a local filesystem, you can
    run the watch command with an option :code:`--inotify` or :code:`-i` to use
-   :code:`inotify` without polling (which is the default).
+   :code:`inotify` without polling. By default, AutoED will use the polling
+   method.
 
-   To minimize CPU usage, you can set the time interval (in seconds) for 
-   filesystem checks. Use :code:`--time_sleep` or :code:`-t`. For example,
+   To minimize the CPU usage, you can set the time interval (in seconds) for 
+   filesystem checks. Use :code:`--sleep_time` or :code:`-t`. For example,
 
     .. code-block:: bash
 
-       autoed --time_sleep 60 watch /path/to/diffraction/data
+       autoed -t 60 watch /path/to/diffraction/data
 
    would check the filesystem every minute.
