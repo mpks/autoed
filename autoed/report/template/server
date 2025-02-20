@@ -1,0 +1,55 @@
+#!/bin/bash
+
+PID_FILE=".server.pid"
+DEFAULT_PORT=8000
+
+function show_help() {
+    echo "Usage: server [port_number | stop | -h]"
+    echo "  port_number   Start the server on the specified port (default: 8000)"
+    echo "  stop          Stop the running server."
+    echo "  -h            Show this help message."
+}
+
+if [ "$1" == "stop" ]; then
+
+    pid_number=`pgrep -f "python -m http.server"`
+    pid_number3=`pgrep -f "python3 -m http.server"`
+
+    echo ${pid_number} | xargs -n1 kill 2>/dev/null
+    echo ${pid_number3} | xargs -n1 kill 2>/dev/null
+    echo "Server stopped"
+
+elif [ "$1" == "-h" ]; then
+    show_help
+elif [[ "$1" =~ ^[0-9]+$ ]]; then
+    PORT=$1
+
+    pid_number=`pgrep -f "python -m http.server ${PORT}"`
+    pid_number3=`pgrep -f "python3 -m http.server ${PORT}"`
+
+    echo ${pid_number} | xargs -n1 kill 2>/dev/null
+    echo ${pid_number3} | xargs -n1 kill 2>/dev/null
+
+    python -m http.server "$PORT" > /dev/null 2>&1 & 
+    pid_number=`pgrep -f "python -m http.server"`
+    echo "Server started on port $PORT"
+    echo "Server PID number: ${pid_number}"
+    echo "To see the report go to:"
+    echo " http://localhost:${PORT}/report.html"
+    echo "Run 'server stop' to kill the server."
+else
+
+    pid_number=`pgrep -f "python -m http.server ${DEFAULT_PORT}"`
+    pid_number3=`pgrep -f "python3 -m http.server ${DEFAULT_PORT}"`
+
+    echo "${pid_number}" | xargs -n1 kill 2>/dev/null
+    echo "${pid_number3}" | xargs -n1 kill 2>/dev/null
+
+    python -m http.server "$DEFAULT_PORT" > /dev/null 2>&1 &
+    pid_number=`pgrep -f "python -m http.server"`
+    echo "Server started on default port $DEFAULT_PORT"
+    echo "Server PID number: ${pid_number}"
+    echo "To see the report go to:"
+    echo " http://localhost:${DEFAULT_PORT}/report.html"
+    echo "Run 'server stop' to kill the server"
+fi

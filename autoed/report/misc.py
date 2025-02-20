@@ -18,17 +18,22 @@ def generate_report_files(report_path, verbose=True):
 
     autoed_path = autoed.__path__[0]
     template_path = os.path.join(autoed_path, 'report/template')
-    template_files = ['report.html', 'scripts.js', 'styles.css', 'favicon.png']
+    template_files = ['report.html', 'scripts.js', 'styles.css',
+                      'server', 'favicon.png']
 
     for file in template_files:
         source_path = os.path.join(template_path, file)
 
-        if file == 'report.html':
+        if file == 'report.html' or file == 'server':
             destination_path = os.path.join(report_path, file)
         else:
             destination_path = os.path.join(data_path, file)
 
         shutil.copy(source_path, destination_path)
+
+        if file == 'server':
+            os.chmod(destination_path,
+                     os.stat(destination_path).st_mode | 0o111)
 
 
 def update_database_for_dataset(dataset, report_path):
