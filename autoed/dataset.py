@@ -13,7 +13,8 @@ from autoed.metadata import Metadata
 from autoed.process.plot_spots import plot_spots_from_dataset
 from autoed.report.misc import (generate_report_files,
                                 update_database_for_dataset)
-from autoed.constants import report_dir
+from autoed.report.txt_report import generate_txt_report
+from autoed.constants import report_dir, report_data_dir, database_json_file
 
 
 class SinglaDataset:                    # pylint: disable=R0902
@@ -302,6 +303,9 @@ def update_database(dataset):
     path = dataset.path
     report_path = r''
 
+    # The report path is the same directory where
+    # the data root is (e.g. ED directory). This assumes there is just one
+    # data root directory in the path
     temp_list = path.split('/')
     for dir_name in temp_list:
         if dir_name != ed_root_dir:
@@ -310,5 +314,10 @@ def update_database(dataset):
             break
 
     report_path = os.path.join(report_path, report_dir)
+    report_data_path = os.path.join(report_path, report_data_dir)
     generate_report_files(report_path, verbose=False)
-    update_database_for_dataset(dataset, report_path)
+    update_database_for_dataset(dataset, report_data_path)
+
+    # Generate TXT output from JSON
+    json_data_path = os.path.join(report_data_path, database_json_file)
+    generate_txt_report(json_data_path, report_path)

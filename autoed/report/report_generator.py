@@ -1,9 +1,10 @@
 import os
 import sys
-from autoed.constants import report_dir, report_data_dir
+from autoed.constants import report_dir, report_data_dir, database_json_file
 from autoed.report.json_database import JsonDatabase
 from autoed.report.parser import Xia2OutputParser
 from autoed.report.misc import generate_report_files
+from autoed.report.txt_report import generate_txt_report
 import argparse
 
 
@@ -29,6 +30,12 @@ def run():
 
     generate_report_files(report_full_path)
     generate_json_database(watch_dir, report_full_path)
+
+    # Generate TXT output from JSON
+    print("TXT report generated")
+    json_data_path = os.path.join(report_full_path, report_data_dir)
+    json_data_path = os.path.join(json_data_path, database_json_file)
+    generate_txt_report(json_data_path, report_full_path)
 
 
 def generate_json_database(path_to_watched_dir, report_path):

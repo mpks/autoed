@@ -10,7 +10,7 @@ def generate_report_files(report_path, verbose=True):
 
     os.makedirs(report_path, exist_ok=True)
     if verbose:
-        print("Generating HTML report in")
+        print("Generating report in")
         print(f" {report_path} ")
 
     data_path = os.path.join(report_path, report_data_dir)
