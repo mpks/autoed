@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   parts of a dataset (`autoed_plot_spots`).
 - An automatic plotting of spots figures (also included in the HTML report).
 - Global configuration file (generated with autoed_generate_config).
+- Automatic report generation. Previously, the user needed to run a
+  separate command to generate a report.
+- Textual report generated along with the HTML report.
+
+
+### Fixed
+- Internal structure of the report directory. Report data is
+  now separated from the report.html file.
 
 ## [0.2.0] - 2024-08-27
 
