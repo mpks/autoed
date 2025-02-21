@@ -9,7 +9,3 @@ Watching the filesystem
 ********************
 Processing pipelines
 ********************
-
-********************
-Generating reports
-********************

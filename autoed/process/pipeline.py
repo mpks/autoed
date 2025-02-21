@@ -80,6 +80,7 @@ class Pipeline(ABC):
         cmd = f"xia2 image={self.dataset.nexgen_file} "
         cmd += "goniometer.axis=0,-1,0 dials.fix_distance=True "
         cmd += "dials.masking.d_max=9 "
+        cmd += "xia2.settings.remove_blanks=True "
 
         if 'gain' in global_config.keys():
             cmd += f'input.gain={global_config.gain} '

@@ -30,5 +30,6 @@ use, and configure the package and its internal structure.
 
    pages/intro
    pages/how_autoed_works
+   pages/reports
    pages/configuring_autoed
    pages/beam_position_methods
