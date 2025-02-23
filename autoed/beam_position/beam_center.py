@@ -36,7 +36,7 @@ def main():
 
     choices = ['maximum', 'midpoint', 'mixed']
     parser.add_argument('--method', choices=choices,
-                        default='midpoint', help=msg)
+                        default='mixed', help=msg)
 
     parser.add_argument('--every', type=int, default=20,
                         help='Use `every` image when computing the average.')
