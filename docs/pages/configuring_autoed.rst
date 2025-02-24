@@ -100,3 +100,8 @@ A list of global parameters (their default value) and their description is given
 
      Name of the directory where to keep the processed results (xia2 log
      files and reports).
+
+   - ``run_pipelines: {"default": true, "user": true, ...}``
+
+     A dictionary that sets which pipelines to run. Only the pipelines in this
+     dictionary set to ``true`` will be executed.
