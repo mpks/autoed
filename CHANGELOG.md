@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic report generation. Previously, the user needed to run a
   separate command to generate a report.
 - Textual report generated along with the HTML report.
+- An option for the user to choose which pipelines to run.
 
 
 ### Fixed
