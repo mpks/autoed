@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Internal structure of the report directory. Report data is
   now separated from the report.html file.
+- A pipeline will now clear the processed directory before
+  processing again.
 
 ## [0.2.0] - 2024-08-27
 

@@ -2,7 +2,7 @@ import sys
 import os
 import argparse
 from autoed.dataset import SinglaDataset
-from autoed.utility.filesytem import gather_master_files
+from autoed.utility.filesystem import gather_master_files
 
 
 def main():

@@ -5,6 +5,7 @@ import json
 from abc import ABC, abstractmethod
 from autoed.global_config import global_config
 from autoed.constants import xia2_pipelines, dials_pipelines, all_pipelines
+from autoed.utility.filesystem import clear_dir
 import subprocess
 
 
@@ -31,6 +32,7 @@ class Pipeline(ABC):
 
         self.out_dir = os.path.join(dataset.output_path, method)
         os.makedirs(self.out_dir, exist_ok=True)
+        clear_dir(self.out_dir)    # Clear any previous output
 
     @abstractmethod
     def run(self):

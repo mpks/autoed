@@ -4,7 +4,7 @@ from autoed.constants import xia2_pipelines
 from autoed.constants import xia2_output_file
 from autoed.constants import xia2_dials_report_path
 from autoed.report.json_database import JsonDatabase
-from autoed.utility.filesytem import find_files_in_directory
+from autoed.utility.filesystem import find_files_in_directory
 import re
 import os
 
