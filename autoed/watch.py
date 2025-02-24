@@ -44,6 +44,10 @@ def main():
     parser.add_argument('--dummy', action='store_true', default=None,
                         help=msg)
 
+    msg = 'Same as dummy, but do not overwrite default config params.'
+    parser.add_argument('--test', action='store_true', default=None,
+                        help=msg)
+
     msg = 'If used, it runs xia2 and DIALS processing locally with bash, '
     msg += 'instead of submitting the job request to cluster using SLURM.'
     parser.add_argument('--local', action='store_true', default=None,
@@ -176,7 +180,12 @@ class DirectoryHandler(FileSystemEventHandler):
                                 self.dataset_names.add(basename)
                                 dataset = SinglaDataset.from_basename(basename)
                                 dataset.search_and_update_data_files()
-                                dataset.dummy = self.global_config.dummy
+
+                                # We do not want to run processing scripts
+                                # if either this is a test, or a dummy run
+                                run_dummy = (self.global_config.test or
+                                             self.global_config.dummy)
+                                dataset.dummy = run_dummy
                                 self.datasets[dataset.base] = dataset
                             else:
                                 dataset = self.datasets[basename]

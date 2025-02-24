@@ -32,7 +32,8 @@ class Pipeline(ABC):
 
         self.out_dir = os.path.join(dataset.output_path, method)
         os.makedirs(self.out_dir, exist_ok=True)
-        clear_dir(self.out_dir)    # Clear any previous output
+        if not dataset.dummy:
+            clear_dir(self.out_dir)    # Clear any previous output
 
     @abstractmethod
     def run(self):

@@ -284,10 +284,11 @@ class SinglaDataset:                    # pylint: disable=R0902
                     run_processing_pipelines(self, global_config.local)
                     self.last_processed_time = time.time()
 
-                    # Update the report database
-                    self.logger.info('Updating the report directory')
-                    update_database(self)
-                    self.logger.info('Report directory updated')
+                    if not self.dummy:
+                        # Update the report database
+                        self.logger.info('Updating the report directory')
+                        update_database(self)
+                        self.logger.info('Report directory updated')
                     return True
                 else:
                     msg = 'Failed to generate nexus file'

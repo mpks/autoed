@@ -58,10 +58,13 @@ A list of global parameters (their default value) and their description is given
      To process each dataset, AutoED creates a processing script (with DIALS or
      xia2 commands) and executes them. If this parameter is set to ``true``,
      AutoED will create the processing scripts, but it will not execute them.
-     This parameter is used mainly for testing. Note that if you set it to 
-     ``true`` AutoED will assume you are running tests, and will reset all the
-     other parameters to their default values.
-    
+
+   - ``test: false`` 
+
+     Similar to ``dummy``, except if you set it to ``true`` AutoED will 
+     assume you are running tests, and will reset all the other global
+     parameters to their default values.
+
    - ``local: false``
 
      If ``true``, execution of the processing scripts is done locally, on the

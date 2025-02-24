@@ -40,8 +40,13 @@ def main():
     parser.add_argument('--version', '-v', action='store_true',
                         default=None, help='Print AutoED version number.')
 
-    msg = 'Do not run xia2 or DIALS (used for testing).'
+    msg = 'Generate the xia2/DIALS processing scripts, but do not run them.'
     parser.add_argument('--dummy', action='store_true', default=False,
+                        help=msg)
+
+    msg = 'Same as option "dummy", but does not overwrite the default '
+    msg += 'config parameters (used for running tests).'
+    parser.add_argument('--test', action='store_true', default=False,
                         help=msg)
 
     msg = 'If set, AutoED will run all the processes localy, without '
@@ -84,7 +89,8 @@ def main():
             sleep_time=args.sleep_time,
             log_dir=args.log_dir,
             dummy=args.dummy,
-            local=args.local
+            local=args.local,
+            test=args.test
         )
     elif args.command == "list":
         autoed_daemon.list_directories()
@@ -239,6 +245,7 @@ class AutoedDaemon:
               log_dir=None,
               dummy=False,
               local=False,
+              test=False,
               ):
 
         if not os.path.exists(self.lock_file):
@@ -271,6 +278,8 @@ class AutoedDaemon:
                 command += '--local '
             if dummy:
                 command += '--dummy '
+            if test:
+                command += '--test '
             if log_dir:
                 log_path = os.path.abspath(log_dir)
                 command += '--log-dir ' + log_path + ' '

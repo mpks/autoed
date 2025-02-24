@@ -21,7 +21,7 @@ def autoed_setup():
 
     run("autoed start")
     print('Running autoed')
-    run2(f"autoed --inotify -t 0.1 --dummy watch {watch_path}")
+    run2(f"autoed --inotify -t 0.1 --test watch {watch_path}")
     time.sleep(0.5)
 
     yield

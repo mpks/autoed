@@ -7,6 +7,7 @@ default_global_config = {}
 default_global_config['inotify'] = False
 default_global_config['sleep_time'] = 1.
 default_global_config['dummy'] = False
+default_global_config['test'] = False
 default_global_config['local'] = False
 default_global_config['log_dir'] = None
 default_global_config['gain'] = 1.
@@ -122,10 +123,10 @@ class GlobalConfig(dict):
                     log += f"(old value: {value})"
                     self[key] = args_dict[key]
 
-        if self['dummy']:
+        if self['test']:
             # For 'dummy' run we want to run with default arguments
             log += "\n" + bfr
-            log += "Argument 'dummy' is True. Setting all back to defaults."
+            log += "Argument 'test' is True. Setting all back to defaults."
             for key, value in default_global_config.items():
                 if key in self and key != 'dummy':
                     self[key] = value
