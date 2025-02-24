@@ -284,7 +284,17 @@ def run_processing_pipelines(dataset, local):
     methods = all_pipelines
     pipelines = []
 
-    for method in methods:
+    config_pipelines = global_config.run_pipelines
+
+    running_methods = []
+
+    # Only run those pipelines that apear in the global config file
+    for conf_pipeline, run_pipeline in config_pipelines.items():
+        if run_pipeline and conf_pipeline in methods:
+            running_methods.append(conf_pipeline)
+
+    for method in running_methods:
+
         if local:
             pipelines.append(LocalPipeline(dataset, method))
         else:

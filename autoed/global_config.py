@@ -15,6 +15,16 @@ default_global_config['trigger_file'] = '.HiMarko'
 default_global_config['ed_root_dir'] = 'ED'
 default_global_config['processed_dir'] = 'processed'  # !CHANGE IN dataset
 
+run_pipelines = {'default': True,
+                 'user': True,
+                 'ice': True,
+                 'max_lattices': True,
+                 'real_space_indexing': True,
+                 'xds': False,
+                 }
+
+default_global_config['run_pipelines'] = run_pipelines
+
 
 class GlobalConfig(dict):
 
@@ -157,9 +167,11 @@ def save_default():
         json.dump(default_global_config, f, indent=4)
 
     print(f" Default configuration saved in '{autoed_config_file}'")
-    print(f' Set system variable {autoed_config_var} with\n')
+    print(f' Set environment variable {autoed_config_var} with\n')
     msg = f' export {autoed_config_var}=/path/to/{autoed_config_file}\n'
     print(msg)
     print(' in your .bashrc to enable AutoED to find your config file.')
     print(' For more details on the config parameters see the docs: ')
-    print(' https://autoed.readthedocs.io/en/latest/pages/configuring_autoed.html')
+    link = ' https://autoed.readthedocs.io/en/latest/pages/'
+    link += 'configuring_autoed.html'
+    print(link)
