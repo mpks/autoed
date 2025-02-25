@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now separated from the report.html file.
 - A pipeline will now clear the processed directory before
   processing again.
+- AutoED will now catch exceptions from the beam center 
+  calculations. If the method fails now, the default beam position
+  will be saved to the NeXus file (and a warning will be saved in
+  the AutoED log).
 
 ## [0.2.0] - 2024-08-27
 
