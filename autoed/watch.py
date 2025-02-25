@@ -179,6 +179,9 @@ class DirectoryHandler(FileSystemEventHandler):
                             if (basename not in self.dataset_names):
                                 self.dataset_names.add(basename)
                                 dataset = SinglaDataset.from_basename(basename)
+                                msg = 'AutoED global log file at '
+                                msg += f"'{global_config.log_dir}'."
+                                dataset.logger.info(msg)
                                 dataset.search_and_update_data_files()
 
                                 # We do not want to run processing scripts
