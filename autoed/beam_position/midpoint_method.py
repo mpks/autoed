@@ -206,6 +206,8 @@ def sort_peak_by_occurence(peaks: List[List[float]],
     Sort peaks by average width
     """
 
+    if len(widths) == 0:       # No midpoints found
+        raise ValueError('No midpoints found in the projected profile.')
     average_widths = [sum(wlist) / len(wlist) for wlist in widths]
     zipped_data = list(zip(peaks, levels, average_widths))
 

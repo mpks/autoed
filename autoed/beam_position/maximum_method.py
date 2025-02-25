@@ -67,20 +67,6 @@ def beam_position_from_max(image, params):
     bx = data_x["beam_position"]
     by = data_y["beam_position"]
 
-#    if params.plot:
-#        i1, i2 = data_x["bin_position"]
-#        j1, j2 = data_y["bin_position"]
-#        span_xy = i1, i2, j1, j2
-#        p = PlotParams(
-#            image,
-#            profiles_x=data_x["profile"],
-#            profiles_y=data_y["profile"],
-#            span_xy=span_xy,
-#            beam_position=(bx, by),
-#            filename=params.filename,
-#        )
-#        plot_profile(p)
-
     return bx, by
 
 

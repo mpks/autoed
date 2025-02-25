@@ -12,3 +12,10 @@ beam_report_dir = 'beam_positions'                 # Keeps beam images
 spots_report_dir = 'spots'                         # Keeps spots
 xia2_dials_report_path = 'DEFAULT/NATIVE/SWEEP1/index'
 report_data_dir = 'report_data'
+
+SINGLA_GAP_START = 510
+SINGLA_GAP_STOP = 550
+MID_START = 0.2    # Start of the midpoint intersection range (from 0 to 1)
+MID_STOP = 0.9     # End of the midpoint intersection range   (from 0 to 1)
+MID_STEP = 0.02     # Midpoint intersection range step (from 0 to 1)
+BAD_PIXEL_THRESHOLD = 200000

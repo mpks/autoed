@@ -3,6 +3,7 @@ import os
 import logging
 import time
 import re
+import traceback
 from autoed.constants import slurm_file
 from autoed.global_config import global_config
 from autoed.convert import generate_nexus_file
@@ -204,23 +205,32 @@ class SinglaDataset:                    # pylint: disable=R0902
                 x = 514
                 y = 531
                 msg = f"Problem reading data file {self.data_files[0]}.\n"
-                msg += "Setting beam position to default (514, 531)."
-                self.logger.error(msg)
+                msg += "Setting the beam position to default (514, 531)."
+                self.logger.warning(msg)
                 self.beam_center = (x, y)
                 return
 
             ed_root = global_config.ed_root_dir
-            x, y = calc.center_from_mixed(every=50,
-                                          plot_file=self.beam_figure,
-                                          title=self.beam_figure,
-                                          ed_root_dir=ed_root)
+            try:
+                x, y = calc.center_from_mixed(every=50,
+                                              plot_file=self.beam_figure,
+                                              title=self.beam_figure,
+                                              ed_root_dir=ed_root)
+            except Exception:
+                full_traceback = traceback.format_exc()
+                msg = "Failed to compute the beam center.\n"
+                msg += f"{full_traceback}\n"
+                msg += "Setting the beam position to default (514, 531)."
+                self.logger.warning(msg)
+                x = 514
+                y = 531
 
             if not x:
-                msg = 'Beam position along x is None. Setting beam_x to 514'
-                self.logger.error(msg)
+                msg = 'Beam position along x is None. Setting it to 514 px'
+                self.logger.warning(msg)
                 x = 514
             if not y:
-                msg = 'Beam position along y is None. Setting beam_y to 531'
+                msg = 'Beam position along y is None. Setting it to 531 px'
                 self.logger.error(msg)
                 y = 531
             self.beam_center = (x, y)
@@ -262,10 +272,11 @@ class SinglaDataset:                    # pylint: disable=R0902
                 msg = f"Computing the beam center for {self.dataset_name}"
                 self.logger.info(msg)
 
+                # Will write the default if it fails to compute
                 self.compute_beam_center()
 
                 msg = f"Beam center for {self.dataset_name}"
-                msg += ' = (%f, %f) ' % self.beam_center
+                msg += ' = (%.2f, %.2f) ' % self.beam_center
                 self.logger.info(msg)
 
             succes_metadata = self.fetch_metadata()

@@ -3,6 +3,9 @@ import hdf5plugin
 import numpy as np
 import os
 import autoed
+from autoed.constants import (SINGLA_GAP_START, SINGLA_GAP_STOP, MID_START,
+                              MID_STOP, MID_STEP, BAD_PIXEL_THRESHOLD)
+
 from autoed.beam_position.midpoint_method import (MidpointMethodParams,
                                                   position_from_midpoint)
 from autoed.beam_position.maximum_method import MaxMethodParams, find_max
@@ -114,16 +117,18 @@ class BeamCenterCalculator:
                 time.sleep(1)
 
     def center_from_midpoint(self, every=20, verbose=False, plot_file=None,
-                             ed_root_dir='ED'):
+                             ed_root_dir='ED',
+                             bad_pixel_threshold=BAD_PIXEL_THRESHOLD):
 
         image = self.dataset[::every, :, :].mean(axis=0)
         image[self.mask > 0] = 0
+        image[image > bad_pixel_threshold] = 0
 
         mid_params = MidpointMethodParams(
-            data_slice=(0.35, 0.9, 0.02),
+            data_slice=(MID_START, MID_STOP, MID_STEP),
             convolution_width=20,
             exclude_range_x=None,
-            exclude_range_y=(510, 550),
+            exclude_range_y=(SINGLA_GAP_START, SINGLA_GAP_STOP),
             per_image=False)
 
         x0, y0, plot_params = position_from_midpoint(image, mid_params,
@@ -132,7 +137,8 @@ class BeamCenterCalculator:
                                                      ed_root_dir=ed_root_dir)
         return x0, y0
 
-    def center_from_mixed(self, every=20, bad_pixel_threshold=20000,
+    def center_from_mixed(self, every=20,
+                          bad_pixel_threshold=BAD_PIXEL_THRESHOLD,
                           convolution_width=3,
                           plot_file=None, title=None, ed_root_dir='ED'):
 
@@ -142,10 +148,10 @@ class BeamCenterCalculator:
 
         # First try midpoint method
         mid_params = MidpointMethodParams(
-            data_slice=(0.35, 0.9, 0.02),
+            data_slice=(MID_START, MID_STOP, MID_STEP),
             convolution_width=20,
             exclude_range_x=None,
-            exclude_range_y=(510, 550),
+            exclude_range_y=(SINGLA_GAP_START, SINGLA_GAP_STOP),
             per_image=False)
 
         (x_mid, y_mid,
@@ -194,7 +200,7 @@ class BeamCenterCalculator:
             plot_params.label = label
 
         edge = 0
-        if y_mid > 550 - edge or y_mid < 510 + edge:
+        if y_mid > SINGLA_GAP_STOP - edge or y_mid < SINGLA_GAP_START + edge:
             # The beam is visible, switch to maximum
             y = y_max
             x = x_max
