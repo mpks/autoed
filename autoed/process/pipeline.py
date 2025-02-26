@@ -179,18 +179,20 @@ class LocalPipeline(Pipeline):
 
         if not self.dataset.dummy:
 
+            msg = f"Processing with local pipeline '{self.method}'"
+            self.dataset.logger.info(msg)
+
             p = subprocess.run('bash ' + self.bash_file,
                                shell=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, cwd=self.out_dir,
                                env=os.environ)
             if p.stderr:
-                msg = "Failed to process data with local pipeline "
-                msg += f"'{self.method}'"
+                msg = f"Pipeline '{self.method}' status: FAILED"
                 self.dataset.logger.error(msg)
                 self.dataset.logger.error(p.stderr)
                 return 0
             else:
-                msg = f"Data processed with local pipeline '{self.method}'"
+                msg = f"Pipeline '{self.method}' status: PROCESSED"
                 self.dataset.logger.info(msg)
                 return 1
         else:

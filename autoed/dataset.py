@@ -111,8 +111,11 @@ class SinglaDataset:                    # pylint: disable=R0902
         new_files_exist = (os.path.exists(self.master_file) and
                            os.path.exists(self.json_file))
 
-        if (files_exist and data_exists):
-            self.logger.info('All files present in dataset %s' % self.base)
+        if (new_files_exist and data_exists):
+            self.logger.info("Detected data and JSON metadata")
+            return True
+        elif (files_exist and data_exists):
+            self.logger.info("Detected data and TXT metadata")
 
             con_data = True
             for data_file in self.data_files:
@@ -172,9 +175,6 @@ class SinglaDataset:                    # pylint: disable=R0902
             if con1 and con2 and con3 and con4 and con_data:
                 self.present_lock = True
             return con1 and con2 and con3 and con4 and con_data
-        elif (new_files_exist and data_exists):
-            self.logger.info(f"Detected JSON dataset: {self.base}")
-            return True
         else:
             self.logger.info('Dataset not complete %s' % self.base)
             return False
@@ -288,8 +288,6 @@ class SinglaDataset:                    # pylint: disable=R0902
             else:
                 success = generate_nexus_file(self)
                 if success:
-                    msg = 'Nexus file generated'
-                    self.logger.info(msg)
                     os.makedirs(self.output_path, exist_ok=True)
                     # run_slurm_job(self)
                     run_processing_pipelines(self, global_config.local)

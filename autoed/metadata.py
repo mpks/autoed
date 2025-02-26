@@ -9,18 +9,24 @@ from autoed.utility.misc_functions import (
     is_file_fully_written,
 )
 
+default_metadata = {}
+default_metadata['wavelength'] = None
+default_metadata['angle_increment'] = None
+default_metadata['start_angle'] = None
+default_metadata['detector_distance'] = None
+default_metadata['sample_type'] = None
+default_metadata['unit_cell'] = None
+default_metadata['space_group'] = None
+default_metadata['rotation_speed'] = None
 
-class Metadata:
+
+class Metadata(dict):
     """A class to keep all relevant experimental metadata"""
 
     def __init__(self):
-        self.wavelength = 0.02507934052490744
-        self.angle_increment = 0.5
-        self.start_angle = -30.0
-        self.detector_distance = 785.91
-        self.sample_type = 'macro'
-        self.unit_cell = None
-        self.space_group = None
+
+        for key, value in default_metadata.items():
+            self[key] = value
 
     def from_txt(self, dataset):
         """Read the metadata from textual files (e.g. log, mdoc etc)
@@ -112,46 +118,63 @@ class Metadata:
         with open(dataset.json_file, 'r') as json_file:
             json_data = json.load(json_file)
 
-        if 'wavelength' not in json_data:
-            dataset.logger.error('wavelength set to None in JSON file')
-            return False
-        self.wavelength = json_data['wavelength']
-
-        if 'angle_increment' not in json_data:
-            dataset.logger.error('angle_increment set to None in JSON file')
-            return False
-        self.angle_increment = json_data['angle_increment']
-
-        if 'start_angle' not in json_data:
-            dataset.logger.error('start_angle set to None in JSON file')
-            dataset.logger.info('Trying to fetch start_angle from log file')
-
-            success, start_angle = scrap(dataset.log_file, 'start angle',
-                                         float, -60)
-            if not success:
+        # First check if all the required metadata is in JSON file
+        msg = "Reading required metadata from the JSON file"
+        dataset.logger.info(msg)
+        for key, value in self.items():
+            if key not in json_data:
+                msg = f"Required key '{key}' not in JSON metadata file"
+                dataset.logger.error(msg)
                 return False
             else:
-                dataset.logger.info(f"start_angle set to {start_angle}")
-                self.start_angle = start_angle
-        else:
-            self.start_angle = json_data['start_angle']
+                msg = f"  {key}: {json_data[key]}"
+                dataset.logger.info(msg)
+                self[key] = json_data[key]
 
-        self.sample_type = json_data['sample_type']
-        self.unit_cell = json_data['unit_cell']
-        space_group = json_data['space_group']
-        if space_group == "undefined":
-            space_group = None
-        self.space_group = space_group
+        if self.space_group == "undefined":
+            dataset.logger.info("Overwritting the space_group: to None")
+            self.space_group = None
 
-        if 'detector_distance' not in json_data:
-            dataset.logger.error('detector_distance not in JSON file')
-            return False
-        self.detector_distance = json_data['detector_distance']
-        if self.detector_distance is None:
-            dataset.logger.error('detector_distance set to None in JSON file')
-            return False
+        if isinstance(self.rotation_speed, str):
+            try:
+                dataset.logger.info("Converting rotation_speed to float")
+                self.rotation_speed = float(self.rotation_speed)
+            except Exception:
+                msg = "Failed to convert the rotation speed from the JSON "
+                msg += "metadata file into a float"
+                dataset.logger.error(msg)
+                return False
+
+        # Read any other metadata present in the metadata file
+        msg = "Reading the rest of metadata from the JSON file"
+        dataset.logger.info(msg)
+        for key, value in json_data.items():
+            if key not in default_metadata:
+                msg = f"  {key}: {value}"
+                dataset.logger.info(msg)
+                self[key] = value
 
         return True
+
+    def __getattr__(self, key):
+        """Handle attribute access (obj.key)."""
+        try:
+            return self[key]
+        except KeyError:
+            msg = f"{self.__class__.__name__} object has no attribute '{key}'"
+            raise AttributeError(msg)
+
+    def __setattr__(self, key, value):
+        """Handle attribute assignment (obj.key = value)."""
+        self[key] = value
+
+    def __delattr__(self, key):
+        """Handle attribute deletion (del obj.key)."""
+        try:
+            del self[key]
+        except KeyError:
+            msg = f"{self.__class__.__name__} object has no attribute '{key}'"
+            raise AttributeError(msg)
 
 
 def get_angle_increment_old(dataset):
