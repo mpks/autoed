@@ -26,6 +26,75 @@ run_pipelines = {'default': True,
 
 default_global_config['run_pipelines'] = run_pipelines
 
+defined_pipelines = [
+    {'pipeline_name': 'default',
+     'type': 'xia2',
+     'run_condition': True,
+     'script': [
+         'xia2 image={nexus_file}',
+         'goniometer.axis=0,-1,0  dials.fix_distance=True',
+         'dials.masking.d_max=9',
+         'xia2.settings.remove_blanks=True',
+         'input.gain={g.gain};'
+     ]
+     },
+    {'pipeline_name': 'ice',
+     'type': 'xia2',
+     'run_condition': True,
+     'script': [
+         "xia2 image={nexus_file}",
+         "goniometer.axis=0,-1,0  dials.fix_distance=True",
+         "dials.masking.d_max=9",
+         "xia2.settings.remove_blanks=True",
+         "input.gain={g.gain}",
+         "xia2.settings.unit_cell=4.5,4.5,7.33,90,90,119.999",
+         "xia2.settings.space_group=P63/mmc;"
+     ]
+     },
+    {'pipeline_name': 'user',
+     'type': 'xia2',
+     'run_condition':
+         '(m.unit_cell is not None) or (m.space_group is not None)',
+     'script': [
+         'xia2 image={nexus_file}',
+         'goniometer.axis=0,-1,0  dials.fix_distance=True',
+         'dials.masking.d_max=9',
+         'xia2.settings.remove_blanks=True',
+         'input.gain={g.gain}',
+         'xia2.settings.unit_cell={unit_cell}',
+         'xia2.settings.space_group={m.space_group};'
+      ]
+     },
+    {'pipeline_name': 'real_space_indexing',
+     'type': 'xia2',
+     'run_condition':
+         '(m.unit_cell is not None) and (m.space_group is not None)',
+     'script': [
+         'xia2 image={nexus_file}',
+         'goniometer.axis=0,-1,0  dials.fix_distance=True',
+         'dials.masking.d_max=9',
+         'xia2.settings.remove_blanks=True',
+         'input.gain={g.gain}',
+         'dials.index.method=real_space_grid_search',
+         'xia2.settings.unit_cell={unit_cell}',
+         'xia2.settings.space_group={m.space_group};'
+     ]
+     },
+    {'pipeline_name': 'max_lattices',
+     'type': 'dials',
+     'run_condition': True,
+     'script': [
+        "dials.import {nexus_file} goniometer.axis=0,-1,0;",
+        "dials.find_spots {imported_file} d_max=9 gain={g.gain};",
+        "dials.index {processed_dir}/imported.expt ",
+        "{processed_dir}/strong.refl detector.fix=distance",
+        "max_lattices=5;"
+     ]
+     }
+]
+
+default_global_config['defined_pipelines'] = defined_pipelines
+
 
 class GlobalConfig(dict):
 
@@ -100,7 +169,8 @@ class GlobalConfig(dict):
 
         logger.info('Listing current global configuration: ')
         for key, value in self.items():
-            logger.info(f"    {key}: {value} ")
+            if key != 'defined_pipelines':
+                logger.info(f"    {key}: {value} ")
 
     def overwrite_from_commandline(self, parsed_args):
         """Overwrite object dict values with the ones from the command line"""

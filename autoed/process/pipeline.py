@@ -4,33 +4,29 @@ import autoed
 import json
 from abc import ABC, abstractmethod
 from autoed.global_config import global_config
-from autoed.constants import xia2_pipelines, dials_pipelines, all_pipelines
 from autoed.utility.filesystem import clear_dir
 import subprocess
+import traceback
 
 
 class Pipeline(ABC):
 
     @abstractmethod
-    def __init__(self, dataset, method=xia2_pipelines[0]):
+    def __init__(self, dataset, pipeline_dict):
         """
         A pipeline to process diffraction data
 
         dataset : SinglaDataset
-        method : string
-            Method used to process the dataset:
-            default - Run xia2 with default params.
-            user - Run xia2 with user-provided space group and unit cell.
-            ice - Run xia2 with ice parameters.
-            max_lattices - Run with DIALS using `max_lattices=5` parameter.
-            real_space_indexing - Run xia2 using real space indexing.
-            xds - Run with xia2 with XDS pipeline.
+        pipeline_dict : dictionary
+            A dictionary that defines all the pipeline details
         """
 
         self.dataset = dataset
-        self.method = method
+        self.info = pipeline_dict
+        self.method = pipeline_dict['pipeline_name']
+        self.run_condition = False     # By default, pipeline will not run
 
-        self.out_dir = os.path.join(dataset.output_path, method)
+        self.out_dir = os.path.join(dataset.output_path, self.method)
         os.makedirs(self.out_dir, exist_ok=True)
         if not dataset.dummy:
             clear_dir(self.out_dir)    # Clear any previous output
@@ -42,118 +38,79 @@ class Pipeline(ABC):
     def generate_pipeline_cmd(self):
         """Generate the command to process the pipeline"""
 
-        if self.method in dials_pipelines:
-            cmd = self.generate_dials_cmd()
-        elif self.method in xia2_pipelines:
-            cmd = self.generate_xia2_cmd()
-        else:
-            cmd = f"echo Unknown method provided: '{self.method}'\n "
-            cmd += "echo pipeline empty \n "
-        return cmd
+        g = global_config
+        m = self.dataset.metadata
 
-    def generate_dials_cmd(self):
-        """Generate commands for methods that work with DIALS"""
+        unit_cell = 'None'
+        if is_unit_cell_OK(m.unit_cell):
+            a, b, c, alpha, beta, gamma = m.unit_cell
+            unit_cell = f"{a},{b},{c},{alpha},{beta},{gamma}"
 
-        import_file = os.path.join(self.out_dir, 'imported.expt')
+        imported_file = os.path.join(self.out_dir, 'imported.expt')
         refl_file = os.path.join(self.out_dir, 'strong.refl')
         nexus_file = self.dataset.nexgen_file
 
-        if 'gain' in global_config.keys():
-            gain_str = f'gain={global_config.gain} '
+        variables_dict = {'m': m, 'g': g, 'imported_file': imported_file,
+                          'nexus_file': nexus_file,
+                          'refl_file': refl_file,
+                          'processed_dir': self.out_dir,
+                          'unit_cell': unit_cell}
+
+        script = self.info['script']
+
+        run_condition = self.info['run_condition']
+
+        if isinstance(run_condition, bool):
+            self.run_condition = run_condition
         else:
-            gain_str = ''
+            try:
+                eval_out = eval(run_condition)
+                if isinstance(eval_out, bool):
+                    self.run_condition = eval_out
+            except Exception:
+                full_traceback = traceback.format_exc()
+                msg = "Failed to parse the run condition in the pipeline"
+                msg += f" '{self.method}'"
+                self.dataset.logger.error(msg)
+                self.run_condition = False
 
-        cmd = f"dials.import {nexus_file} goniometer.axis=0,-1,0; "
-        cmd += f"dials.find_spots {import_file} d_max=9 {gain_str}; "
-        cmd += f"dials.index {import_file} {refl_file} "
-        cmd += "detector.fix=distance "
+        if self.run_condition:
 
-        if self.method == 'max_lattices':
-            options = 'max_lattices=5 '
-            cmd += options
-            cmd += "\n"
+            cmd = ''
+            for line in script:
+                if line[-2:] == '%%':  # Concatenate without space
+                    cmd += line[:-2]
+                else:
+                    line += " "
+                    cmd += line
+
+            try:
+                new_cmd = cmd.format(**variables_dict)
+
+            except Exception:
+                full_traceback = traceback.format_exc()
+                msg = f"Failed to parse the pipeline '{self.method}' script\n"
+                msg += f"{full_traceback}\n"
+                self.dataset.logger.error(msg)
+                new_cmd = 'echo Failed to parse the pipeline script string;\n'
+
+            return new_cmd
+
         else:
-            cmd = f"echo Unknown method provided: '{self.method}'\n "
-            cmd += "echo pipeline empty \n "
-        return cmd
+            msg = f"Run conditions for the pipeline '{self.method}'"
+            msg += " not satisfied. Ignoring this pipeline for this dataset."
+            self.dataset.logger.error(msg)
 
-    def generate_xia2_cmd(self):
-        """Generate commands for methods that work with xia2"""
-
-        cmd = f"xia2 image={self.dataset.nexgen_file} "
-        cmd += "goniometer.axis=0,-1,0 dials.fix_distance=True "
-        cmd += "dials.masking.d_max=9 "
-        cmd += "xia2.settings.remove_blanks=True "
-
-        if 'gain' in global_config.keys():
-            cmd += f'input.gain={global_config.gain} '
-
-        if self.method == 'default':
-            cmd += "\n"
-        elif self.method == 'ice':
-            cmd += "xia2.settings.unit_cell=4.5,4.5,7.33,90,90,119.999 "
-            cmd += 'xia2.settings.space_group="P63/mmc" '
-            cmd += "\n"
-        elif self.method == 'user':
-            option = ''
-
-            # If the user does not supply either a unit cell or a space group
-            # the is no point in processing this pipeline
-            process_user = False
-
-            if is_unit_cell_OK(self.dataset.metadata.unit_cell):
-                a, b, c, alpha, beta, gamma = self.dataset.metadata.unit_cell
-                unit_cell = f"{a},{b},{c},{alpha},{beta},{gamma}"
-                option += f"xia2.settings.unit_cell={unit_cell} "
-                process_user = True
-
-            if self.dataset.metadata.space_group:
-                sg = self.dataset.metadata.space_group
-                option += f"xia2.settings.space_group={sg} "
-                process_user = True
-
-            cmd += option
-            cmd += "\n"
-
-            if not process_user:
-                cmd = "echo Wrong unit cell or space group provided\n "
-                cmd += f"echo Unit cell: {self.dataset.metadata.unit_cell}\n "
-                cmd += f"echo SG: {self.dataset.metadata.space_group}\n "
-                cmd += "echo Pipeline with user parameters empty \n "
-                return cmd
-
-        elif self.method == 'real_space_indexing':
-
-            option = 'dials.index.method=real_space_grid_search '
-
-            if is_unit_cell_OK(self.dataset.metadata.unit_cell):
-                a, b, c, alpha, beta, gamma = self.dataset.metadata.unit_cell
-                unit_cell = f"{a},{b},{c},{alpha},{beta},{gamma}"
-                option += f"xia2.settings.unit_cell={unit_cell} "
-            else:
-                cmd = "echo Method real_space_grid_search "
-                cmd += "requires the user to provide the unit cell.\n "
-                cmd += "echo pipeline empty \n "
-                return cmd
-
-            if self.dataset.metadata.space_group:
-                sg = self.dataset.metadata.space_group
-                option += f"xia2.settings.space_group={sg} "
-
-            option += cmd
-            cmd += "\n"
-
-        else:         # Wrong command provided (do nothing)
-            cmd = f"echo Unknown method provided: '{self.method}'\n "
-            cmd += "echo pipeline empty \n "
-        return cmd
+            cmd = 'echo Run condition for this pipeline is not satisfied;\n '
+            return cmd
 
 
 class LocalPipeline(Pipeline):
     """Pipeline that runs processes locally using a bash script"""
 
-    def __init__(self, dataset, method=xia2_pipelines[0]):
-        super().__init__(dataset, method)
+    def __init__(self, dataset, pipeline_dict):
+
+        super().__init__(dataset, pipeline_dict)
         self.bash_file = os.path.join(self.out_dir, 'run_pipeline.sh')
 
         script = self.generate_bash_script()
@@ -196,16 +153,17 @@ class LocalPipeline(Pipeline):
                 self.dataset.logger.info(msg)
                 return 1
         else:
-            self.dataset.logger.info('bash run switched off for testing')
+            msg = f"Pipeline '{self.method}' status: DUMMY PROCESSED"
+            self.dataset.logger.info(msg)
             return 1
 
 
 class SlurmPipeline(Pipeline):
     """Pipeline that submitts processes using SLURM"""
 
-    def __init__(self, dataset, method='default'):
+    def __init__(self, dataset, pipeline_dict):
 
-        super().__init__(dataset, method)
+        super().__init__(dataset, pipeline_dict)
         self.slurm_file = os.path.join(self.out_dir, 'slurm_config.json')
 
         slurm_template = 'data/relion_slurm_cpu.json'
@@ -286,24 +244,23 @@ def is_unit_cell_OK(unit_cell):
 
 def run_processing_pipelines(dataset, local):
 
-    methods = all_pipelines
     pipelines = []
-
-    config_pipelines = global_config.run_pipelines
-
-    running_methods = []
+    running_pipelines = global_config.run_pipelines
 
     # Only run those pipelines that apear in the global config file
-    for conf_pipeline, run_pipeline in config_pipelines.items():
-        if run_pipeline and conf_pipeline in methods:
-            running_methods.append(conf_pipeline)
+    for name, run_pipeline in running_pipelines.items():
+        if run_pipeline:
 
-    for method in running_methods:
+            # Search if the pipeline is defined in the global parameters
+            for pipeline in global_config.defined_pipelines:
 
-        if local:
-            pipelines.append(LocalPipeline(dataset, method))
-        else:
-            pipelines.append(SlurmPipeline(dataset, method))
+                if pipeline['pipeline_name'] == name:
+
+                    if local:
+                        pipelines.append(LocalPipeline(dataset, pipeline))
+                    else:
+                        pipelines.append(SlurmPipeline(dataset, pipeline))
 
     for pipeline in pipelines:
-        pipeline.run()
+        if pipeline.run_condition:
+            pipeline.run()

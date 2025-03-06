@@ -188,12 +188,16 @@ class SinglaDataset:                    # pylint: disable=R0902
     def update_processed(self):
         """
         AutoED can process a dataset again if we want. If data is sitting
-        for say 10 min after being processed, it should be possible to
+        for say 5 min after being processed, it should be possible to
         reprocess it again.
         """
         time_diff = time.time() - self.last_processed_time
         if time_diff > 300:
             self.processed = False
+        else:
+            msg = 'Detected trigger file, but dataset processed recently.'
+            msg = 'You have to wait 5 min to process again.'
+            self.logger.info(msg)
 
     def compute_beam_center(self):
 
