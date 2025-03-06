@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   separate command to generate a report.
 - Textual report generated along with the HTML report.
 - An option for the user to choose which pipelines to run.
+- Pipelines are now defined in the default configuration file.
 
 
 ### Fixed
