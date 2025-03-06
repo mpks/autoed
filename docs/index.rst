@@ -32,4 +32,5 @@ use, and configure the package and its internal structure.
    pages/how_autoed_works
    pages/reports
    pages/configuring_autoed
+   pages/new_pipelines
    pages/beam_position_methods

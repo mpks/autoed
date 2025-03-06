@@ -34,9 +34,9 @@ AutoED watch command (e.g., ``autoed --inotify watch`` would set the option
 ``inotify`` to ``True``). In that case, the option from the command line will
 overwrite both the default and the one set in the user configuration file.
 Again, this change will be recorded in the log file. In case you set the
-parameter ``dummy`` to ``true`` (either in the global config file or on the
+parameter ``test`` to ``true`` (either in the global config file or on the
 command line) AutoED will assume you are running tests, and will reset all the
-parameters (except ``dummy``) to their default values.
+parameters (except ``test``) to their default values.
 
 
 A list of global parameters (their default value) and their description is given below. 
