@@ -5,6 +5,7 @@ import json
 from abc import ABC, abstractmethod
 from autoed.global_config import global_config
 from autoed.utility.filesystem import clear_dir
+from autoed.constants import PROCESS_DONE_TRIGGER
 import subprocess
 import traceback
 
@@ -104,6 +105,23 @@ class Pipeline(ABC):
             cmd = 'echo Run condition for this pipeline is not satisfied;\n '
             return cmd
 
+    def submit_report_watch(self):
+        """Submit a subprocess to wait for finished processing"""
+
+        done_file = os.path.join(self.out_dir, self.method)
+        done_file = os.path.join(done_file, PROCESS_DONE_TRIGGER)
+
+        if os.path.exists(done_file):
+            os.remove(done_file)
+
+        cmd1 = 'autoed_add_to_database'
+        cmd2 = f'{self.dataset.master_file}'
+        cmd3 = f'{self.method}'
+
+        subprocess.Popen([cmd1, cmd2, cmd3],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+
 
 class LocalPipeline(Pipeline):
     """Pipeline that runs processes locally using a bash script"""
@@ -128,7 +146,8 @@ class LocalPipeline(Pipeline):
 
         command = self.generate_pipeline_cmd()
 
-        end = "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): job finished\""
+        end = "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): job finished\";\n"
+        end += f"touch {PROCESS_DONE_TRIGGER};\n"
 
         return start + command + end
 
@@ -138,6 +157,8 @@ class LocalPipeline(Pipeline):
 
             msg = f"Processing with local pipeline '{self.method}'"
             self.dataset.logger.info(msg)
+
+            self.submit_report_watch()
 
             p = subprocess.run('bash ' + self.bash_file,
                                shell=True, stdout=subprocess.PIPE,
@@ -196,7 +217,8 @@ class SlurmPipeline(Pipeline):
         command = self.generate_pipeline_cmd()
 
         end = "\n unset SLURM_JWT\n"
-        end += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'):\" job finished\n"
+        end += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'):\" job finished;\n"
+        end += f"touch {PROCESS_DONE_TRIGGER};\n"
 
         return start + command + end
 
@@ -217,12 +239,14 @@ class SlurmPipeline(Pipeline):
 
             p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, cwd=self.out_dir)
+
             if p.stderr:
                 msg = f"Failed to process data with pipeline '{self.method}'"
                 self.dataset.logger.error(msg)
                 self.dataset.logger.error(p.stderr)
                 return 0
             else:
+                self.submit_report_watch()
                 msg = f"Data processed with pipeline '{self.method}'"
                 self.dataset.logger.info(msg)
                 return 1

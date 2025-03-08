@@ -15,6 +15,7 @@ setup(
             'autoed_txt_report = autoed.report.txt_report:main',
             'autoed_plot_spots = autoed.process.plot_spots:main',
             'autoed_generate_config = autoed.global_config:save_default',
+            'autoed_add_to_database = autoed.report.misc:add_to_database',
         ]
     },
     setup_requires=['argcomplete'],

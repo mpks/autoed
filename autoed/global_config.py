@@ -15,6 +15,7 @@ default_global_config['overwrite_mask'] = False
 default_global_config['trigger_file'] = '.HiMarko'
 default_global_config['ed_root_dir'] = 'ED'
 default_global_config['processed_dir'] = 'processed'  # !CHANGE IN dataset
+default_global_config['report_wait_time_sec'] = 600
 
 run_pipelines = {'default': True,
                  'user': True,

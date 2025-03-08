@@ -4,6 +4,45 @@ from autoed.constants import report_data_dir
 import os
 import shutil
 import autoed
+import argparse
+
+
+def add_to_database():
+    """
+    A function that checks if processing finished and adds the result to
+    AutoED database.
+    """
+
+    from autoed.dataset import SinglaDataset
+    import time
+    from autoed.constants import PROCESS_DONE_TRIGGER
+    import sys
+    from autoed.global_config import global_config
+
+    msg = 'Wait until the trigger file (.done) '
+    msg += 'and then add dataset/pipeline to AutoED database'
+
+    parser = argparse.ArgumentParser(description=msg)
+    parser.add_argument('master_file', type=str,
+                        help='The name of the pipeline to add to database')
+    parser.add_argument('pipeline_name', type=str,
+                        help='The name of the pipeline to add to database')
+
+    args = parser.parse_args()
+
+    dataset = SinglaDataset.from_master_file(args.master_file,
+                                             make_out_path=False)
+
+    start_time = time.time()
+    trigger_path = os.path.join(dataset.output_path, args.pipeline_name)
+    trigger_file = os.path.join(trigger_path, PROCESS_DONE_TRIGGER)
+
+    while (time.time() - start_time) < global_config['report_wait_time_sec']:
+
+        time.sleep(10)
+        if os.path.exists(trigger_file):
+            update_database(dataset, args.pipeline_name)
+            sys.exit()
 
 
 def generate_report_files(report_path, verbose=True):
@@ -36,11 +75,46 @@ def generate_report_files(report_path, verbose=True):
                      os.stat(destination_path).st_mode | 0o111)
 
 
-def update_database_for_dataset(dataset, report_path):
+def update_database(dataset, pipeline_name):
+
+    from autoed.global_config import global_config
+    from autoed.report.misc import (generate_report_files,
+                                    update_database_for_dataset)
+    from autoed.report.txt_report import generate_txt_report
+    from autoed.constants import (report_dir,
+                                  report_data_dir,
+                                  database_json_file)
+
+    ed_root_dir = global_config.ed_root_dir
+    path = dataset.path
+    report_path = r''
+
+    # The report path is the same directory where
+    # the data root is (e.g. ED directory). This assumes there is just one
+    # data root directory in the path
+    temp_list = path.split('/')
+    for dir_name in temp_list:
+        if dir_name != ed_root_dir:
+            report_path += r'/' + dir_name
+        else:
+            break
+
+    report_path = os.path.join(report_path, report_dir)
+    report_data_path = os.path.join(report_path, report_data_dir)
+
+    generate_report_files(report_path, verbose=False)
+    update_database_for_dataset(dataset, report_data_path, pipeline_name)
+
+    # Generate TXT output from JSON
+    json_data_path = os.path.join(report_data_path, database_json_file)
+    generate_txt_report(json_data_path, report_path)
+
+
+def update_database_for_dataset(dataset, report_path, pipeline_name):
     """ Add dataset to database """
 
     database = JsonDatabase(report_path)
     database.load_data()
 
     parser = Xia2OutputParser(dataset, database)
-    parser.add_to_database()
+    parser.add_to_database(pipeline_name)

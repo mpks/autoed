@@ -16,30 +16,28 @@ class Xia2OutputParser:
         self.dataset = dataset
         self.database = database
 
-    def add_to_database(self):
+    def add_to_database(self, pipeline_name):
 
         dataset_name = self.dataset.base
 
-        for pipeline_name in xia2_pipelines:
+        xia2_path = os.path.join(self.dataset.output_path, pipeline_name)
 
-            xia2_path = os.path.join(self.dataset.output_path, pipeline_name)
+        # For older datasets, the output of default pipeline went
+        # directly in the processed directory and not in a separate
+        # (e.g. 'default') directory. The folowing line is just to process
+        # those datasets
+        if pipeline_name == 'default':
+            if not os.path.exists(xia2_path):
+                xia2_path = self.dataset.output_path
 
-            # For older datasets, the output of default pipeline went
-            # directly in the processed directory and not in a separate
-            # (e.g. 'default') directory. The folowing line is just to process
-            # those datasets
-            if pipeline_name == 'default':
-                if not os.path.exists(xia2_path):
-                    xia2_path = self.dataset.output_path
+        xia2_file = os.path.join(xia2_path, xia2_output_file)
 
-            xia2_file = os.path.join(xia2_path, xia2_output_file)
-
-            table_entry = self._parse_output(xia2_file, pipeline_name)
-            table_entry = table_entry.to_dict()
-            self.database.add_entry(dataset_name, table_entry,
-                                    self.dataset.beam_figure,
-                                    self.dataset.spots_figure)
-            self.database.save_data()
+        table_entry = self._parse_output(xia2_file, pipeline_name)
+        table_entry = table_entry.to_dict()
+        self.database.add_entry(dataset_name, table_entry,
+                                self.dataset.beam_figure,
+                                self.dataset.spots_figure)
+        self.database.save_data()
 
     def _parse_output(self, xia2_file, pipeline):
 
