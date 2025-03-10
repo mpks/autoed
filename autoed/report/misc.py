@@ -58,7 +58,7 @@ def generate_report_files(report_path, verbose=True):
     autoed_path = autoed.__path__[0]
     template_path = os.path.join(autoed_path, 'report/template')
     template_files = ['report.html', 'scripts.js', 'styles.css',
-                      'server', 'favicon.png']
+                      'server', 'misc.js', 'favicon.png']
 
     for file in template_files:
         source_path = os.path.join(template_path, file)

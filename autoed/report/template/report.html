@@ -26,7 +26,7 @@
   <!-- [>] Page Header -->
 
   <div class="table-container">
-    <div class='table'>
+    <div id='table' class='table'>
 
     <div id='col1' class="column">
         <div class="cell header" id='N_index'> N <br>
@@ -52,90 +52,8 @@
         </div> 
         <!-- <div class="cell column_02"> 20240322_nav7_504.sweep01 </div> -->
     </div>
-    <div id='default_indexed' class="column">
-        <div class="cell header"> 
-            Indexed <br>
-            <span class="sort-icon clickable-span" id="sort_default_11" style="color: orange;">&#x25B2;&#x25BC;</span> 
-        </div>
-        <!-- <div class="cell "> 12.7 </div> -->
-    </div>
-    <div id='default_unit_cell' class="column">
-        <div class="cell header"> Unit cell </div>
-        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
-    </div>
-    <div id='default_space_group' class="column">
-        <div class="cell header"> Space<br>group </div>
-        <!-- <div class="cell "> P01 </div> --> 
-    </div>
-    <div id='default' class="column expandable">
-        <div class="cell header" onclick="toggleColumn('default')"> default </div>
-        <!-- <div class="cell"> DEF </div> -->
-    </div>
-
-    <div id='user_indexed' class="column">
-        <div class="cell header"> 
-            Indexed <br>
-            <span class="sort-icon clickable-span" id="sort_button_user" style="color: orange;">&#x25B2;&#x25BC;</span> 
-        </div>
-        <!-- <div class="cell "> 12.7 </div> -->
-    </div>
-    <div id='user_unit_cell' class="column">
-        <div class="cell header"> Unit cell </div>
-        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
-    </div>
-    <div id='user_space_group' class="column">
-        <div class="cell header"> Space<br>group </div>
-        <!-- <div class="cell "> P01 </div> --> 
-    </div>
-
-    <div id='user' class="column expandable">
-        <div class="cell header" onclick="toggleColumn('user')"> user </div>
-        <!-- <div class="cell"> OK </div> --> 
-    </div>
-
-
-    <div id='ice_indexed' class="column">
-        <div class="cell header"> 
-            <span id='indx'>Indexed</span> <br>
-            <span class="sort-icon" id="sort_button_ice" style="color: orange;">&#x25B2;&#x25BC;</span> 
-        </div>
-        <!-- <div class="cell "> 12.7 </div> -->
-    </div>
-    <div id='ice_unit_cell' class="column">
-        <div class="cell header"> Unit cell </div>
-        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
-    </div>
-    <div id='ice_space_group' class="column">
-        <div class="cell header"> Space<br>group </div>
-        <!-- <div class="cell "> P01 </div> --> 
-    </div>
-    <div id='ice' class="column expandable">
-        <div class="cell header" onclick="toggleColumn('ice')"> ice </div>
-        <!-- <div class="cell"> OK </div> --> 
-    </div>
-
-    <div id='real_space_indexing_indexed' class="column">
-        <div class="cell header"> 
-            Indexed <br>
-            <span class="sort-icon" id="sort_button_rs" style="color: orange;">&#x25B2;&#x25BC;</span> 
-        </div>
-        <!-- <div class="cell "> 12.7 </div> -->
-    </div>
-
-    <div id='real_space_indexing_unit_cell' class="column">
-        <div class="cell header"> Unit cell </div>
-        <!-- <div class="cell "> 12.5        13.7         15.5         (60 72 33) </div> -->
-    </div>
-    <div id='real_space_indexing_space_group' class="column">
-        <div class="cell header"> Space<br>group </div>
-        <!-- <div class="cell "> P01 </div> --> 
-    </div>
-    <div id='real_space_indexing' class="column expandable">
-        <div class="cell header" onclick="toggleColumn('real_space_indexing')"> rs index </div>
-        <!-- <div class="cell"> OK </div> --> 
-    </div>
-    </div>
-  </div> <!-- Close Container -->
+    </div>        <!-- Close Table -->
+  </div>          <!-- Close Container -->
 
   <!-- [<] Page stats -->
   <!-- 
@@ -156,7 +74,7 @@
 
     <link rel="stylesheet" href="report_data/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="report_data/scripts.js"></script>
+    <script type="module" src="report_data/scripts.js"></script>
 </body>
 </html>
 
