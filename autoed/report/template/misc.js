@@ -576,7 +576,7 @@ export function getPipelineNames(in_data) {
   data.forEach(([datasetName, datasetValue]) => {
       let dataValues = Object.entries(datasetValue);
       dataValues.forEach(([key, value]) => {
-          if (typeof value == 'object') {
+          if (typeof value == 'object' && value != null) {
               if ("title" in value) {
                   uniquePipelines.add(value.title);
               };
