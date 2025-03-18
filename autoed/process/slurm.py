@@ -5,6 +5,7 @@ import argparse
 
 from autoed.global_config import global_config
 
+global_config.overwrite_from_local_config()
 
 def main():
     """Defines autoed_slurm command"""
@@ -17,6 +18,7 @@ def main():
     args = parser.parse_args()
 
     error = run_slurm_job(args.json_file)
+    
 
     if error:
         print(error)
