@@ -1,7 +1,7 @@
 """ Contains global configuration dictionary """
-from autoed.constants import (autoed_config_var, autoed_config_file)
 import json
 import os
+from autoed.constants import (autoed_config_var, autoed_config_file)
 
 default_global_config = {}
 default_global_config['inotify'] = False
@@ -16,6 +16,7 @@ default_global_config['trigger_file'] = '.HiMarko'
 default_global_config['ed_root_dir'] = 'ED'
 default_global_config['processed_dir'] = 'processed'  # !CHANGE IN dataset
 default_global_config['report_wait_time_sec'] = 600
+default_global_config['slurm_user'] = 'gda2'
 default_global_config['run_multiplex'] = True
 default_global_config['multiplex_pipeline'] = 'default'
 default_global_config['multiplex_indexing_percent_threshold'] = 25

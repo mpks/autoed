@@ -1,16 +1,19 @@
 """ A class which allows for different processing pipelines """
 import os
-import autoed
 import json
 from abc import ABC, abstractmethod
-from autoed.global_config import global_config
-from autoed.utility.filesystem import clear_dir
-from autoed.constants import PROCESS_DONE_TRIGGER
 import subprocess
 import traceback
 
+import autoed
+from autoed.global_config import global_config
+from autoed.utility.filesystem import clear_dir
+from autoed.constants import PROCESS_DONE_TRIGGER
+from autoed.process.slurm import run_slurm_job
+
 
 class Pipeline(ABC):
+    """An abstract processing pipeline class"""
 
     @abstractmethod
     def __init__(self, dataset, pipeline_dict):
@@ -34,7 +37,7 @@ class Pipeline(ABC):
 
     @abstractmethod
     def run(self):
-        pass
+        """Run processing pipeline"""
 
     def generate_pipeline_cmd(self):
         """Generate the command to process the pipeline"""
@@ -43,7 +46,7 @@ class Pipeline(ABC):
         m = self.dataset.metadata
 
         unit_cell = 'None'
-        if is_unit_cell_OK(m.unit_cell):
+        if is_unit_cell_ok(m.unit_cell):
             a, b, c, alpha, beta, gamma = m.unit_cell
             unit_cell = f"{a},{b},{c},{alpha},{beta},{gamma}"
 
@@ -76,7 +79,6 @@ class Pipeline(ABC):
                 self.run_condition = False
 
         if self.run_condition:
-
             cmd = ''
             for line in script:
                 if line[-2:] == '%%':  # Concatenate without space
@@ -84,26 +86,22 @@ class Pipeline(ABC):
                 else:
                     line += " "
                     cmd += line
-
             try:
                 new_cmd = cmd.format(**variables_dict)
-
             except Exception:
                 full_traceback = traceback.format_exc()
                 msg = f"Failed to parse the pipeline '{self.method}' script\n"
                 msg += f"{full_traceback}\n"
                 self.dataset.logger.error(msg)
                 new_cmd = 'echo Failed to parse the pipeline script string;\n'
-
             return new_cmd
 
-        else:
-            msg = f"Run conditions for the pipeline '{self.method}'"
-            msg += " not satisfied. Ignoring this pipeline for this dataset."
-            self.dataset.logger.error(msg)
+        msg = f"Run conditions for the pipeline '{self.method}'"
+        msg += " not satisfied. Ignoring this pipeline for this dataset."
+        self.dataset.logger.error(msg)
 
-            cmd = 'echo Run condition for this pipeline is not satisfied;\n '
-            return cmd
+        cmd = 'echo Run condition for this pipeline is not satisfied;\n '
+        return cmd
 
     def submit_report_watch(self):
         """Submit a subprocess to wait for finished processing"""
@@ -142,10 +140,12 @@ class LocalPipeline(Pipeline):
 
         script = self.generate_bash_script()
 
-        with open(self.bash_file, 'w') as bash_file:
+        with open(self.bash_file, 'w', encoding='utf-8') as bash_file:
             bash_file.write(script)
 
     def generate_bash_script(self):
+        """Write the bash script for local processing"""
+
         start = "#!/bin/bash\n"
         start += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'):\"\n"
         start += "if command -v module &> /dev/null; then\n"
@@ -172,20 +172,20 @@ class LocalPipeline(Pipeline):
             p = subprocess.run('bash ' + self.bash_file,
                                shell=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, cwd=self.out_dir,
-                               env=os.environ)
+                               env=os.environ, check=False)
             if p.stderr:
                 msg = f"Pipeline '{self.method}' status: FAILED"
                 self.dataset.logger.error(msg)
                 self.dataset.logger.error(p.stderr)
                 return 0
-            else:
-                msg = f"Pipeline '{self.method}' status: PROCESSED"
-                self.dataset.logger.info(msg)
-                return 1
-        else:
-            msg = f"Pipeline '{self.method}' status: DUMMY PROCESSED"
+
+            msg = f"Pipeline '{self.method}' status: PROCESSED"
             self.dataset.logger.info(msg)
             return 1
+
+        msg = f"Pipeline '{self.method}' status: DUMMY PROCESSED"
+        self.dataset.logger.info(msg)
+        return 1
 
 
 class SlurmPipeline(Pipeline):
@@ -199,7 +199,7 @@ class SlurmPipeline(Pipeline):
         slurm_template = 'data/relion_slurm_cpu.json'
         slurm_template = os.path.join(autoed.__path__[0], slurm_template)
 
-        with open(slurm_template, 'r') as file:
+        with open(slurm_template, 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         data['job']['current_working_directory'] = self.out_dir
@@ -209,10 +209,11 @@ class SlurmPipeline(Pipeline):
         script_line = self.generate_json_script()
         data['script'] = script_line
 
-        with open(self.slurm_file, 'w') as file:
+        with open(self.slurm_file, 'w', encoding='utf-8') as file:
             json.dump(data, file, indent=2)
 
     def generate_json_script(self):
+        """Write slurm processing script into the JSON file"""
 
         start = "#!/bin/bash\n"
         start += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): \"\n"
@@ -233,39 +234,26 @@ class SlurmPipeline(Pipeline):
 
     def run(self):
 
-        if 'SLURM_JWT' not in os.environ:
-            cmd = 'export `ssh wilson scontrol token lifespan=7776000`;'
-        else:
-            cmd = ''
-        cmd += 'curl -s -H X-SLURM-USER-NAME:${USER} -H '
-        cmd += 'X-SLURM-USER-TOKEN:${SLURM_JWT} '
-        cmd += '-H "Content-Type: application/json" '
-        cmd += '-X POST https://slurm-rest.diamond.ac.uk:'
-        cmd += '8443/slurm/v0.0.38/job/submit '
-        cmd += '-d@' + self.slurm_file
-
         if not self.dataset.dummy:
 
-            p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, cwd=self.out_dir)
+            error = run_slurm_job(self.slurm_file)
 
-            if p.stderr:
+            if error:
                 msg = f"Failed to process data with pipeline '{self.method}'"
                 self.dataset.logger.error(msg)
-                self.dataset.logger.error(p.stderr)
+                self.dataset.logger.error(error)
                 return 0
-            else:
-                self.submit_report_watch()
-                msg = f"Data processed with pipeline '{self.method}'"
-                self.dataset.logger.info(msg)
-                return 1
-        else:
-            self.dataset.logger.info('Slurm run switched off for testing')
-            self.dataset.logger.info(f"Slurm command: {cmd}")
+
+            self.submit_report_watch()
+            msg = f"Data processed with pipeline '{self.method}'"
+            self.dataset.logger.info(msg)
             return 1
 
+        self.dataset.logger.info('Slurm run switched off for testing')
+        return 1
 
-def is_unit_cell_OK(unit_cell):
+
+def is_unit_cell_ok(unit_cell):
     """Checks if unit cell parameter is of the proper format and type"""
     if isinstance(unit_cell, (list, tuple)):
         if len(unit_cell) == 6:
@@ -276,6 +264,7 @@ def is_unit_cell_OK(unit_cell):
 
 
 def run_processing_pipelines(dataset, local):
+    """Run only pipelines set in the global config file"""
 
     pipelines = []
     running_pipelines = global_config.run_pipelines

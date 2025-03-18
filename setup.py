@@ -17,6 +17,7 @@ setup(
             'autoed_generate_config = autoed.global_config:save_default',
             'autoed_add_to_database = autoed.report.misc:add_to_database',
             'autoed_multiplex = autoed.process.multiplex:main'
+            'autoed_slurm = autoed.process.slurm:main'
         ]
     },
     setup_requires=['argcomplete'],
