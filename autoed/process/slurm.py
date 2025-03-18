@@ -7,6 +7,7 @@ from autoed.global_config import global_config
 
 global_config.overwrite_from_local_config()
 
+
 def main():
     """Defines autoed_slurm command"""
 
@@ -17,12 +18,12 @@ def main():
                         help='A JSON file with the processing script')
     args = parser.parse_args()
 
-    error = run_slurm_job(args.json_file)
+    error, out = run_slurm_job(args.json_file)
+
+    print('Output: ', out)
     
-
     if error:
-        print(error)
-
+        print('Error: ', error)
 
 def run_slurm_job(slurm_file):
     """Submit the slurm script to Diamond cluster"""
@@ -47,7 +48,5 @@ def run_slurm_job(slurm_file):
 
     p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE, cwd=slurm_dir)
-    if p.stderr:
-        return p.stderr
+    return p.stderr, p.stdout
 
-    return None
