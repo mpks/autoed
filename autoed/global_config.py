@@ -16,6 +16,11 @@ default_global_config['trigger_file'] = '.HiMarko'
 default_global_config['ed_root_dir'] = 'ED'
 default_global_config['processed_dir'] = 'processed'  # !CHANGE IN dataset
 default_global_config['report_wait_time_sec'] = 600
+default_global_config['run_multiplex'] = True
+default_global_config['multiplex_pipeline'] = 'default'
+default_global_config['multiplex_indexing_percent_threshold'] = 25
+default_global_config['multiplex_run_on_every_nth'] = 3
+
 
 run_pipelines = {'default': True,
                  'user': True,

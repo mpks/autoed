@@ -185,7 +185,7 @@ class SinglaDataset:                    # pylint: disable=R0902
     def from_master_file(cls, master_file, make_out_path=True):
         path = os.path.dirname(master_file)
         dataset_name = os.path.basename(master_file)
-        dataset_name.replace('_master.h5', '')
+        dataset_name = dataset_name.replace('_master.h5', '')
         return cls(path, dataset_name, make_out_path=make_out_path)
 
     def update_processed(self):
@@ -286,8 +286,8 @@ class SinglaDataset:                    # pylint: disable=R0902
                 msg += ' = (%.2f, %.2f) ' % self.beam_center
                 self.logger.info(msg)
 
-            succes_metadata = self.fetch_metadata()
-            if not succes_metadata:
+            success_metadata = self.fetch_metadata()
+            if not success_metadata:
                 msg = 'Failed to fetch metadata from JSON and TXT.\n'
                 msg += 'No conversion/processing'
                 self.logger.error(msg)
@@ -296,15 +296,9 @@ class SinglaDataset:                    # pylint: disable=R0902
                 success = generate_nexus_file(self)
                 if success:
                     os.makedirs(self.output_path, exist_ok=True)
-                    # run_slurm_job(self)
                     run_processing_pipelines(self, global_config.local)
                     self.last_processed_time = time.time()
 
-                    if not self.dummy:
-                        # Update the report database
-                        self.logger.info('Updating the report directory')
-                        # update_database(self)
-                        self.logger.info('Report directory updated')
                     return True
                 else:
                     msg = 'Failed to generate nexus file'

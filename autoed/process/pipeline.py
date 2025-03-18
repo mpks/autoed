@@ -111,15 +111,24 @@ class Pipeline(ABC):
         done_file = os.path.join(self.out_dir, self.method)
         done_file = os.path.join(done_file, PROCESS_DONE_TRIGGER)
 
+        # Remove .done file if it exists from previous runs
         if os.path.exists(done_file):
             os.remove(done_file)
 
-        cmd1 = 'autoed_add_to_database'
-        cmd2 = f'{self.dataset.master_file}'
-        cmd3 = f'{self.method}'
+        cmds = []
+        cmds.append('autoed_add_to_database')
+        cmds.append(f'{self.dataset.master_file}')
+        cmds.append(f'{self.method}')
 
-        subprocess.Popen([cmd1, cmd2, cmd3],
-                         stdout=subprocess.DEVNULL,
+        if global_config['run_multiplex']:
+            cmds.append('--multiplex')
+
+        if global_config['local']:
+            cmds.append('--local')
+
+        # Note that beside adding result to report database, the submitted
+        # script starts the multiplex processing
+        subprocess.Popen(cmds, stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL, start_new_session=True)
 
 

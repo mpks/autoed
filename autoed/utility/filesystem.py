@@ -10,7 +10,10 @@ def find_files_in_directory(directory, pattern):
     return files
 
 
-def clear_dir(dir_path):
+def clear_dir(dir_path, skip_list=None):
+
+    if skip_list is None:
+        skip_list = []
 
     dir_path = os.path.abspath(dir_path)
 
@@ -21,6 +24,10 @@ def clear_dir(dir_path):
         return
 
     for item in os.listdir(dir_path):
+
+        if item in skip_list:
+            continue
+
         item_path = os.path.join(dir_path, item)
         try:
             if os.path.isfile(item_path) or os.path.islink(item_path):

@@ -1,10 +1,12 @@
+"""Module with helper function for report generation and xia2 multiplex"""
+import os
+import shutil
+import argparse
+
+import autoed
 from autoed.report.json_database import JsonDatabase
 from autoed.report.parser import Xia2OutputParser
 from autoed.constants import report_data_dir
-import os
-import shutil
-import autoed
-import argparse
 
 
 def add_to_database():
@@ -18,15 +20,24 @@ def add_to_database():
     from autoed.constants import PROCESS_DONE_TRIGGER
     import sys
     from autoed.global_config import global_config
+    from autoed.process.multiplex import MultiplexDataset
 
     msg = 'Wait until the trigger file (.done) '
-    msg += 'and then add dataset/pipeline to AutoED database'
+    msg += 'and then add dataset/pipeline to AutoED database.'
+    msg += 'Additionally, can run xia2 multiplex using the new result.'
 
     parser = argparse.ArgumentParser(description=msg)
     parser.add_argument('master_file', type=str,
                         help='The name of the pipeline to add to database')
     parser.add_argument('pipeline_name', type=str,
                         help='The name of the pipeline to add to database')
+
+    parser.add_argument('--multiplex', action='store_true',
+                        default=False,
+                        help='Run multiplex.')
+    parser.add_argument('--local', action='store_true',
+                        default=False,
+                        help='Run multiplex locally, or using SLURM.')
 
     args = parser.parse_args()
 
@@ -42,6 +53,17 @@ def add_to_database():
         time.sleep(10)
         if os.path.exists(trigger_file):
             update_database(dataset, args.pipeline_name)
+
+            cond = args.pipeline_name == global_config['multiplex_pipeline']
+            if (args.multiplex and cond):
+                multiplex_dataset = MultiplexDataset(
+                                        master_file=args.master_file,
+                                        local=args.local)
+
+                success = multiplex_dataset.copy_files()
+                if success and multiplex_dataset.run_condition():
+                    multiplex_dataset.run()
+
             sys.exit()
 
 

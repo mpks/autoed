@@ -6,6 +6,9 @@ dials_pipelines = ['max_lattices']
 all_pipelines = xia2_pipelines + dials_pipelines
 xia2_output_file = 'xia2.txt'
 report_dir = 'autoed_report'
+multiplex_dir = 'multiplex'                       # Where to copy all the files
+multiplex_output_dir = 'xia2_multiplex_output'    # Where to keep the results
+multiplex_default_sample = 'default_sample'
 database_json_file = 'autoed_database.json'   # Keeps processing summaries
 xia2_report_dir = 'xia2_reports'              # Keeps xia2 html reports
 beam_report_dir = 'beam_positions'                 # Keeps beam images
@@ -13,6 +16,7 @@ spots_report_dir = 'spots'                         # Keeps spots
 xia2_dials_report_path = 'DEFAULT/NATIVE/SWEEP1/index'
 report_data_dir = 'report_data'
 PROCESS_DONE_TRIGGER = '.done'
+
 
 SINGLA_GAP_START = 510
 SINGLA_GAP_STOP = 550
