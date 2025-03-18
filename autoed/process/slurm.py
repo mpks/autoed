@@ -16,7 +16,10 @@ def main():
                         help='A JSON file with the processing script')
     args = parser.parse_args()
 
-    run_slurm_job(args.json_file)
+    error = run_slurm_job(args.json_file)
+    
+    if error:
+        print(error)
 
 
 def run_slurm_job(slurm_file):
