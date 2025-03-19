@@ -20,20 +20,15 @@ def main():
 
     error, out = run_slurm_job(args.json_file)
 
-    print('Output: ', out)
-    
-    if error:
-        print('Error: ', error)
+    print(f"Error: '{error}'")
+
 
 def run_slurm_job(slurm_file):
     """Submit the slurm script to Diamond cluster"""
 
     slurm_file = os.path.abspath(slurm_file)
-    print('Slurm file', slurm_file)
     slurm_dir = os.path.dirname(slurm_file)
-    print('Slurm dir', slurm_dir)
     user = global_config['slurm_user']
-    print('Slurm user', user)
 
     if 'SLURM_JWT' not in os.environ:
         cmd = 'export `ssh wilson scontrol token lifespan=7776000`;'
@@ -43,10 +38,9 @@ def run_slurm_job(slurm_file):
     cmd += 'X-SLURM-USER-TOKEN:${SLURM_JWT} '
     cmd += '-H "Content-Type: application/json" '
     cmd += '-X POST https://slurm-rest.diamond.ac.uk:'
-    cmd += '8443/slurm/v0.0.38/job/submit '
+    cmd += '8443/slurm/v0.0.42/job/submit '
     cmd += '-d@' + slurm_file
 
     p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE, cwd=slurm_dir)
     return p.stderr, p.stdout
-
