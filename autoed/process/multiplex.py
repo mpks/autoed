@@ -14,7 +14,8 @@ from autoed.constants import (multiplex_dir, multiplex_output_dir,
 from autoed.dataset import SinglaDataset
 from autoed.global_config import global_config
 from autoed.utility.filesystem import clear_dir
-
+from autoed.process.slurm import run_slurm_job
+import autoed
 
 # The assumption of the file structure is the following
 # /../../ED/SAMPLE_DIRS/CRYSTAL_DIR/SWEEP_DIR/DATA_master.h5
@@ -128,6 +129,8 @@ class MultiplexDataset:
             subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE, cwd=path, env=os.environ,
                            check=False)
+        else:
+            multiplex_with_slurm(self.info)
 
     def run_condition(self):
         """
@@ -261,6 +264,49 @@ def write_to_log(info: MultiplexInfo, message):
     with open(log_file, "a", encoding="utf-8") as file:
 
         file.write(f"{date_and_time} - {message}\n")
+
+
+def multiplex_with_slurm(info):
+    """Creates a template slurm submission script to run multiplex"""
+
+    slurm_template = 'data/relion_slurm_cpu.json'
+    slurm_template = os.path.join(autoed.__path__[0], slurm_template)
+
+    with open(slurm_template, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+
+    path = os.path.join(info.multiplex_dir_path,
+                        info.sample_dirs, multiplex_output_dir)
+
+    data_path = os.path.join(info.multiplex_dir_path,
+                             info.sample_dirs)
+
+    cmd = f'xia2.multiplex $(find {data_path} -name *expt | sort -V) '
+    cmd += f'$(find {data_path} -name *refl | sort -V)\n'
+
+    data['job']['current_working_directory'] = path
+    # data['job']['environment']['USER'] = os.getenv('USER')
+    data['job']['environment']['USER'] = global_config['slurm_user']
+    data['job']['environment']['HOME'] = os.getenv('HOME')
+
+    script = "#!/bin/bash\n"
+    script += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): \"\n"
+    script += "echo \"Running on host $(hostname -s) \""
+    script += "\"with job ID ${SLURM_JOB_ID:-(SLURM_JOB_ID not set)}\"\n"
+    script += "source /etc/profile.d/modules.sh\n"
+    script += "module load EM/relion/4.0-slurm 2> /dev/null\n"
+    script += "module load ccp4\n"
+    script += "module load dials\n"
+    script += cmd
+    script += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'):\" job finished;\n"
+
+    data['script'] = script
+
+    slurm_file = os.path.join(path, 'slurm_script.json')
+    with open(slurm_file, 'w', encoding='utf-8') as file:
+        json.dump(data, file, indent=2)
+
+    run_slurm_job(slurm_file)
 
 
 if __name__ == '__main__':

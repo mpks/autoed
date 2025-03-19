@@ -20,8 +20,6 @@ def main():
 
     error, out = run_slurm_job(args.json_file)
 
-    print(f"Error: '{error}'")
-
 
 def run_slurm_job(slurm_file):
     """Submit the slurm script to Diamond cluster"""

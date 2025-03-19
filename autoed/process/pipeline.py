@@ -236,7 +236,7 @@ class SlurmPipeline(Pipeline):
 
         if not self.dataset.dummy:
 
-            error = run_slurm_job(self.slurm_file)
+            error, _ = run_slurm_job(self.slurm_file)
 
             if error:
                 msg = f"Failed to process data with pipeline '{self.method}'"
