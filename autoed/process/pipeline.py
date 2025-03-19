@@ -203,8 +203,8 @@ class SlurmPipeline(Pipeline):
             data = json.load(file)
 
         data['job']['current_working_directory'] = self.out_dir
-        data['job']['environment']['USER'] = os.getenv('USER')
-        data['job']['environment']['HOME'] = os.getenv('HOME')
+        data['job']['environment'].append(f"USER={os.getenv('USER')}")
+        data['job']['environment'].append(f"HOME={os.getenv('HOME')}")
 
         script_line = self.generate_json_script()
         data['script'] = script_line

@@ -7,13 +7,8 @@
     "name": "relion_cpu",
     "current_working_directory": "/home/eci94165/2024/nt34283-21/spool/2024/processed/abc/sweep0/",
     "time_limit": "20",
-    "environment": {
-      "PATH": "/bin:/usr/bin/:/usr/local/bin/",
-      "LD_LIBRARY_PATH": "/lib/:/lib64/:/usr/local/lib",
-      "MODULEPATH": "",
-      "USER": "eci94165",
-      "HOME": "/home/eci94165"
-    },
+    "environment": [
+    ],
     "standard_error": "./run.err",
     "standard_output": "./run.out"
   },

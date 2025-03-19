@@ -286,8 +286,8 @@ def multiplex_with_slurm(info):
 
     data['job']['current_working_directory'] = path
     # data['job']['environment']['USER'] = os.getenv('USER')
-    data['job']['environment']['USER'] = global_config['slurm_user']
-    data['job']['environment']['HOME'] = os.getenv('HOME')
+    data['job']['environment'].append(f"USER={global_config['slurm_user']}")
+    data['job']['environment'].append(f"HOME={os.getenv('HOME')}")
 
     script = "#!/bin/bash\n"
     script += "echo \"$(date '+%Y-%m-%d %H:%M:%S.%3N'): \"\n"
