@@ -294,7 +294,6 @@ def multiplex_with_slurm(info):
     script += "echo \"Running on host $(hostname -s) \""
     script += "\"with job ID ${SLURM_JOB_ID:-(SLURM_JOB_ID not set)}\"\n"
     script += "source /etc/profile.d/modules.sh\n"
-    script += "module load EM/relion/4.0-slurm 2> /dev/null\n"
     script += "module load ccp4\n"
     script += "module load dials\n"
     script += cmd

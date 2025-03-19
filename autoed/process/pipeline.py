@@ -220,7 +220,6 @@ class SlurmPipeline(Pipeline):
         start += "echo \"Running on host $(hostname -s) \""
         start += "\"with job ID ${SLURM_JOB_ID:-(SLURM_JOB_ID not set)}\"\n"
         start += "source /etc/profile.d/modules.sh\n"
-        start += "module load EM/relion/4.0-slurm 2> /dev/null\n"
         start += "module load ccp4\n"
         start += "module load dials\n"
 
