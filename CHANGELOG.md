@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-03-20
+
 ### Added
 
 - CHANGELOG.md based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
@@ -19,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Textual report generated along with the HTML report.
 - An option for the user to choose which pipelines to run.
 - Pipelines are now defined in the default configuration file.
+- Multiplex processing.
 
 
 ### Fixed
@@ -53,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release of the AutoED package.
 
 [unreleased]: https://github.com/mpks/autoed/compare/v0.2.2.post2...HEAD
+[0.3.0]: https://github.com/mpks/autoed/compare/v0.2.0...v0.3.0
 [0.2.2.post2]: https://github.com/mpks/autoed/compare/v0.2.0...v0.2.2.post2
 [0.2.0]: https://github.com/mpks/autoed/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mpks/autoed/releases/tag/v0.1.0
