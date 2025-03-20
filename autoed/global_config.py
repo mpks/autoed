@@ -19,8 +19,8 @@ default_global_config['report_wait_time_sec'] = 600
 default_global_config['slurm_user'] = 'gda2'
 default_global_config['run_multiplex'] = True
 default_global_config['multiplex_pipeline'] = 'default'
-default_global_config['multiplex_indexing_percent_threshold'] = 25
-default_global_config['multiplex_run_on_every_nth'] = 3
+default_global_config['multiplex_indexing_percent_threshold'] = 75
+default_global_config['multiplex_run_on_every_nth'] = 5
 
 
 run_pipelines = {'default': True,

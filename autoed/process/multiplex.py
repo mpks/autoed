@@ -196,7 +196,7 @@ def info_from_master_file(master_file):
         sweep_dir = sample_dirs[-1]
         expt_copy = os.path.basename(
                         dataset.master_file).replace('_master.h5',
-                                                     f"{sweep_dir}.expt")
+                                                     f"_{sweep_dir}.expt")
         refl_copy = expt_copy.replace('.expt', '.refl')
 
         expt_copy = os.path.join(multiplex_dir_path, sample_path,

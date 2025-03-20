@@ -129,18 +129,6 @@ def main():
     for index, (hdf5_file, metadata_file) in enumerate(zip_files):
 
         print(50*'-')
-        print(f" Loading dataset: {hdf5_file}")
-
-        with h5py.File(hdf5_file, "r") as f:
-            images = f['/entry/data/data'][:, :, :]
-
-        n_images, ny, nx = images.shape
-
-        print(f' There are {n_images} images in the dataset')
-        print(f' Setting cutoff intensity: {CUT_OFF_INTENSITY}')
-
-        # Set the default frame stack size
-        stack_size = 10
 
         # Check if the metadata file overwrites the stack size
         if metadata_file:
@@ -159,22 +147,35 @@ def main():
         else:
             print(' No metadata file. Setting the stack size to default value')
 
-        if args.stack_size:
-            print(' Overwritting the stack size from the command line')
-            stack_size = args.stack_size
+        print(f" Loading dataset: {hdf5_file}")
 
-        if (stack_size > n_images):
-            print(' Stack size larger than total number of frames')
-            print(' Resizing stack size to fit the data')
-            stack_size = n_images
+        with h5py.File(hdf5_file, "r") as f:
 
-        print(f' Stack size: {stack_size} (frames / deg)')
+            images = f['/entry/data/data']
+            n_images, ny, nx = images.shape
 
-        plot_spots(images, hdf5_file, stack_size, n_images, index,
-                   args, log_scale=False)
+            print(f' There are {n_images} images in the dataset')
+            print(f' Setting cutoff intensity: {CUT_OFF_INTENSITY}')
 
-        plot_spots(images, hdf5_file, stack_size, n_images, index,
-                   args, log_scale=True)
+            # Set the default frame stack size
+            stack_size = 10
+
+            if args.stack_size:
+                print(' Overwritting the stack size from the command line')
+                stack_size = args.stack_size
+
+            if (stack_size > n_images):
+                print(' Stack size larger than total number of frames')
+                print(' Resizing stack size to fit the data')
+                stack_size = n_images
+
+            print(f' Stack size: {stack_size} (frames / deg)')
+
+            plot_spots(images, hdf5_file, stack_size, n_images, index,
+                       args, log_scale=False)
+
+            plot_spots(images, hdf5_file, stack_size, n_images, index,
+                       args, log_scale=True)
 
         print(50*'-')
 
@@ -225,7 +226,7 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
 
         start, stop = stack_range
 
-        image = images[start:stop].max(axis=0)
+        image = images[start:stop, :, :].max(axis=0)
 
         cut_intensity = CUT_OFF_INTENSITY
 
