@@ -55,7 +55,7 @@ class WatcherSetup(BaseModel):
     inotify: bool = False
     sleep_time: float = 30
     log_dir: str = ""
-    slurm: bool = False
+    slurm: bool = True
 
 
 @router.post("/watcher")
