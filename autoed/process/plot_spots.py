@@ -227,7 +227,6 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
 
         start, stop = stack_range
 
-        print('start', start, stop)
         load_error = False
         try:
             image = images[start:stop, :, :].max(axis=0)
