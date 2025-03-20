@@ -105,7 +105,7 @@ A list of global parameters (their default value) and their description is given
      Name of the directory where to keep the processed results (xia2 log
      files and reports).
     
-   - ``report_wait_time_sec``
+   - ``report_wait_time_sec: 600``
 
     Because SLURM jobs can be run in parallel, generating report files is
     asynchronous. For each dataset, any of the pipelines can update the report
@@ -114,24 +114,24 @@ A list of global parameters (their default value) and their description is given
     parameter sets the time limit (in seconds) for how long the report update
     process will wait for the pipeline to finish. 
 
-   - ``slurm_user``
+   - ``slurm_user: gda2``
 
-    Name of the SLURM user. Usually ``gda2``.
+    Name of the default SLURM user.
 
-   - ``run_multiplex``
+   - ``run_multiplex: true``
 
-    Run multiplex processing.
+    Run xia2 multiplex.
 
-   - ``multiplex_pipeline``
+   - ``multiplex_pipeline: default``
 
     Name of the pipeline on which to run the multiplex processing.
 
-   - ``multiplex_indexing_percent_threshold``
+   - ``multiplex_indexing_percent_threshold: 75``
     
     Include only those datasets with indexing percentage above this value in
     the multiplex processing.
 
-   - ``multiplex_run_on_every_nth``
+   - ``multiplex_run_on_every_nth: 5``
     
     Run multiplex only when the number of successful datasets (above the
     threshold percentage) is a multiple of this number.  
