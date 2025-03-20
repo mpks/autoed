@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import h5py
+import hdf5plugin
 import os
 import json
 import argparse
@@ -226,7 +227,14 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
 
         start, stop = stack_range
 
-        image = images[start:stop, :, :].max(axis=0)
+        print('start', start, stop)
+        load_error = False
+        try:
+            image = images[start:stop, :, :].max(axis=0)
+        except MemoryError:
+            image = images[start:stop:100, :, :].max(axis=0)
+            load_error = True
+        
 
         cut_intensity = CUT_OFF_INTENSITY
 
@@ -261,6 +269,8 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
         plt.colorbar(img, cax, orientation='horizontal')
 
         label = f"frames: {start} - {stop-1}"
+        if load_error:
+                label += ' (every 100th)'
 
         imax = int(image.max())
         iavg = int(image.mean())
@@ -271,12 +281,12 @@ def plot_spots(images, dataset_name, stack_size, n_images, index, args,
         else:
             label_color = 'white'
 
-        ax.text(0.05, 0.97, label, color=label_color,
+        ax.text(0.05, 0.95, label, color=label_color,
                 va='top', ha='left', transform=ax.transAxes)
-        ax.text(0.70, 0.97, f'max: {imax}', color=label_color,
-                va='top', ha='left', transform=ax.transAxes)
-        ax.text(0.70, 0.91, f'avg: {iavg}', color=label_color,
-                va='top', ha='left', transform=ax.transAxes)
+        ax.text(0.05, 0.17, f'max: {imax}', color=label_color,
+                va='top', ha='left', transform=ax.transAxes, fontsize=7)
+        ax.text(0.05, 0.10, f'avg: {iavg}', color=label_color,
+                va='top', ha='left', transform=ax.transAxes, fontsize=7)
 
     file_name = 'spots'
 
