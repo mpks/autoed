@@ -132,8 +132,7 @@ def main():
         print(f" Loading dataset: {hdf5_file}")
 
         with h5py.File(hdf5_file, "r") as f:
-            dataset = f['/entry/data/data']
-            images = dataset[()]
+            images = f['/entry/data/data'][:, :, :]
 
         n_images, ny, nx = images.shape
 
