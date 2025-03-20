@@ -97,6 +97,18 @@ defined_pipelines = [
         "{processed_dir}/strong.refl detector.fix=distance",
         "max_lattices=5;"
      ]
+     },
+    {'pipeline_name': 'xds',
+     'type': 'xia2',
+     'run_condition': True,
+     'script': [
+         'xia2 image={nexus_file}',
+         'pipeline=3dii',
+         'goniometer.axis=0,-1,0  dials.fix_distance=True',
+         'dials.masking.d_max=9',
+         'xia2.settings.remove_blanks=True',
+         'input.gain={g.gain};'
+     ]
      }
 ]
 

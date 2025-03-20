@@ -167,7 +167,8 @@ class DirectoryHandler(FileSystemEventHandler):
                     basename = None
 
                     # Process only events that happened in ED directory
-                    if 'ED' in event.src_path.split(os.path.sep):
+                    ed_root = global_config['ed_root_dir']
+                    if ed_root in event.src_path.split(os.path.sep):
 
                         dir_name = os.path.dirname(event.src_path)
 
