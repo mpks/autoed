@@ -47,6 +47,7 @@ A list of global parameters (their default value) and their description is given
      with the polling method. If set to ``true``, AutoED will use 
      ``inotify``. For more details, see the 
      :ref:`note <inotify-note>` on ``inotify``.
+
    - ``sleep_time: 1.0`` 
 
      When AutoED monitors the filesystem, it checks for the existence of a
@@ -103,6 +104,37 @@ A list of global parameters (their default value) and their description is given
 
      Name of the directory where to keep the processed results (xia2 log
      files and reports).
+    
+   - ``report_wait_time_sec``
+
+    Because SLURM jobs can be run in parallel, generating report files is
+    asynchronous. For each dataset, any of the pipelines can update the report
+    at any time. To solve this problem, each pipeline starts a new process that 
+    waits for data to be processed and then updates the report files. This 
+    parameter sets the time limit (in seconds) for how long the report update
+    process will wait for the pipeline to finish. 
+
+   - ``slurm_user``
+
+    Name of the SLURM user. Usually ``gda2``.
+
+   - ``run_multiplex``
+
+    Run multiplex processing.
+
+   - ``multiplex_pipeline``
+
+    Name of the pipeline on which to run the multiplex processing.
+
+   - ``multiplex_indexing_percent_threshold``
+    
+    Include only those datasets with indexing percentage above this value in
+    the multiplex processing.
+
+   - ``multiplex_run_on_every_nth``
+    
+    Run multiplex only when the number of successful datasets (above the
+    threshold percentage) is a multiple of this number.  
 
    - ``run_pipelines: {"default": true, "user": true, ...}``
 
