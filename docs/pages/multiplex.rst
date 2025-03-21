@@ -36,7 +36,7 @@ single dataset looks like this.
     /../ED/SAMPLE_DIRS/CRYSTAL_DIR/SWEEP_DIR/DATA_master.h5
 
 Here, ``ED`` is the data root directory (a directory where AutoED 
-looks for diffraction images). The assumption is there is only one 
+looks for diffraction images). The assumption is that there is only one 
 data root directory in a dataset path (a complete path of a master
 file). ``CRYSTAL_DIR`` is a directory where we keep diffraction 
 data obtained from individual crystals. These directories usually 
