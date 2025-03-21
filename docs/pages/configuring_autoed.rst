@@ -20,7 +20,14 @@ your home directory, add a command
 
     export AUTOED_CONFIG_FILE=~/autoed_config.json
 
-in your .bashrc. When you set the environment variable, you can edit your 
+in your .bashrc. You then need to source your .bashrc to read the exported
+value.
+
+.. code-block:: console
+
+   source ~/.bashrc
+
+When you set the environment variable, you can edit your 
 configuration file using it (e.g. ``vim $AUTOED_CONFIG_FILE``, or use
 ``nano`` instead of ``vim``).
 
