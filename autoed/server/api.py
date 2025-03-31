@@ -78,3 +78,9 @@ async def stop_watcher(pid: str):
                 del autoed_daemon.pids[d]
                 autoed_daemon.directories.remove(d)
                 break
+
+
+@router.post("/process")
+async def process(process_setup: ProcessSetup):
+    processing_thread = Thread(name=f"proccesor-{process_setup.path}", target=process_dir, kwargs={"dir_name": process_setup.path, "force": process_setup.force, "local": process_setup.local})
+    processing_thread.start()
