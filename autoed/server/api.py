@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from autoed.autoed import AutoedDaemon, kill_process_and_children
 from autoed.server.auth import validate_token
+from autoed.process.process_static import process_dir
 
 autoed_daemon = AutoedDaemon()
 with open(autoed_daemon.lock_file, 'w') as f:
@@ -79,8 +80,12 @@ async def stop_watcher(pid: str):
                 autoed_daemon.directories.remove(d)
                 break
 
+class ProcessSetup(BaseModel):
+    path: str
+    slurm: bool = True
+    force: bool = True
 
 @router.post("/process")
 async def process(process_setup: ProcessSetup):
-    processing_thread = Thread(name=f"proccesor-{process_setup.path}", target=process_dir, kwargs={"dir_name": process_setup.path, "force": process_setup.force, "local": process_setup.local})
+    processing_thread = Thread(name=f"proccesor-{process_setup.path}", target=process_dir, kwargs={"dir_name": process_setup.path, "force": process_setup.force})
     processing_thread.start()
