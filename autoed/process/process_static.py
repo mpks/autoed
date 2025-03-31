@@ -3,7 +3,7 @@ import os
 import argparse
 from autoed.dataset import SinglaDataset
 from autoed.utility.filesystem import gather_master_files
-
+from autoed.global_config import global_config
 
 def main():
 
@@ -52,12 +52,12 @@ def process_dir(dir_name, force=False):
             if force:
                 dataset.set_logger()
                 print('Processing ', dataset.base)
-                dataset.process()
+                dataset.process(global_config)
             else:
                 if not os.path.exists(dataset.nexgen_file):
                     dataset.set_logger()
                     print('Processing ', dataset.base)
-                    dataset.process()
+                    dataset.process(global_config)
                 else:
                     print('Ignoring. Nexgen file exist in ',
                           dataset.base)

@@ -4,6 +4,7 @@ import os
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+from threading import Thread
 
 from autoed.autoed import AutoedDaemon, kill_process_and_children
 from autoed.server.auth import validate_token
