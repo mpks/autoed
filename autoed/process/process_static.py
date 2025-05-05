@@ -5,6 +5,8 @@ from autoed.dataset import SinglaDataset
 from autoed.utility.filesystem import gather_master_files
 from autoed.global_config import global_config
 
+global_config.overwrite_from_local_config()
+
 def main():
 
     msg = 'Script for automatic processing of existing Singla data'
