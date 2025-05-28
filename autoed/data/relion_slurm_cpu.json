@@ -3,10 +3,18 @@
     "partition": "cs05r",
     "tasks": 1,
     "cpus_per_task": 20,
-    "memory_per_cpu": 7000,
-    "name": "autoed",
+    "memory_per_cpu": {
+      "number": 7000,
+      "set": "True",
+      "infinite": "False"
+    },
+    "name": "relion_cpu",
     "current_working_directory": "/home/eci94165/2024/nt34283-21/spool/2024/processed/abc/sweep0/",
-    "time_limit": "20",
+    "time_limit": {
+      "number": "20",
+      "set": "True",
+      "infinite": "False"
+    },
     "environment": [
     ],
     "standard_error": "./run.err",

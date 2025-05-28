@@ -41,6 +41,8 @@ def add_to_database():
 
     args = parser.parse_args()
 
+    args.master_file = os.path.abspath(args.master_file)
+
     dataset = SinglaDataset.from_master_file(args.master_file,
                                              make_out_path=False)
 

@@ -51,6 +51,9 @@ class Xia2OutputParser:
             values = parse_xia2_txt_file(xia2_file)
             n_tot, n_indexed = parse_xia2_indexed_stats(xia2_file)
 
+            if not n_tot:
+                n_tot, n_indexed = parse_xds_indexed_stats(xia2_file)
+
             if len(values) != 7:
                 return PipelineEntry(title=pipeline,
                                      status='parse_error',
@@ -135,6 +138,26 @@ def parse_dials_indexed_stats(dials_index_file):
     return indexed + unindexed, indexed
 
 
+def parse_xds_indexed_stats(xia2_file):
+
+    xia2_path = os.path.dirname(xia2_file)
+    output_path = os.path.join(xia2_path, xia2_dials_report_path)
+    spots_file = os.path.join(output_path, "SPOT.XDS")
+
+    print("XIS", spots_file)
+    if os.path.exists(spots_file):
+        with open(spots_file, "r") as file:
+            lines = file.readlines()
+        ntot = len(lines)
+        unindexed = 0
+        for line in lines:
+            if " 0 0 0" in line:
+                unindexed += 1
+        indexed = ntot - unindexed
+        return ntot, indexed
+    return None, None
+
+
 def parse_xia2_indexed_stats(xia2_file):
 
     dials_index_file = find_xia2_dials_indexed_log_file(xia2_file)
@@ -190,9 +213,10 @@ def find_xia2_dials_indexed_log_file(xia2_file):
                                                     '*dials.index.log')
         dials_index_file = sort_dials_index_files(dials_index_files)
 
-        dials_index_file = os.path.join(dials_output_path, dials_index_file)
-
-        return dials_index_file
+        if dials_index_file:
+            dials_index_file = os.path.join(dials_output_path,
+                                            dials_index_file)
+            return dials_index_file
 
     return None
 
@@ -209,6 +233,12 @@ def parse_xia2_txt_file(xia2_file):
     for i, line in enumerate(lines):     # Find the last occurence
         if match_uc_str in line:
             match_index = i
+
+    if not match_index:                  # Parse output from xds pipeline
+        match_uc_str_xds = 'Unit cell:'
+        for i, line in enumerate(lines):     # Find the last occurence
+            if match_uc_str_xds in line:
+                match_index = i
 
     if not match_index:
         return None
