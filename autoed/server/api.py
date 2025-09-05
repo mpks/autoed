@@ -57,7 +57,8 @@ class WatcherSetup(BaseModel):
     inotify: bool = False
     sleep_time: float = 30
     log_dir: str = ""
-    slurm: bool = True
+    slurm: bool = False
+    config_file: str = ""
 
 
 @router.post("/watcher")
@@ -68,6 +69,7 @@ async def start_watcher(watcher_setup: WatcherSetup):
         sleep_time=watcher_setup.sleep_time,
         log_dir=watcher_setup.log_dir,
         local=not watcher_setup.slurm,
+        config_file=watcher_setup.config_file or None,
     )
 
 
@@ -85,8 +87,12 @@ class ProcessSetup(BaseModel):
     path: str
     slurm: bool = True
     force: bool = True
+    config_file: str = ""
 
 @router.post("/process")
 async def process(process_setup: ProcessSetup):
-    processing_thread = Thread(name=f"proccesor-{process_setup.path}", target=process_dir, kwargs={"dir_name": process_setup.path, "force": process_setup.force})
-    processing_thread.start()
+    command = f"autoed_process {process_setup.path}"
+    if process_setup.force:
+        command += " -f"
+    process = subprocess.Popen(command, shell=True, env={**os.environ, "AUTOED_CONFIG_FILE": process_setup.config_file} if process_setup.config_file else None)
+    return process.pid

@@ -246,6 +246,7 @@ class AutoedDaemon:
               dummy=False,
               local=False,
               test=False,
+              config_file: str | None = None,
               ):
 
         if not os.path.exists(self.lock_file):
@@ -286,7 +287,7 @@ class AutoedDaemon:
             command += full_path
             if not self.is_process_running(command):
                 print('Watching path:', full_path)
-                process = subprocess.Popen(command, shell=True)
+                process = subprocess.Popen(command, shell=True, env={**os.environ, "AUTOED_CONFIG_FILE": config_file} if config_file else None)
                 pid = str(process.pid)
                 self.pids[full_path] = pid
                 self.directories.append(full_path)
