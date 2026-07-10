@@ -97,7 +97,7 @@ A list of global parameters (their default value) and their description is given
      been fixed on the microscope, so overwriting the mask is now obsolete.
      However, there is still an option to control it.
 
-   - ``trigger_file: .HiMarko``
+   - ``trigger_file: .process``
     
      Name of the file that triggers the dataset processing.
     

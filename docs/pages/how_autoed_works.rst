@@ -103,13 +103,13 @@ directory
     autoed watch /home/some_user/diffraction
 
 Next, we trigger the processing by creating a trigger file (a hidden file
-called ``.HiMarko``). The name of the trigger file can be changed in the
+called ``.process``). The name of the trigger file can be changed in the
 global configuration file (see more about that in the section
 about :doc:`configuring AutoED<configuring_autoed>`).
 
 .. code-block:: console
 
-    touch /home/some_user/diffraction/ED/dataset_01/.HiMarko
+    touch /home/some_user/diffraction/ED/dataset_01/.process
 
 The AutoED will search the ``dataset_01`` directory, find the master
 file, derive the dataset name from the master file, check if data and metadata
